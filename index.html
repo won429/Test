@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enjoy Vote - Design Fix</title>
+    <title>Enjoy Vote - Realtime</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
@@ -153,7 +153,7 @@
                         <div id="result-list" class="space-y-3"></div>
                     </div>
 
-                    <!-- 투표 반영 비율 (디자인 수정됨: 그리드 카드 스타일) -->
+                    <!-- 투표 반영 비율 -->
                     <div class="fade-in-up delay-300 mt-8 mb-6">
                         <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 반영 비율</h3>
                         <div class="grid grid-cols-2 gap-3">
@@ -308,18 +308,109 @@
                 </div>
             </div>
 
-            <!-- 하단바 -->
+            <!-- 하단바 (약한 블러: backdrop-blur-sm) -->
             <nav id="bottom-nav" class="absolute left-1/2 -translate-x-1/2 z-50 w-auto" style="bottom: calc(24px + env(safe-area-inset-bottom));">
-                <div class="flex items-center bg-white/90 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] border border-white/50 rounded-full p-1 gap-1">
-                    <div id="nav-bg" class="absolute top-1 bottom-1 bg-gray-100 rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
-                    <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-check-to-slot text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">투표</span></button>
-                    <button onclick="window.switchTab(1)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-1"><i class="fa-solid fa-user text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">내 정보</span></button>
+                <div class="flex items-center bg-white/50 backdrop-blur-sm border border-white/50 shadow-2xl p-1 gap-1 rounded-full">
+                    <div id="nav-bg" class="absolute top-1 bottom-1 bg-white shadow-md rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
+                    
+                    <!-- 0: Home -->
+                    <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-house text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">홈</span></button>
+                    <!-- 1: Vote (Current) -->
+                    <button onclick="window.switchTab(1)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-1"><i class="fa-solid fa-check-to-slot text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">투표</span></button>
+                    <!-- 2: My Info -->
+                    <button onclick="window.switchTab(2)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-2"><i class="fa-solid fa-user text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">내 정보</span></button>
                 </div>
             </nav>
         </div>
     </div>
 
+    <!-- 파이어베이스 SDK 추가 (v11.6.1) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- [1] 파이어베이스 설정 ---
+        // (사용자 제공)
+        const firebaseConfig = {
+          apiKey: "AIzaSyCDIg4UNJNWa-HUJhjbkBjUyX9eBpq8n0Q",
+          authDomain: "vote-c189b.firebaseapp.com",
+          projectId: "vote-c189b",
+          storageBucket: "vote-c189b.firebasestorage.app",
+          messagingSenderId: "470329969958",
+          appId: "1:470329969958:web:91cf5d7f8ca6142297c5e7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // 공용 데이터 저장을 위한 식별자 (프로젝트 ID 사용 권장)
+        const appId = 'vote-c189b';
+
+        // 전역 변수 설정
+        window.db = db;
+        window.auth = auth;
+        window.appId = appId;
+        
+        // 함수들 전역 노출 (모듈 스코프 탈출)
+        window.signInAnonymously = signInAnonymously;
+        window.collection = collection;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.updateDoc = updateDoc;
+        window.onSnapshot = onSnapshot;
+        window.increment = increment;
+
+        // 앱 초기화 시작
+        initApp();
+
+        async function initApp() {
+            try {
+                // 1. 익명 로그인 (누구나 투표 가능하게)
+                await signInAnonymously(auth);
+                console.log("Firebase Auth Success");
+
+                // 2. 실시간 데이터 리스너 연결
+                // 경로 규칙: /artifacts/{appId}/public/data/{collection}
+                const pollCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'polls');
+                
+                onSnapshot(pollCollectionRef, (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added" || change.type === "modified") {
+                            const data = change.doc.data();
+                            const pollId = parseInt(change.doc.id.replace('poll_', ''));
+                            
+                            // 로컬 데이터 업데이트
+                            const localPoll = window.polls.find(p => p.id === pollId);
+                            if (localPoll && data.options) {
+                                // DB의 optionCounts 맵을 로컬 options 배열에 반영
+                                localPoll.options.forEach((opt, idx) => {
+                                    if (data.options[idx] !== undefined) {
+                                        opt.count = data.options[idx];
+                                    }
+                                });
+                                localPoll.total = data.total || 0;
+                                
+                                // 화면 갱신 (상세화면이 열려있다면)
+                                if (window.currentPollId === pollId) {
+                                    window.renderDetailContent(localPoll);
+                                }
+                                // 리스트 갱신
+                                window.renderResultList();
+                            }
+                        }
+                    });
+                });
+
+            } catch (e) {
+                console.error("Firebase Init Error:", e);
+            }
+        }
+    </script>
+
     <script>
+        // 초기 데이터 (구조만 사용, 실제 카운트는 DB에서 덮어씌움)
         window.polls = [
             { id: 0, type: 'active', title: "설날특선 엔조이 인기가요2 사전투표 🎤", author: "엔조이 제작진", total: 0, options: [{ text: "너의 모든 순간", count: 0 }, { text: "흰수염 고래", count: 0 }], myPick: null, hasVoted: false },
             { id: 1, type: 'result', title: "인기가요2 아티스트 사전투표 👨‍🎤", author: "엔조이 제작진", total: 5, options: [{ text: "전시기", count: 3 }, { text: "홍박사", count: 2 }], icon: "👨‍🎤", color: "bg-blue-50 text-blue-500", myPick: null, hasVoted: true }
@@ -348,10 +439,42 @@
             animate();
         };
 
-        window.onload = function() { window.renderResultList(); window.switchTab(0); };
+        window.onload = function() { 
+            window.renderResultList(); 
+            // 기본 탭: 투표 (index 1)
+            window.switchTab(1); 
+        };
+
         window.switchTab = function(index) {
-            if(index === 1) { alert('내 정보 기능은 준비중입니다.'); return; }
-            document.getElementById('nav-bg').style.transform = `translateX(${index * 60}px)`;
+            // 0: 홈 (외부 링크)
+            if (index === 0) {
+                window.location.href = 'https://won429.github.io/enjoysite/';
+                return;
+            }
+            // 2: 내 정보 (준비중)
+            if (index === 2) { 
+                alert('내 정보 기능은 준비중입니다.'); 
+                return; 
+            }
+            
+            // 1: 투표 (현재 페이지) -> UI 업데이트
+            const navBg = document.getElementById('nav-bg');
+            navBg.style.transform = `translateX(${index * 60}px)`;
+
+            [0, 1, 2].forEach(i => {
+                const btn = document.getElementById(`btn-tab-${i}`);
+                if (!btn) return;
+                const icon = btn.querySelector('i');
+                const text = btn.querySelector('span');
+                
+                if (i === index) {
+                    icon.className = icon.className.replace('text-[#B0B8C1]', 'text-[#191F28]');
+                    text.className = text.className.replace('font-medium', 'font-bold').replace('text-[#B0B8C1]', 'text-[#191F28]');
+                } else {
+                    icon.className = icon.className.replace('text-[#191F28]', 'text-[#B0B8C1]');
+                    text.className = text.className.replace('font-bold', 'font-medium').replace('text-[#191F28]', 'text-[#B0B8C1]');
+                }
+            });
         };
 
         window.renderResultList = function() {
@@ -413,12 +536,42 @@
         };
 
         window.selectOption = function(idx) { window.selectedOptionIdx = idx; document.getElementById('btn-submit').disabled = false; };
-        window.submitVote = function() {
+        
+        // --- [2] 투표 제출 로직 (파이어베이스 연동) ---
+        window.submitVote = async function() {
             if(window.selectedOptionIdx === null) return;
+            
+            // 로컬 상태 업데이트
             const p = window.polls.find(item => item.id === window.currentPollId);
-            p.options[window.selectedOptionIdx].count++; p.total++; p.myPick = window.selectedOptionIdx; p.hasVoted = true;
-            window.renderDetailContent(p); window.fireConfetti('confetti-canvas');
+            p.myPick = window.selectedOptionIdx; 
+            p.hasVoted = true;
+            
+            // UI 먼저 반응 (쾌적함)
+            window.renderDetailContent(p); 
+            window.fireConfetti('confetti-canvas');
+
+            // DB 업데이트 (실제 데이터 저장)
+            try {
+                if(window.db && window.auth && window.auth.currentUser) {
+                    const pollRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'polls', 'poll_' + p.id);
+                    
+                    // 옵션별 카운트 증가 (options.0, options.1 ...)
+                    const updateData = {};
+                    updateData[`options.${window.selectedOptionIdx}`] = window.increment(1);
+                    updateData['total'] = window.increment(1);
+                    
+                    // 문서가 없으면 생성(set), 있으면 수정(update)
+                    await window.setDoc(pollRef, updateData, { merge: true });
+                    console.log("Vote saved to Firestore!");
+                } else {
+                    console.log("Offline mode or Auth not ready");
+                }
+            } catch (e) {
+                console.error("Vote Error:", e);
+                // 에러 처리 로직 (필요시)
+            }
         };
+
         window.voteAgain = function() {
             const p = window.polls.find(item => item.id === window.currentPollId);
             p.hasVoted = false; p.myPick = null; window.selectedOptionIdx = null; window.renderDetailContent(p);
