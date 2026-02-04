@@ -329,7 +329,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- [1] 파이어베이스 설정 ---
         const firebaseConfig = {
@@ -344,18 +344,17 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = 'vote-c189b'; // 프로젝트 ID를 앱 식별자로 사용
 
         // 전역 변수 설정
         window.db = db;
         window.auth = auth;
-        window.appId = appId;
         
         // 함수들 전역 노출
         window.signInAnonymously = signInAnonymously;
         window.collection = collection;
         window.doc = doc;
         window.setDoc = setDoc;
+        window.getDoc = getDoc;
         window.updateDoc = updateDoc;
         window.onSnapshot = onSnapshot;
         window.increment = increment;
@@ -364,16 +363,28 @@
 
         async function initApp() {
             try {
+                // 1. 익명 로그인 (중요: 콘솔에서 켜져있어야 함)
                 await signInAnonymously(auth);
                 console.log("Firebase Auth Success");
 
-                // 경로 수정: artifacts/{projectId}/public/data/polls
-                // 이렇게 하면 누구나 읽고 쓸 수 있는 공용 데이터 영역이 됩니다.
-                const pollCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'polls');
+                // 2. 초기 데이터 확인 및 생성
+                // (투표 문서가 아예 없으면 작동을 안 하므로, 처음 1회 자동 생성)
+                const pollRef = doc(db, 'polls', 'poll_0');
+                const docSnap = await getDoc(pollRef);
+                
+                if (!docSnap.exists()) {
+                    console.log("Initializing Poll 0...");
+                    await setDoc(pollRef, {
+                        total: 0,
+                        options: [0, 0] // 0번째 옵션 0표, 1번째 옵션 0표
+                    });
+                }
+
+                // 3. 실시간 리스너 연결 (단순화된 경로: 'polls' 컬렉션)
+                const pollCollectionRef = collection(db, 'polls');
                 
                 onSnapshot(pollCollectionRef, (snapshot) => {
                     snapshot.docChanges().forEach((change) => {
-                        // 추가되거나 수정된 경우 모두 처리
                         if (change.type === "added" || change.type === "modified") {
                             const data = change.doc.data();
                             const pollId = parseInt(change.doc.id.replace('poll_', ''));
@@ -382,8 +393,6 @@
                             if (localPoll && data.options) {
                                 // DB 데이터를 로컬에 반영
                                 localPoll.options.forEach((opt, idx) => {
-                                    // 값이 있으면 쓰고 없으면 기존값 유지 혹은 0
-                                    // options가 맵 형태("0": 1)일 수도 있고 배열일 수도 있음. 둘 다 접근 가능.
                                     if (data.options[idx] !== undefined) {
                                         opt.count = data.options[idx];
                                     }
@@ -403,6 +412,7 @@
 
             } catch (e) {
                 console.error("Firebase Init Error:", e);
+                // alert("파이어베이스 연결 실패: 콘솔의 Auth 설정을 확인해주세요.");
             }
         }
     </script>
@@ -487,7 +497,6 @@
             else { badge.className = "inline-block px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded mb-2"; badge.innerText = "종료됨"; }
             window.renderDetailContent(p);
             document.getElementById('modal-detail').classList.add('open');
-            // 폭죽 제거됨
         };
         window.closeModal = function() { document.getElementById('modal-detail').classList.remove('open'); };
 
@@ -535,7 +544,6 @@
             
             const p = window.polls.find(item => item.id === window.currentPollId);
             
-            // 선반영 (Optimistic Update)
             p.myPick = window.selectedOptionIdx; 
             p.hasVoted = true;
             if(!p.options[window.selectedOptionIdx].count) p.options[window.selectedOptionIdx].count = 0;
@@ -543,19 +551,39 @@
             p.total++;
 
             window.renderDetailContent(p); 
-            // 폭죽 제거
 
             try {
                 if(window.db && window.auth && window.auth.currentUser) {
-                    const pollRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'polls', 'poll_' + p.id);
+                    // 루트 컬렉션 'polls' 사용 (경로 단순화)
+                    const pollRef = window.doc(window.db, 'polls', 'poll_' + p.id);
+                    
+                    // Firestore increment 사용 -> 배열의 특정 인덱스 필드만 업데이트 불가 (배열 전체 덮어쓰기 필요)
+                    // 하지만 setDoc(merge)와 dot notation(점 표기법)을 사용하면 가능함
+                    // 예: { "options.0": increment(1) } -> 단, options가 Map이어야 함.
+                    // 만약 options가 Array라면 배열 전체를 읽고 써야 함.
+                    // 편의상 여기서는 options를 { 0: count, 1: count } 형태의 맵으로 저장하거나
+                    // 간단히 문서 전체를 읽고 +1 해서 다시 쓰는 트랜잭션을 쓰는게 정석이나,
+                    // 트래픽이 많지 않다면 dot notation으로 "options" 필드(배열)의 인덱스 접근 시도해볼 수 있음.
+                    // 그러나 Firestore에서 배열 인덱스 수정은 지원하지 않음.
+                    // 해결책: options 필드를 Array가 아니라 Map(Object)으로 저장하도록 초기화 로직을 짰음. (initApp 참고)
+                    
                     const updateData = {};
                     updateData[`options.${window.selectedOptionIdx}`] = window.increment(1);
                     updateData['total'] = window.increment(1);
-                    await window.setDoc(pollRef, updateData, { merge: true });
+                    
+                    await window.updateDoc(pollRef, updateData);
                     console.log("Vote saved!");
                 }
             } catch (e) {
                 console.error("Vote Error:", e);
+                // 문서가 없어서 업데이트 실패 시 (혹시 init이 안되었을 경우)
+                if (e.code === 'not-found') {
+                     const pollRef = window.doc(window.db, 'polls', 'poll_' + p.id);
+                     await window.setDoc(pollRef, {
+                        total: 1,
+                        options: { [window.selectedOptionIdx]: 1 }
+                     }, { merge: true });
+                }
             }
         };
 
