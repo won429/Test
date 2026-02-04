@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enjoy Vote - Bottom Nav Fixed</title>
+    <title>Enjoy Vote - Firebase Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
@@ -344,7 +344,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = 'vote-c189b';
+        const appId = 'vote-c189b'; // 프로젝트 ID를 앱 식별자로 사용
 
         // 전역 변수 설정
         window.db = db;
@@ -367,10 +367,13 @@
                 await signInAnonymously(auth);
                 console.log("Firebase Auth Success");
 
+                // 경로 수정: artifacts/{projectId}/public/data/polls
+                // 이렇게 하면 누구나 읽고 쓸 수 있는 공용 데이터 영역이 됩니다.
                 const pollCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'polls');
                 
                 onSnapshot(pollCollectionRef, (snapshot) => {
                     snapshot.docChanges().forEach((change) => {
+                        // 추가되거나 수정된 경우 모두 처리
                         if (change.type === "added" || change.type === "modified") {
                             const data = change.doc.data();
                             const pollId = parseInt(change.doc.id.replace('poll_', ''));
@@ -380,16 +383,18 @@
                                 // DB 데이터를 로컬에 반영
                                 localPoll.options.forEach((opt, idx) => {
                                     // 값이 있으면 쓰고 없으면 기존값 유지 혹은 0
+                                    // options가 맵 형태("0": 1)일 수도 있고 배열일 수도 있음. 둘 다 접근 가능.
                                     if (data.options[idx] !== undefined) {
                                         opt.count = data.options[idx];
                                     }
                                 });
                                 localPoll.total = data.total || 0;
                                 
-                                // 화면 갱신
+                                // 화면 갱신 (상세화면이 열려있다면)
                                 if (window.currentPollId === pollId) {
                                     window.renderDetailContent(localPoll);
                                 }
+                                // 리스트 갱신
                                 window.renderResultList();
                             }
                         }
@@ -482,8 +487,7 @@
             else { badge.className = "inline-block px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded mb-2"; badge.innerText = "종료됨"; }
             window.renderDetailContent(p);
             document.getElementById('modal-detail').classList.add('open');
-            // 수정: 투표중인 것은 폭죽 터지지 않음 (완료된 투표 결과 볼 때도 안 터짐)
-            // if(p.hasVoted) setTimeout(() => window.fireConfetti('confetti-canvas'), 300); <-- 제거됨
+            // 폭죽 제거됨
         };
         window.closeModal = function() { document.getElementById('modal-detail').classList.remove('open'); };
 
@@ -492,7 +496,6 @@
             const btnSubmit = document.getElementById('btn-submit');
             const resultButtons = document.getElementById('result-buttons');
             
-            // 상세 정보 업데이트 (총 참여자 수 실시간 반영)
             document.getElementById('detail-info').innerText = `작성자: ${p.author} · ${p.total}명 참여`;
 
             container.innerHTML = '';
@@ -510,8 +513,8 @@
                 
                 const max = Math.max(...p.options.map(o => o.count || 0));
                 p.options.forEach((opt, idx) => {
-                    const count = opt.count || 0; // undefined 방지
-                    const total = p.total || 0;   // undefined 방지
+                    const count = opt.count || 0;
+                    const total = p.total || 0;
                     const pct = total === 0 ? 0 : Math.round((count / total) * 100);
                     
                     const isWin = count === max && max > 0;
@@ -522,14 +525,6 @@
                     
                     container.innerHTML += `<div class="${wrapperClass}"><div class="flex justify-between items-end mb-2 relative z-10"><div><h4 class="text-base font-bold text-[#191F28] flex items-center">${opt.text} ${medal} ${isMy ? '<span class="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded font-bold ml-2 self-center">MY</span>' : ''}</h4><p class="text-xs text-gray-400 font-medium mt-0.5">${count}표</p></div><div class="text-right"><span class="text-2xl font-bold text-purple-600 number-counting" data-target="${pct}">${pct}</span><span class="text-sm font-bold text-purple-400">%</span></div></div><div class="w-full bg-gray-100 rounded-full overflow-hidden relative z-10 ${isWin?'h-3':'h-2'}"><div class="${barClass}" style="width: ${pct}%; height: 100%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); border-radius: 99px;"></div></div></div>`;
                 });
-                
-                // 애니메이션 (숫자 카운팅 등) - 이미 HTML에 값을 넣었지만 부드러운 전환을 위해 유지
-                setTimeout(() => {
-                    container.querySelectorAll('.number-counting').forEach(el => {
-                        const target = +el.getAttribute('data-target'); 
-                        // 이미 값이 들어가있으므로 굳이 0부터 시작 안해도 됨, 혹은 갱신 효과
-                    });
-                }, 100);
             }
         };
 
@@ -540,18 +535,16 @@
             
             const p = window.polls.find(item => item.id === window.currentPollId);
             
-            // [선반영 로직 추가] 화면에서 즉시 1 증가된 상태로 보여주기
+            // 선반영 (Optimistic Update)
             p.myPick = window.selectedOptionIdx; 
             p.hasVoted = true;
             if(!p.options[window.selectedOptionIdx].count) p.options[window.selectedOptionIdx].count = 0;
             p.options[window.selectedOptionIdx].count++;
             p.total++;
 
-            // UI 갱신 (폭죽 제거됨)
             window.renderDetailContent(p); 
-            // window.fireConfetti('confetti-canvas'); <-- 투표 시 폭죽 금지 요청 반영
+            // 폭죽 제거
 
-            // DB 업데이트
             try {
                 if(window.db && window.auth && window.auth.currentUser) {
                     const pollRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'polls', 'poll_' + p.id);
@@ -563,7 +556,6 @@
                 }
             } catch (e) {
                 console.error("Vote Error:", e);
-                // 에러 발생 시 로컬 카운트 롤백 로직 등을 여기에 추가할 수 있음
             }
         };
 
@@ -602,7 +594,6 @@
 
             document.getElementById('cert-step-1').classList.add('hidden');
             document.getElementById('cert-step-2').classList.remove('hidden');
-            // 인증서 발급 시에만 폭죽 터짐
             setTimeout(() => window.fireConfetti('cert-confetti-canvas'), 200);
         };
 
