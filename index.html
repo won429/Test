@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enjoy Vote - Realtime</title>
+    <title>Enjoy Vote - Bottom Nav Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
@@ -309,7 +309,8 @@
             </div>
 
             <!-- 하단바 (약한 블러: backdrop-blur-sm) -->
-            <nav id="bottom-nav" class="absolute left-1/2 -translate-x-1/2 z-50 w-auto" style="bottom: calc(24px + env(safe-area-inset-bottom));">
+            <!-- 24px 여백을 8px로 축소하여 더 아래로 이동 -->
+            <nav id="bottom-nav" class="absolute left-1/2 -translate-x-1/2 z-50 w-auto" style="bottom: calc(8px + env(safe-area-inset-bottom));">
                 <div class="flex items-center bg-white/50 backdrop-blur-sm border border-white/50 shadow-2xl p-1 gap-1 rounded-full">
                     <div id="nav-bg" class="absolute top-1 bottom-1 bg-white shadow-md rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
                     
@@ -331,7 +332,6 @@
         import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- [1] 파이어베이스 설정 ---
-        // (사용자 제공)
         const firebaseConfig = {
           apiKey: "AIzaSyCDIg4UNJNWa-HUJhjbkBjUyX9eBpq8n0Q",
           authDomain: "vote-c189b.firebaseapp.com",
@@ -344,8 +344,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // 공용 데이터 저장을 위한 식별자 (프로젝트 ID 사용 권장)
         const appId = 'vote-c189b';
 
         // 전역 변수 설정
@@ -353,7 +351,7 @@
         window.auth = auth;
         window.appId = appId;
         
-        // 함수들 전역 노출 (모듈 스코프 탈출)
+        // 함수들 전역 노출
         window.signInAnonymously = signInAnonymously;
         window.collection = collection;
         window.doc = doc;
@@ -362,17 +360,13 @@
         window.onSnapshot = onSnapshot;
         window.increment = increment;
 
-        // 앱 초기화 시작
         initApp();
 
         async function initApp() {
             try {
-                // 1. 익명 로그인 (누구나 투표 가능하게)
                 await signInAnonymously(auth);
                 console.log("Firebase Auth Success");
 
-                // 2. 실시간 데이터 리스너 연결
-                // 경로 규칙: /artifacts/{appId}/public/data/{collection}
                 const pollCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'polls');
                 
                 onSnapshot(pollCollectionRef, (snapshot) => {
@@ -381,22 +375,21 @@
                             const data = change.doc.data();
                             const pollId = parseInt(change.doc.id.replace('poll_', ''));
                             
-                            // 로컬 데이터 업데이트
                             const localPoll = window.polls.find(p => p.id === pollId);
                             if (localPoll && data.options) {
-                                // DB의 optionCounts 맵을 로컬 options 배열에 반영
+                                // DB 데이터를 로컬에 반영
                                 localPoll.options.forEach((opt, idx) => {
+                                    // 값이 있으면 쓰고 없으면 기존값 유지 혹은 0
                                     if (data.options[idx] !== undefined) {
                                         opt.count = data.options[idx];
                                     }
                                 });
                                 localPoll.total = data.total || 0;
                                 
-                                // 화면 갱신 (상세화면이 열려있다면)
+                                // 화면 갱신
                                 if (window.currentPollId === pollId) {
                                     window.renderDetailContent(localPoll);
                                 }
-                                // 리스트 갱신
                                 window.renderResultList();
                             }
                         }
@@ -410,7 +403,6 @@
     </script>
 
     <script>
-        // 초기 데이터 (구조만 사용, 실제 카운트는 DB에서 덮어씌움)
         window.polls = [
             { id: 0, type: 'active', title: "설날특선 엔조이 인기가요2 사전투표 🎤", author: "엔조이 제작진", total: 0, options: [{ text: "너의 모든 순간", count: 0 }, { text: "흰수염 고래", count: 0 }], myPick: null, hasVoted: false },
             { id: 1, type: 'result', title: "인기가요2 아티스트 사전투표 👨‍🎤", author: "엔조이 제작진", total: 5, options: [{ text: "전시기", count: 3 }, { text: "홍박사", count: 2 }], icon: "👨‍🎤", color: "bg-blue-50 text-blue-500", myPick: null, hasVoted: true }
@@ -441,23 +433,19 @@
 
         window.onload = function() { 
             window.renderResultList(); 
-            // 기본 탭: 투표 (index 1)
             window.switchTab(1); 
         };
 
         window.switchTab = function(index) {
-            // 0: 홈 (외부 링크)
             if (index === 0) {
                 window.location.href = 'https://won429.github.io/enjoysite/';
                 return;
             }
-            // 2: 내 정보 (준비중)
             if (index === 2) { 
                 alert('내 정보 기능은 준비중입니다.'); 
                 return; 
             }
             
-            // 1: 투표 (현재 페이지) -> UI 업데이트
             const navBg = document.getElementById('nav-bg');
             navBg.style.transform = `translateX(${index * 60}px)`;
 
@@ -494,7 +482,8 @@
             else { badge.className = "inline-block px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded mb-2"; badge.innerText = "종료됨"; }
             window.renderDetailContent(p);
             document.getElementById('modal-detail').classList.add('open');
-            if(p.hasVoted) setTimeout(() => window.fireConfetti('confetti-canvas'), 300);
+            // 수정: 투표중인 것은 폭죽 터지지 않음 (완료된 투표 결과 볼 때도 안 터짐)
+            // if(p.hasVoted) setTimeout(() => window.fireConfetti('confetti-canvas'), 300); <-- 제거됨
         };
         window.closeModal = function() { document.getElementById('modal-detail').classList.remove('open'); };
 
@@ -502,6 +491,10 @@
             const container = document.getElementById('detail-options');
             const btnSubmit = document.getElementById('btn-submit');
             const resultButtons = document.getElementById('result-buttons');
+            
+            // 상세 정보 업데이트 (총 참여자 수 실시간 반영)
+            document.getElementById('detail-info').innerText = `작성자: ${p.author} · ${p.total}명 참여`;
+
             container.innerHTML = '';
             const showResult = p.type === 'result' || p.hasVoted;
 
@@ -514,22 +507,27 @@
                 btnSubmit.classList.add('hidden');
                 if(p.type === 'active' && p.hasVoted) resultButtons.classList.remove('hidden'); 
                 else resultButtons.classList.add('hidden');
-                const max = Math.max(...p.options.map(o => o.count));
+                
+                const max = Math.max(...p.options.map(o => o.count || 0));
                 p.options.forEach((opt, idx) => {
-                    const pct = p.total === 0 ? 0 : Math.round((opt.count / p.total) * 100);
-                    const isWin = opt.count === max && max > 0;
+                    const count = opt.count || 0; // undefined 방지
+                    const total = p.total || 0;   // undefined 방지
+                    const pct = total === 0 ? 0 : Math.round((count / total) * 100);
+                    
+                    const isWin = count === max && max > 0;
                     const isMy = idx === p.myPick;
                     const wrapperClass = isWin ? "rank-1-card p-5 rounded-[24px] mb-4 relative overflow-hidden" : "bg-white p-4 rounded-[20px] mb-3 border border-gray-100 shadow-sm relative overflow-hidden";
                     const barClass = isWin ? "bar-gradient" : "bg-gray-300";
                     const medal = isWin ? `<span class="ml-2 text-5xl inline-block align-middle drop-shadow-md">🥇</span>` : '';
-                    container.innerHTML += `<div class="${wrapperClass}"><div class="flex justify-between items-end mb-2 relative z-10"><div><h4 class="text-base font-bold text-[#191F28] flex items-center">${opt.text} ${medal} ${isMy ? '<span class="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded font-bold ml-2 self-center">MY</span>' : ''}</h4><p class="text-xs text-gray-400 font-medium mt-0.5">${opt.count}표</p></div><div class="text-right"><span class="text-2xl font-bold text-purple-600 number-counting" data-target="${pct}">0</span><span class="text-sm font-bold text-purple-400">%</span></div></div><div class="w-full bg-gray-100 rounded-full overflow-hidden relative z-10 ${isWin?'h-3':'h-2'}"><div class="${barClass}" style="width: 0%; height: 100%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); border-radius: 99px;" data-width="${pct}%"></div></div></div>`;
+                    
+                    container.innerHTML += `<div class="${wrapperClass}"><div class="flex justify-between items-end mb-2 relative z-10"><div><h4 class="text-base font-bold text-[#191F28] flex items-center">${opt.text} ${medal} ${isMy ? '<span class="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded font-bold ml-2 self-center">MY</span>' : ''}</h4><p class="text-xs text-gray-400 font-medium mt-0.5">${count}표</p></div><div class="text-right"><span class="text-2xl font-bold text-purple-600 number-counting" data-target="${pct}">${pct}</span><span class="text-sm font-bold text-purple-400">%</span></div></div><div class="w-full bg-gray-100 rounded-full overflow-hidden relative z-10 ${isWin?'h-3':'h-2'}"><div class="${barClass}" style="width: ${pct}%; height: 100%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); border-radius: 99px;"></div></div></div>`;
                 });
+                
+                // 애니메이션 (숫자 카운팅 등) - 이미 HTML에 값을 넣었지만 부드러운 전환을 위해 유지
                 setTimeout(() => {
-                    container.querySelectorAll('[data-width]').forEach(el => el.style.width = el.getAttribute('data-width'));
                     container.querySelectorAll('.number-counting').forEach(el => {
-                        const target = +el.getAttribute('data-target'); let current = 0;
-                        const update = () => { current += Math.ceil((target - current) * 0.1); el.innerText = current; if(current < target) requestAnimationFrame(update); };
-                        update();
+                        const target = +el.getAttribute('data-target'); 
+                        // 이미 값이 들어가있으므로 굳이 0부터 시작 안해도 됨, 혹은 갱신 효과
                     });
                 }, 100);
             }
@@ -537,38 +535,35 @@
 
         window.selectOption = function(idx) { window.selectedOptionIdx = idx; document.getElementById('btn-submit').disabled = false; };
         
-        // --- [2] 투표 제출 로직 (파이어베이스 연동) ---
         window.submitVote = async function() {
             if(window.selectedOptionIdx === null) return;
             
-            // 로컬 상태 업데이트
             const p = window.polls.find(item => item.id === window.currentPollId);
+            
+            // [선반영 로직 추가] 화면에서 즉시 1 증가된 상태로 보여주기
             p.myPick = window.selectedOptionIdx; 
             p.hasVoted = true;
-            
-            // UI 먼저 반응 (쾌적함)
-            window.renderDetailContent(p); 
-            window.fireConfetti('confetti-canvas');
+            if(!p.options[window.selectedOptionIdx].count) p.options[window.selectedOptionIdx].count = 0;
+            p.options[window.selectedOptionIdx].count++;
+            p.total++;
 
-            // DB 업데이트 (실제 데이터 저장)
+            // UI 갱신 (폭죽 제거됨)
+            window.renderDetailContent(p); 
+            // window.fireConfetti('confetti-canvas'); <-- 투표 시 폭죽 금지 요청 반영
+
+            // DB 업데이트
             try {
                 if(window.db && window.auth && window.auth.currentUser) {
                     const pollRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'polls', 'poll_' + p.id);
-                    
-                    // 옵션별 카운트 증가 (options.0, options.1 ...)
                     const updateData = {};
                     updateData[`options.${window.selectedOptionIdx}`] = window.increment(1);
                     updateData['total'] = window.increment(1);
-                    
-                    // 문서가 없으면 생성(set), 있으면 수정(update)
                     await window.setDoc(pollRef, updateData, { merge: true });
-                    console.log("Vote saved to Firestore!");
-                } else {
-                    console.log("Offline mode or Auth not ready");
+                    console.log("Vote saved!");
                 }
             } catch (e) {
                 console.error("Vote Error:", e);
-                // 에러 처리 로직 (필요시)
+                // 에러 발생 시 로컬 카운트 롤백 로직 등을 여기에 추가할 수 있음
             }
         };
 
@@ -607,6 +602,7 @@
 
             document.getElementById('cert-step-1').classList.add('hidden');
             document.getElementById('cert-step-2').classList.remove('hidden');
+            // 인증서 발급 시에만 폭죽 터짐
             setTimeout(() => window.fireConfetti('cert-confetti-canvas'), 200);
         };
 
