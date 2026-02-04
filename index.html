@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enjoy Vote - Safari Fix</title>
+    <title>Enjoy Vote - Design Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
@@ -109,7 +109,7 @@
         #cert-confetti-canvas { z-index: 250; }
 
         /* 안전 영역(Safe Area) 대응 패딩 */
-        .pt-safe { padding-top: max(12px, env(safe-area-inset-top)); }
+        .pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
         .pb-safe-scroll { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 
         .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
@@ -128,12 +128,8 @@
             
             <!-- 메인 화면 -->
             <div id="screen-home" class="screen active">
-                <header class="flex-none px-5 pt-safe pb-2 flex items-center bg-white/50 backdrop-blur-md sticky top-0 z-20 h-14">
-                    <h1 class="text-xl font-bold text-[#191F28]">엔조이 투표</h1>
-                </header>
-
-                <!-- pb-safe-scroll 클래스 적용: 하단바에 가려지지 않게 여백 추가 -->
-                <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-2 pb-safe-scroll">
+                
+                <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-safe pb-safe-scroll">
                     <!-- 배너 -->
                     <div class="fade-in-up delay-100 mb-8 w-full h-72 rounded-[28px] relative overflow-hidden cursor-pointer group shadow-lg shadow-purple-200" onclick="window.openPollDetail(0)">
                         <div class="absolute inset-0 bg-gradient-to-br from-[#F3E8FF] via-[#E9D5FF] to-[#D8B4FE]"></div>
@@ -157,14 +153,73 @@
                         <div id="result-list" class="space-y-3"></div>
                     </div>
 
-                    <!-- 투표 반영 비율 -->
+                    <!-- 투표 반영 비율 (디자인 수정됨: 그리드 카드 스타일) -->
                     <div class="fade-in-up delay-300 mt-8 mb-6">
                         <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 반영 비율</h3>
-                        <div class="bg-white/70 backdrop-blur-sm rounded-[24px] p-5 border border-white/60 shadow-sm space-y-5">
-                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">아티스트 사전투표</span><span class="text-sm font-bold text-blue-500">15%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-blue-400 h-full rounded-full" style="width: 15%"></div></div></div>
-                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">노래제목 사전투표</span><span class="text-sm font-bold text-green-500">15%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-green-400 h-full rounded-full" style="width: 15%"></div></div></div>
-                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">AI 실력평가</span><span class="text-sm font-bold text-pink-500">30%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-pink-400 h-full rounded-full" style="width: 30%"></div></div></div>
-                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">본투표 (생방송)</span><span class="text-sm font-bold text-purple-600">40%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-purple-600 h-full rounded-full" style="width: 40%"></div></div></div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- 아티스트 -->
+                            <div class="bg-white/80 p-4 rounded-[24px] shadow-sm relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-blue-50 rounded-full blur-lg"></div>
+                                <div class="relative z-10">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="text-[11px] text-gray-500 font-bold">아티스트</p>
+                                        <i class="fa-solid fa-microphone text-blue-200 text-sm"></i>
+                                    </div>
+                                    <div class="flex items-baseline gap-0.5">
+                                        <span class="text-3xl font-black text-[#191F28] tracking-tight">15</span>
+                                        <span class="text-xs font-bold text-blue-500">%</span>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-gray-100/80 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-400 h-full rounded-full" style="width: 15%"></div></div>
+                            </div>
+
+                            <!-- 노래제목 -->
+                            <div class="bg-white/80 p-4 rounded-[24px] shadow-sm relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-green-50 rounded-full blur-lg"></div>
+                                <div class="relative z-10">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="text-[11px] text-gray-500 font-bold">노래제목</p>
+                                        <i class="fa-solid fa-music text-green-200 text-sm"></i>
+                                    </div>
+                                    <div class="flex items-baseline gap-0.5">
+                                        <span class="text-3xl font-black text-[#191F28] tracking-tight">15</span>
+                                        <span class="text-xs font-bold text-green-500">%</span>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-gray-100/80 rounded-full h-1.5 overflow-hidden"><div class="bg-green-400 h-full rounded-full" style="width: 15%"></div></div>
+                            </div>
+
+                            <!-- AI 실력평가 -->
+                            <div class="bg-white/80 p-4 rounded-[24px] shadow-sm relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-pink-50 rounded-full blur-lg"></div>
+                                <div class="relative z-10">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="text-[11px] text-gray-500 font-bold">AI 실력평가</p>
+                                        <i class="fa-solid fa-robot text-pink-200 text-sm"></i>
+                                    </div>
+                                    <div class="flex items-baseline gap-0.5">
+                                        <span class="text-3xl font-black text-[#191F28] tracking-tight">30</span>
+                                        <span class="text-xs font-bold text-pink-500">%</span>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-gray-100/80 rounded-full h-1.5 overflow-hidden"><div class="bg-pink-400 h-full rounded-full" style="width: 30%"></div></div>
+                            </div>
+
+                            <!-- 본투표 -->
+                            <div class="bg-purple-50 p-4 rounded-[24px] shadow-sm border border-purple-100 relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-4 -top-4 w-20 h-20 bg-purple-200/40 rounded-full blur-xl"></div>
+                                <div class="relative z-10">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="text-[11px] text-purple-600 font-bold">생방송 본투표</p>
+                                        <i class="fa-solid fa-check-to-slot text-purple-300 text-sm"></i>
+                                    </div>
+                                    <div class="flex items-baseline gap-0.5">
+                                        <span class="text-3xl font-black text-purple-700 tracking-tight">40</span>
+                                        <span class="text-xs font-bold text-purple-500">%</span>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-purple-200/50 rounded-full h-1.5 overflow-hidden"><div class="bg-purple-600 h-full rounded-full" style="width: 40%"></div></div>
+                            </div>
                         </div>
                     </div>
                     <!-- 안전 영역만큼 추가 여백 -->
@@ -257,7 +312,7 @@
             <nav id="bottom-nav" class="absolute left-1/2 -translate-x-1/2 z-50 w-auto" style="bottom: calc(24px + env(safe-area-inset-bottom));">
                 <div class="flex items-center bg-white/90 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] border border-white/50 rounded-full p-1 gap-1">
                     <div id="nav-bg" class="absolute top-1 bottom-1 bg-gray-100 rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
-                    <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-house text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">홈</span></button>
+                    <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-check-to-slot text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">투표</span></button>
                     <button onclick="window.switchTab(1)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-1"><i class="fa-solid fa-user text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">내 정보</span></button>
                 </div>
             </nav>
