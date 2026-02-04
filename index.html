@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enjoy Vote - Full Screen</title>
+    <title>Enjoy Vote - Safari Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
@@ -11,41 +11,49 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* 1. 높이 단위를 100vh -> 100dvh로 변경 (모바일 주소창 대응) */
-        body { 
-            font-family: 'Pretendard', sans-serif;
+        /* 사파리 풀스크린 강제 고정 */
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden; /* 브라우저 자체 스크롤 방지 */
+            position: fixed; /* iOS 바운스 방지 */
+            top: 0; left: 0;
             background-color: #202020;
-            margin: 0; padding: 0;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        /* 중앙 정렬용 래퍼 (PC 화면 대응) */
+        #app-wrapper {
+            width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            height: 100dvh; /* dvh 사용 */
-            width: 100vw;
-            overflow: hidden;
         }
 
         #mobile-frame {
-            width: 100%; 
-            max-width: 430px; 
-            height: 100%; 
-            /* max-height 제거하고 flex-grow로 채움 */
+            width: 100%; max-width: 430px; 
+            height: 100%; /* 부모 높이 꽉 채움 */
             background: #F2F4F6; 
             position: relative; 
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); 
-            display: flex; 
-            flex-direction: column;
+            display: flex; flex-direction: column;
             z-index: 10;
         }
 
-        /* 2. 모바일 화면(폭 480px 이하)일 때 회색 배경 제거하고 꽉 채우기 */
-        @media (max-width: 480px) {
-            body {
-                background-color: #F2F4F6;
-                align-items: flex-start; /* 위쪽 정렬 */
-            }
+        /* PC/태블릿에서는 그림자 효과 */
+        @media (min-width: 480px) {
             #mobile-frame {
-                max-width: 100%;
-                box-shadow: none;
-                border-radius: 0;
+                height: 100dvh; /* PC에서는 dvh 사용 */
+                max-height: 900px; /* 너무 길어지지 않게 제한 */
+                border-radius: 30px; /* 모서리 둥글게 */
+                box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            }
+        }
+
+        /* 모바일에서는 꽉 채우기 */
+        @media (max-width: 480px) {
+            #app-wrapper { display: block; }
+            #mobile-frame { 
+                max-width: 100%; 
+                border-radius: 0; 
+                height: 100%; 
             }
         }
 
@@ -100,7 +108,10 @@
         #confetti-canvas { z-index: 150; }
         #cert-confetti-canvas { z-index: 250; }
 
+        /* 안전 영역(Safe Area) 대응 패딩 */
         .pt-safe { padding-top: max(12px, env(safe-area-inset-top)); }
+        .pb-safe-scroll { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+
         .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
         
@@ -110,143 +121,147 @@
 </head>
 <body>
 
-    <div id="mobile-frame">
-        <canvas id="confetti-canvas"></canvas>
-        <canvas id="cert-confetti-canvas"></canvas>
-        
-        <!-- 메인 화면 -->
-        <div id="screen-home" class="screen active">
-            <header class="flex-none px-5 pt-safe pb-2 flex items-center bg-white/50 backdrop-blur-md sticky top-0 z-20 h-14">
-                <h1 class="text-xl font-bold text-[#191F28]">엔조이 투표</h1>
-            </header>
+    <div id="app-wrapper">
+        <div id="mobile-frame">
+            <canvas id="confetti-canvas"></canvas>
+            <canvas id="cert-confetti-canvas"></canvas>
+            
+            <!-- 메인 화면 -->
+            <div id="screen-home" class="screen active">
+                <header class="flex-none px-5 pt-safe pb-2 flex items-center bg-white/50 backdrop-blur-md sticky top-0 z-20 h-14">
+                    <h1 class="text-xl font-bold text-[#191F28]">엔조이 투표</h1>
+                </header>
 
-            <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pb-20 pt-2">
-                <!-- 배너 -->
-                <div class="fade-in-up delay-100 mb-8 w-full h-72 rounded-[28px] relative overflow-hidden cursor-pointer group shadow-lg shadow-purple-200" onclick="window.openPollDetail(0)">
-                    <div class="absolute inset-0 bg-gradient-to-br from-[#F3E8FF] via-[#E9D5FF] to-[#D8B4FE]"></div>
-                    <div class="absolute -right-4 -top-4 w-40 h-40 bg-white/40 rounded-full blur-2xl"></div>
-                    <div class="absolute -left-4 bottom-4 w-32 h-32 bg-purple-300/30 rounded-full blur-2xl"></div>
-                    <img src="program_logo.png" alt="Logo" class="absolute right-4 bottom-4 w-36 h-36 object-contain drop-shadow-xl rotate-[-5deg] filter brightness-105" onerror="this.style.display='none'; document.getElementById('fb-icon').style.display='block'">
-                    <div id="fb-icon" class="hidden absolute right-6 bottom-6 text-[80px] drop-shadow-lg rotate-[-10deg] filter brightness-105">🎤</div>
-                    <div class="relative z-10 h-full p-6 flex flex-col justify-between">
-                        <div>
-                            <span class="inline-flex items-center gap-1 bg-white/70 text-purple-700 text-[10px] font-bold px-2.5 py-1 rounded-full mb-2 backdrop-blur-sm shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span> VOTE NOW</span>
-                            <h2 class="text-[26px] font-extrabold text-[#191F28] leading-[1.15]">설날특선<br>엔조이 인기가요2<br><span class="text-purple-600">사전투표</span></h2>
-                            <p class="text-gray-600 font-medium mt-3 text-xs opacity-80">🎵 너의 모든 순간<br>🎵 흰수염 고래</p>
+                <!-- pb-safe-scroll 클래스 적용: 하단바에 가려지지 않게 여백 추가 -->
+                <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-2 pb-safe-scroll">
+                    <!-- 배너 -->
+                    <div class="fade-in-up delay-100 mb-8 w-full h-72 rounded-[28px] relative overflow-hidden cursor-pointer group shadow-lg shadow-purple-200" onclick="window.openPollDetail(0)">
+                        <div class="absolute inset-0 bg-gradient-to-br from-[#F3E8FF] via-[#E9D5FF] to-[#D8B4FE]"></div>
+                        <div class="absolute -right-4 -top-4 w-40 h-40 bg-white/40 rounded-full blur-2xl"></div>
+                        <div class="absolute -left-4 bottom-4 w-32 h-32 bg-purple-300/30 rounded-full blur-2xl"></div>
+                        <img src="program_logo.png" alt="Logo" class="absolute right-4 bottom-4 w-36 h-36 object-contain drop-shadow-xl rotate-[-5deg] filter brightness-105" onerror="this.style.display='none'; document.getElementById('fb-icon').style.display='block'">
+                        <div id="fb-icon" class="hidden absolute right-6 bottom-6 text-[80px] drop-shadow-lg rotate-[-10deg] filter brightness-105">🎤</div>
+                        <div class="relative z-10 h-full p-6 flex flex-col justify-between">
+                            <div>
+                                <span class="inline-flex items-center gap-1 bg-white/70 text-purple-700 text-[10px] font-bold px-2.5 py-1 rounded-full mb-2 backdrop-blur-sm shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span> VOTE NOW</span>
+                                <h2 class="text-[26px] font-extrabold text-[#191F28] leading-[1.15]">설날특선<br>엔조이 인기가요2<br><span class="text-purple-600">사전투표</span></h2>
+                                <p class="text-gray-600 font-medium mt-3 text-xs opacity-80">🎵 너의 모든 순간<br>🎵 흰수염 고래</p>
+                            </div>
+                            <div class="flex items-center gap-2"><span class="text-xs font-bold text-white bg-purple-500 px-5 py-2.5 rounded-full shadow-md">지금 투표하기 →</span></div>
                         </div>
-                        <div class="flex items-center gap-2"><span class="text-xs font-bold text-white bg-purple-500 px-5 py-2.5 rounded-full shadow-md">지금 투표하기 →</span></div>
                     </div>
-                </div>
 
-                <!-- 결과 리스트 -->
-                <div class="fade-in-up delay-200">
-                    <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 결과</h3>
-                    <div id="result-list" class="space-y-3"></div>
-                </div>
-
-                <!-- 투표 반영 비율 -->
-                <div class="fade-in-up delay-300 mt-8 mb-6">
-                    <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 반영 비율</h3>
-                    <div class="bg-white/70 backdrop-blur-sm rounded-[24px] p-5 border border-white/60 shadow-sm space-y-5">
-                        <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">아티스트 사전투표</span><span class="text-sm font-bold text-blue-500">15%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-blue-400 h-full rounded-full" style="width: 15%"></div></div></div>
-                        <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">노래제목 사전투표</span><span class="text-sm font-bold text-green-500">15%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-green-400 h-full rounded-full" style="width: 15%"></div></div></div>
-                        <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">AI 실력평가</span><span class="text-sm font-bold text-pink-500">30%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-pink-400 h-full rounded-full" style="width: 30%"></div></div></div>
-                        <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">본투표 (생방송)</span><span class="text-sm font-bold text-purple-600">40%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-purple-600 h-full rounded-full" style="width: 40%"></div></div></div>
+                    <!-- 결과 리스트 -->
+                    <div class="fade-in-up delay-200">
+                        <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 결과</h3>
+                        <div id="result-list" class="space-y-3"></div>
                     </div>
+
+                    <!-- 투표 반영 비율 -->
+                    <div class="fade-in-up delay-300 mt-8 mb-6">
+                        <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 반영 비율</h3>
+                        <div class="bg-white/70 backdrop-blur-sm rounded-[24px] p-5 border border-white/60 shadow-sm space-y-5">
+                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">아티스트 사전투표</span><span class="text-sm font-bold text-blue-500">15%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-blue-400 h-full rounded-full" style="width: 15%"></div></div></div>
+                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">노래제목 사전투표</span><span class="text-sm font-bold text-green-500">15%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-green-400 h-full rounded-full" style="width: 15%"></div></div></div>
+                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">AI 실력평가</span><span class="text-sm font-bold text-pink-500">30%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-pink-400 h-full rounded-full" style="width: 30%"></div></div></div>
+                            <div><div class="flex justify-between items-end mb-2"><span class="text-xs font-bold text-gray-500">본투표 (생방송)</span><span class="text-sm font-bold text-purple-600">40%</span></div><div class="w-full bg-gray-100/80 rounded-full h-2.5 overflow-hidden"><div class="bg-purple-600 h-full rounded-full" style="width: 40%"></div></div></div>
+                        </div>
+                    </div>
+                    <!-- 안전 영역만큼 추가 여백 -->
+                    <div class="h-8"></div>
                 </div>
-                <div class="h-8"></div>
             </div>
-        </div>
 
-        <!-- 모달 (상세) -->
-        <div id="modal-detail" class="full-modal">
-            <header class="flex-none px-5 pt-safe pb-2 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-gray-100 z-20 h-14">
-                <button onclick="window.closeModal()" class="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-lg text-[#191F28]"></i></button>
-                <span class="text-sm font-bold text-[#191F28]">투표 상세</span>
-                <div class="w-8"></div>
-            </header>
-            <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-6 pb-10">
-                <div class="text-center mb-8">
-                    <span id="poll-badge" class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded mb-2">상태</span>
-                    <h2 id="detail-title" class="text-2xl font-bold text-[#191F28] mb-1.5 leading-tight break-keep">제목</h2>
-                    <p id="detail-info" class="text-xs text-gray-500 font-medium">정보</p>
+            <!-- 모달 (상세) -->
+            <div id="modal-detail" class="full-modal">
+                <header class="flex-none px-5 pt-safe pb-2 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-gray-100 z-20 h-14">
+                    <button onclick="window.closeModal()" class="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-lg text-[#191F28]"></i></button>
+                    <span class="text-sm font-bold text-[#191F28]">투표 상세</span>
+                    <div class="w-8"></div>
+                </header>
+                <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-6 pb-safe-scroll">
+                    <div class="text-center mb-8">
+                        <span id="poll-badge" class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded mb-2">상태</span>
+                        <h2 id="detail-title" class="text-2xl font-bold text-[#191F28] mb-1.5 leading-tight break-keep">제목</h2>
+                        <p id="detail-info" class="text-xs text-gray-500 font-medium">정보</p>
+                    </div>
+                    <div id="detail-options" class="space-y-3 pb-8"></div>
+                    <div class="mt-4 pb-12">
+                        <button id="btn-submit" onclick="window.submitVote()" class="w-full bg-purple-500 text-white font-bold text-lg py-4 rounded-[24px] shadow-lg active:scale-95 transition-transform disabled:bg-gray-300">투표하기</button>
+                        <!-- 결과 버튼들 -->
+                        <div id="result-buttons" class="hidden space-y-3 mt-3">
+                            <button onclick="window.voteAgain()" class="w-full bg-white border border-gray-200 text-gray-600 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform">한 번 더 투표하기 ↺</button>
+                            <button onclick="window.openCertInput()" class="w-full bg-purple-50 border border-purple-200 text-purple-600 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-certificate"></i> 인증서 발급받기
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div id="detail-options" class="space-y-3 pb-8"></div>
-                <div class="mt-4 pb-12">
-                    <button id="btn-submit" onclick="window.submitVote()" class="w-full bg-purple-500 text-white font-bold text-lg py-4 rounded-[24px] shadow-lg active:scale-95 transition-transform disabled:bg-gray-300">투표하기</button>
-                    <!-- 결과 버튼들 -->
-                    <div id="result-buttons" class="hidden space-y-3 mt-3">
-                        <button onclick="window.voteAgain()" class="w-full bg-white border border-gray-200 text-gray-600 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform">한 번 더 투표하기 ↺</button>
-                        <button onclick="window.openCertInput()" class="w-full bg-purple-50 border border-purple-200 text-purple-600 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-certificate"></i> 인증서 발급받기
+            </div>
+            
+            <!-- 인증서 모달 -->
+            <div id="modal-cert" class="cert-modal-overlay">
+                <div id="cert-step-1" class="w-full bg-white rounded-[28px] p-6 shadow-2xl transform transition-all scale-100">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl animate-bounce">
+                            <i class="fa-solid fa-pen-nib"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#191F28]">투표 인증서 발급</h3>
+                        <p class="text-sm text-gray-500 mt-1">인증서에 표시될 이름을 입력해주세요.</p>
+                    </div>
+                    <input type="text" id="cert-name-input" placeholder="이름 또는 닉네임 (최대 6자)" maxlength="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-center text-lg font-bold mb-4 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    <div class="flex gap-2">
+                        <button onclick="window.closeCertModal()" class="flex-1 py-3.5 rounded-xl bg-gray-100 text-gray-500 font-bold">취소</button>
+                        <button onclick="window.generateCert()" class="flex-1 py-3.5 rounded-xl bg-purple-500 text-white font-bold shadow-md">발급하기</button>
+                    </div>
+                </div>
+
+                <div id="cert-step-2" class="hidden w-full relative">
+                    <button onclick="window.closeCertModal()" class="absolute -top-12 right-0 text-white/80 hover:text-white text-2xl z-50 p-2"><i class="fa-solid fa-xmark"></i></button>
+                    <div id="cert-capture-area" class="cert-card-bg rounded-[24px] p-6 text-center relative overflow-hidden transform transition-transform">
+                        <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-400/10 rounded-full blur-xl"></div>
+                        <div class="relative z-10 pt-2">
+                            <div class="inline-block px-3 py-1 rounded-full border border-purple-200 bg-purple-50 text-[10px] text-purple-600 font-bold tracking-widest mb-4">OFFICIAL CERTIFICATE</div>
+                            <h2 class="text-[22px] font-extrabold text-[#191F28] leading-tight mb-6" id="cert-poll-title">투표 제목</h2>
+                            <div class="bg-white/60 rounded-xl p-4 border border-white/50 mb-6 backdrop-blur-sm">
+                                <p class="text-[11px] text-gray-500 font-bold mb-1">VOTE STATUS</p>
+                                <div class="text-xl font-black text-gray-400 tracking-wider">SECRET 🔒</div>
+                            </div>
+                            <div class="flex justify-between items-end border-t border-gray-200 pt-5 mt-2">
+                                <div class="text-left">
+                                    <p class="text-[10px] text-gray-400 font-bold mb-0.5">VOTER</p>
+                                    <p class="text-base font-bold text-[#191F28]" id="cert-user-name">이름</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-gray-400 font-bold mb-0.5">DATE & TIME</p>
+                                    <p class="text-sm font-medium text-gray-600 tracking-tight" id="cert-date">2024.02.09 14:00</p>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-16 right-4 opacity-0 stamp-ani" style="animation-delay: 0.3s;">
+                                <div class="w-20 h-20 border-[3px] border-red-500/40 rounded-full flex items-center justify-center rotate-[-15deg]">
+                                    <div class="w-[72px] h-[72px] border border-red-500/40 rounded-full flex items-center justify-center text-red-500/50 font-black text-xs uppercase tracking-tighter text-center leading-3">VOTE<br>COMPLETE</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex flex-col gap-2">
+                        <button onclick="window.saveCertImage()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-[20px] shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-download"></i> 이미지로 저장하기
                         </button>
+                        <p class="text-white/70 text-xs text-center">또는 화면을 캡쳐해서 공유하세요!</p>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 인증서 모달 -->
-        <div id="modal-cert" class="cert-modal-overlay">
-            <div id="cert-step-1" class="w-full bg-white rounded-[28px] p-6 shadow-2xl transform transition-all scale-100">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl animate-bounce">
-                        <i class="fa-solid fa-pen-nib"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-[#191F28]">투표 인증서 발급</h3>
-                    <p class="text-sm text-gray-500 mt-1">인증서에 표시될 이름을 입력해주세요.</p>
-                </div>
-                <input type="text" id="cert-name-input" placeholder="이름 또는 닉네임 (최대 6자)" maxlength="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-center text-lg font-bold mb-4 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
-                <div class="flex gap-2">
-                    <button onclick="window.closeCertModal()" class="flex-1 py-3.5 rounded-xl bg-gray-100 text-gray-500 font-bold">취소</button>
-                    <button onclick="window.generateCert()" class="flex-1 py-3.5 rounded-xl bg-purple-500 text-white font-bold shadow-md">발급하기</button>
                 </div>
             </div>
 
-            <div id="cert-step-2" class="hidden w-full relative">
-                <button onclick="window.closeCertModal()" class="absolute -top-12 right-0 text-white/80 hover:text-white text-2xl z-50 p-2"><i class="fa-solid fa-xmark"></i></button>
-                <div id="cert-capture-area" class="cert-card-bg rounded-[24px] p-6 text-center relative overflow-hidden transform transition-transform">
-                    <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-400/10 rounded-full blur-xl"></div>
-                    <div class="relative z-10 pt-2">
-                        <div class="inline-block px-3 py-1 rounded-full border border-purple-200 bg-purple-50 text-[10px] text-purple-600 font-bold tracking-widest mb-4">OFFICIAL CERTIFICATE</div>
-                        <h2 class="text-[22px] font-extrabold text-[#191F28] leading-tight mb-6" id="cert-poll-title">투표 제목</h2>
-                        <div class="bg-white/60 rounded-xl p-4 border border-white/50 mb-6 backdrop-blur-sm">
-                            <p class="text-[11px] text-gray-500 font-bold mb-1">VOTE STATUS</p>
-                            <div class="text-xl font-black text-gray-400 tracking-wider">SECRET 🔒</div>
-                        </div>
-                        <div class="flex justify-between items-end border-t border-gray-200 pt-5 mt-2">
-                            <div class="text-left">
-                                <p class="text-[10px] text-gray-400 font-bold mb-0.5">VOTER</p>
-                                <p class="text-base font-bold text-[#191F28]" id="cert-user-name">이름</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[10px] text-gray-400 font-bold mb-0.5">DATE & TIME</p>
-                                <p class="text-sm font-medium text-gray-600 tracking-tight" id="cert-date">2024.02.09 14:00</p>
-                            </div>
-                        </div>
-                        <div class="absolute bottom-16 right-4 opacity-0 stamp-ani" style="animation-delay: 0.3s;">
-                            <div class="w-20 h-20 border-[3px] border-red-500/40 rounded-full flex items-center justify-center rotate-[-15deg]">
-                                <div class="w-[72px] h-[72px] border border-red-500/40 rounded-full flex items-center justify-center text-red-500/50 font-black text-xs uppercase tracking-tighter text-center leading-3">VOTE<br>COMPLETE</div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- 하단바 -->
+            <nav id="bottom-nav" class="absolute left-1/2 -translate-x-1/2 z-50 w-auto" style="bottom: calc(24px + env(safe-area-inset-bottom));">
+                <div class="flex items-center bg-white/90 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] border border-white/50 rounded-full p-1 gap-1">
+                    <div id="nav-bg" class="absolute top-1 bottom-1 bg-gray-100 rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
+                    <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-house text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">홈</span></button>
+                    <button onclick="window.switchTab(1)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-1"><i class="fa-solid fa-user text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">내 정보</span></button>
                 </div>
-                <div class="mt-4 flex flex-col gap-2">
-                    <button onclick="window.saveCertImage()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-[20px] shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-download"></i> 이미지로 저장하기
-                    </button>
-                    <p class="text-white/70 text-xs text-center">또는 화면을 캡쳐해서 공유하세요!</p>
-                </div>
-            </div>
+            </nav>
         </div>
-
-        <!-- 하단바 -->
-        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-auto">
-            <div class="flex items-center bg-white/90 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] border border-white/50 rounded-full p-1 gap-1">
-                <div id="nav-bg" class="absolute top-1 bottom-1 bg-gray-100 rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
-                <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-house text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">홈</span></button>
-                <button onclick="window.switchTab(1)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-1"><i class="fa-solid fa-user text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">내 정보</span></button>
-            </div>
-        </nav>
     </div>
 
     <script>
