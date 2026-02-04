@@ -3,34 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enjoy Vote - Ultimate Fix</title>
+    <title>Enjoy Vote - Final Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2canvas 최신 버전 (1.4.1) -->
+    <!-- html2canvas 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* 1. 레이아웃 강제 고정 (태블릿 깨짐 방지) */
         body { 
             font-family: 'Pretendard', sans-serif;
-            background-color: #202020;
+            background-color: #111; /* 배경색 어둡게 */
             margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden; /* 스크롤 방지 */
         }
 
         #mobile-frame {
-            width: 100%; max-width: 430px; height: 100%; max-height: 100dvh;
-            background: #F2F4F6; position: relative; overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); display: flex; flex-direction: column;
-            z-index: 10;
+            width: 100%; 
+            max-width: 430px; /* 스마트폰 너비 고정 */
+            height: 100%; 
+            max-height: 100dvh;
+            background: #F2F4F6; 
+            position: relative; 
+            overflow: hidden;
+            display: flex; 
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); /* 그림자 효과 */
         }
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         
         .toss-card {
-            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 24px;
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04); 
             transition: transform 0.1s; cursor: pointer;
@@ -63,10 +74,10 @@
             pointer-events: none; z-index: 150;
         }
 
-        /* 📸 [수정] 캡처 스테이지 (화면 맨 위 덮개) */
-        #capture-stage {
-            position: fixed; 
-            inset: 0; 
+        /* 📸 [수정] 인증서 생성 컨테이너 (화면 덮개 뒤에 숨김) */
+        #cert-generation-stage {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: #202020; /* 배경을 가려줌 */
             z-index: 9999; 
             display: flex; 
@@ -74,9 +85,9 @@
             justify-content: center;
             opacity: 0; 
             pointer-events: none;
-            transition: opacity 0.3s;
+            transition: opacity 0.2s;
         }
-        #capture-stage.active { opacity: 1; pointer-events: auto; }
+        #cert-generation-stage.active { opacity: 1; pointer-events: auto; }
         
         /* 📸 프리미엄 티켓 디자인 */
         .premium-cert {
@@ -122,7 +133,7 @@
             border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* 팝업 */
+        /* 팝업 스타일 */
         .custom-modal {
             position: absolute; inset: 0; background: rgba(0,0,0,0.85);
             z-index: 200; display: none; flex-direction: column; 
@@ -131,19 +142,21 @@
         .custom-modal.show { display: flex; }
         .scale-up { animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .pt-safe { padding-top: max(12px, env(safe-area-inset-top)); }
     </style>
 </head>
 <body>
 
-    <!-- 📸 캡처 스테이지 (화면 덮개 + 인증서) -->
-    <div id="capture-stage">
+    <!-- 📸 인증서 생성 스테이지 (평소엔 숨김, 생성 시 활성화) -->
+    <div id="cert-generation-stage">
         <div class="absolute inset-0 flex flex-col items-center justify-center z-50 text-white">
-            <i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
-            <p class="font-bold text-lg">인증서 만드는 중...</p>
+            <i class="fa-solid fa-spinner fa-spin text-4xl mb-4 text-purple-500"></i>
+            <p class="font-bold text-lg animate-pulse">인증서를 만들고 있어요...</p>
         </div>
         
-        <!-- 실제 캡처될 요소 (중앙 배치) -->
-        <div id="cert-target" class="premium-cert scale-90">
+        <!-- 실제 캡처될 요소 (화면 중앙 배치) -->
+        <div id="cert-target" class="premium-cert">
             <div class="cert-bg-gradient"></div>
             <div class="cert-noise"></div>
             <div class="cert-content">
@@ -156,6 +169,7 @@
                     <h1 class="text-5xl font-black text-white leading-tight mb-2 drop-shadow-2xl">VOTE<br>COMPLETED</h1>
                     <p class="text-purple-200 text-base font-medium">투표 참여가 완료되었습니다</p>
                     <div class="w-12 h-1 bg-white/20 rounded-full mt-6 mb-6"></div>
+                    <!-- 이름 표시 -->
                     <p class="text-white/80 text-lg font-bold">Certified by <span id="cert-user-name" class="text-white border-b border-white/50 pb-1">User</span></p>
                 </div>
                 <div class="cert-footer">
@@ -169,36 +183,38 @@
         </div>
     </div>
 
+    <!-- 앱 전체 컨테이너 -->
     <div id="mobile-frame">
         <canvas id="confetti-canvas"></canvas>
         
-        <!-- 이름 입력 모달 -->
+        <!-- 1. 이름 입력 모달 -->
         <div id="name-input-modal" class="custom-modal">
-            <div class="bg-white w-[85%] max-w-[320px] rounded-[24px] p-6 text-center scale-up shadow-2xl">
+            <div class="bg-white w-[85%] max-w-[320px] rounded-[24px] p-6 text-center scale-up shadow-2xl relative">
+                <button onclick="document.getElementById('name-input-modal').classList.remove('show')" class="absolute top-4 right-4 text-gray-300 hover:text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600 text-xl"><i class="fa-solid fa-pen-nib"></i></div>
                 <h3 class="text-xl font-bold text-[#191F28] mb-2">이름을 입력해주세요</h3>
-                <p class="text-sm text-gray-500 mb-6">인증서에 이름이 기록됩니다.</p>
+                <p class="text-sm text-gray-500 mb-6">인증서에 투표자 이름이 기록됩니다.</p>
                 <input type="text" id="voter-name-input" placeholder="예: 김엔조" class="w-full bg-gray-100 border-none rounded-xl px-4 py-3.5 text-center text-lg font-bold text-[#191F28] mb-4 focus:ring-2 focus:ring-purple-500 outline-none" autocomplete="off">
-                <div class="flex gap-2">
-                    <button onclick="document.getElementById('name-input-modal').classList.remove('show')" class="flex-1 bg-gray-100 text-gray-500 font-bold py-3.5 rounded-xl">취소</button>
-                    <button onclick="window.confirmNameAndGenerate()" class="flex-1 bg-purple-600 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-transform">확인</button>
-                </div>
+                <button onclick="window.confirmNameAndGenerate()" class="w-full bg-purple-600 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-transform">확인 및 생성</button>
             </div>
         </div>
 
-        <!-- 이미지 결과 팝업 -->
+        <!-- 2. 이미지 미리보기 팝업 (성공 시) -->
         <div id="img-preview-modal" class="custom-modal">
             <div class="w-full h-full flex flex-col items-center justify-center p-6 relative">
                 <button onclick="closePreview()" class="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white text-xl z-50 hover:bg-white/30">✕</button>
+                
                 <div class="text-center mb-6 scale-up">
                     <h3 class="text-white font-bold text-2xl mb-2">인증서 발급 완료 ✨</h3>
-                    <p class="text-white/60 text-sm">이미지가 저장되지 않았다면<br><span class="text-yellow-300 font-bold">이미지를 길게 눌러 저장</span>하세요!</p>
+                    <p class="text-white/60 text-sm">이미지를 <span class="text-yellow-300 font-bold underline">길게 꾹 눌러서</span><br>갤러리에 저장하세요!</p>
                 </div>
                 
-                <img id="generated-cert-img" src="" class="w-[75%] h-auto rounded-xl shadow-2xl mb-8 border border-white/10 ring-4 ring-purple-500/30 scale-up">
+                <!-- 생성된 이미지 -->
+                <img id="generated-cert-img" src="" class="w-[80%] h-auto max-h-[60vh] rounded-xl shadow-2xl mb-8 border-2 border-white/20 ring-4 ring-purple-500/30 scale-up object-contain bg-black">
                 
-                <a id="download-link" href="#" download="vote_cert.png" class="w-full max-w-[280px] bg-white text-purple-600 px-6 py-4 rounded-2xl font-bold shadow-xl active:scale-95 transition-transform flex items-center justify-center gap-2 scale-up">
-                    <i class="fa-solid fa-download"></i> 앨범에 저장하기
-                </a>
+                <button onclick="closePreview()" class="bg-white/10 border border-white/30 text-white px-8 py-3 rounded-full text-sm font-bold backdrop-blur-sm active:bg-white/20 transition-colors">
+                    닫기
+                </button>
             </div>
         </div>
 
@@ -263,7 +279,7 @@
                     <div id="result-buttons" class="hidden space-y-3 mt-3">
                         <button onclick="window.voteAgain()" class="w-full bg-white border border-purple-200 text-purple-600 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform">한 번 더 투표하기 ↺</button>
                         <button onclick="window.startCertProcess()" class="w-full bg-gray-100 text-gray-600 font-bold text-base py-3.5 rounded-[24px] active:scale-95 transition-transform flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-camera"></i> 투표 인증서 저장
+                            <i class="fa-solid fa-camera"></i> 투표 인증서 만들기
                         </button>
                     </div>
                 </div>
@@ -271,7 +287,7 @@
         </div>
 
         <!-- 하단바 -->
-        <nav id="bottom-nav">
+        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-auto">
             <div class="flex items-center bg-white/90 backdrop-blur-xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] border border-white/50 rounded-full p-1 gap-1">
                 <div id="nav-bg" class="absolute top-1 bottom-1 bg-gray-100 rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
                 <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-house text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">홈</span></button>
@@ -288,54 +304,52 @@
         window.currentPollId = null;
         window.selectedOptionIdx = null;
 
-        // [핵심] 인증서 프로세스 (수정됨)
+        // [핵심] 인증서 생성 프로세스
         window.startCertProcess = function() {
             document.getElementById('voter-name-input').value = '';
             document.getElementById('name-input-modal').classList.add('show');
-            document.getElementById('voter-name-input').focus();
+            setTimeout(() => document.getElementById('voter-name-input').focus(), 100);
         };
 
         window.confirmNameAndGenerate = function() {
             const name = document.getElementById('voter-name-input').value.trim();
             if(!name) { alert("이름을 입력해주세요!"); return; }
             document.getElementById('name-input-modal').classList.remove('show');
-            
-            // 이름 및 시간 설정
-            document.getElementById('cert-user-name').innerText = name;
+            window.generateAndShowCert(name);
+        };
+
+        window.generateAndShowCert = function(userName) {
+            // 1. 정보 업데이트
+            document.getElementById('cert-user-name').innerText = userName;
             const now = new Date();
             document.getElementById('cert-date').innerText = now.toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'}).replace(/\./g, '.');
             document.getElementById('cert-time').innerText = now.toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
 
-            // 캡처 스테이지 활성화 (화면 덮기)
-            const stage = document.getElementById('capture-stage');
+            // 2. 생성 스테이지 활성화 (화면 덮기)
+            const stage = document.getElementById('cert-generation-stage');
             stage.classList.add('active');
 
-            // 렌더링 대기 후 캡처
+            // 3. 약간의 지연 후 캡처 (렌더링 시간 확보)
             setTimeout(() => {
                 const certEl = document.getElementById('cert-target');
-                html2canvas(certEl, {
-                    scale: 2, // 고화질
-                    backgroundColor: '#111',
-                    useCORS: true,
-                    logging: false
+                html2canvas(certEl, { 
+                    scale: 2, // 고해상도
+                    backgroundColor: '#111', 
+                    useCORS: true, 
+                    logging: false,
+                    allowTaint: true // 로컬 이미지 허용
                 }).then(canvas => {
                     const imgData = canvas.toDataURL("image/png");
                     document.getElementById('generated-cert-img').src = imgData;
-                    document.getElementById('download-link').href = imgData;
                     
-                    stage.classList.remove('active'); // 스테이지 숨김
-                    document.getElementById('img-preview-modal').classList.add('show'); // 결과 모달 표시
-                    
-                    // PC 자동 다운로드
-                    if(!navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-                        document.getElementById('download-link').click();
-                    }
+                    stage.classList.remove('active'); // 덮개 끄기
+                    document.getElementById('img-preview-modal').classList.add('show'); // 결과창 열기
                 }).catch(err => {
                     console.error(err);
-                    alert("생성 실패: " + err);
                     stage.classList.remove('active');
+                    alert("인증서 생성에 실패했습니다. 다시 시도해주세요.");
                 });
-            }, 800); // 0.8초 대기 (렌더링 안정화)
+            }, 500); // 0.5초 대기
         };
 
         window.closePreview = function() { document.getElementById('img-preview-modal').classList.remove('show'); }
