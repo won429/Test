@@ -143,7 +143,7 @@
                                 <h2 class="text-[26px] font-extrabold text-[#191F28] leading-[1.15]">설날특선<br>엔조이 인기가요2<br><span class="text-purple-600">사전투표</span></h2>
                                 <p class="text-gray-600 font-medium mt-3 text-xs opacity-80">🎵 너의 모든 순간<br>🎵 흰수염 고래</p>
                             </div>
-                            <div class="flex items-center gap-2"><span class="text-xs font-bold text-white bg-purple-500 px-5 py-2.5 rounded-full shadow-md">지금 투표하기 →</span></div>
+                            <div class="flex items-center gap-2"><span class="text-xs font-bold text-white bg-gray-600 px-5 py-2.5 rounded-full shadow-md">결과 보기 →</span></div>
                         </div>
                     </div>
 
@@ -419,7 +419,7 @@
 
     <script>
         window.polls = [
-            { id: 0, type: 'active', title: "설날특선 엔조이 인기가요2 사전투표 🎤", author: "엔조이 제작진", total: 0, options: [{ text: "너의 모든 순간", count: 0 }, { text: "흰수염 고래", count: 0 }], myPick: null, hasVoted: false },
+            { id: 0, type: 'result', title: "설날특선 엔조이 인기가요2 사전투표 🎤", author: "엔조이 제작진", total: 0, options: [{ text: "너의 모든 순간", count: 0 }, { text: "흰수염 고래", count: 0 }], icon: "🎤", color: "bg-purple-50 text-purple-500", myPick: null, hasVoted: false },
             { id: 1, type: 'result', title: "인기가요2 아티스트 사전투표 👨‍🎤", author: "엔조이 제작진", total: 5, options: [{ text: "전시기", count: 3 }, { text: "홍박사", count: 2 }], icon: "👨‍🎤", color: "bg-blue-50 text-blue-500", myPick: null, hasVoted: true }
         ];
         window.currentPollId = null;
@@ -642,5 +642,4 @@
     </script>
 </body>
 </html>
-
 
