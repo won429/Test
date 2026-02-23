@@ -1,477 +1,569 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { TrainFront, Clock, Map, Route, LocateFixed } from 'lucide-react';
-
-// 대경선 상행(경산->구미) 역별 위치 데이터 (0.0이 구미, 1.0이 경산)
-const STATIONS = {
-  "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4 },
-  "사곡": { progress: 0.08, align: "start", xOff: 15, yOff: 4 },
-  "북삼": { progress: 0.23, align: "middle", xOff: 0, yOff: -20 },
-  "왜관": { progress: 0.39, align: "end", xOff: -15, yOff: 4 },
-  "서대구": { progress: 0.54, align: "middle", xOff: 0, yOff: 24, ktx: true },
-  "대구": { progress: 0.67, align: "start", xOff: 15, yOff: 4 },
-  "동대구": { progress: 0.80, align: "start", xOff: 15, yOff: 4, ktx: true },
-  "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true }
-};
-
-// 💡 여기에 실제 CSV 데이터를 붙여넣으세요! (현재는 샘플용 축약 데이터입니다)
-const rawTimetableCsv = `역명,K1702,K1704,K1706,K1708,K1710,K1712,K1714,K1716,K1718,K1720,K1722,K1724
-경산,,05:30:00,,05:57:00,06:07:00,06:36:00,06:45:00,07:10:00,07:34:00,07:57:00,08:08:00,08:27:00
-동대구,05:15:00,05:42:00,05:57:00,06:11:00,06:19:00,06:48:00,06:57:00,07:22:00,07:46:00,08:09:00,08:20:00,08:39:00
-대구,05:20:00,05:47:00,06:02:00,06:16:00,06:24:00,06:53:00,07:02:00,07:27:00,07:51:00,08:14:00,08:25:00,08:44:00
-서대구,05:25:00,05:52:00,06:07:00,06:21:00,06:29:00,06:58:00,07:07:00,07:32:00,07:56:00,08:19:00,08:30:00,08:49:00
-왜관,05:37:00,06:04:00,06:19:00,06:33:00,06:41:00,07:10:00,07:19:00,07:44:00,08:08:00,08:31:00,08:42:00,09:01:00
-북삼,05:42:00,06:09:00,06:24:00,06:38:00,06:46:00,07:15:00,07:24:00,07:49:00,08:13:00,08:36:00,08:47:00,09:06:00
-사곡,05:47:00,06:14:00,06:29:00,06:43:00,06:51:00,07:20:00,07:29:00,07:54:00,08:18:00,08:41:00,08:52:00,09:11:00
-구미,05:51:00,06:18:00,06:33:00,06:47:00,06:55:00,07:24:00,07:33:00,07:58:00,08:22:00,08:45:00,08:56:00,09:15:00`;
-
-const THEME_COLOR = "#0052FF";
-const STOP_DURATION = 30; // 30초 정차
-
-const timeToSeconds = (timeStr) => {
-  if (!timeStr) return 0;
-  let [h, m, s] = timeStr.split(':').map(Number);
-  // 자정(00시)이 넘어가면 논리적으로 24시~27시로 계산하여 처리
-  if (h < 4) h += 24;
-  return h * 3600 + m * 60 + s;
-};
-
-const secondsToTime = (totalSeconds) => {
-  const h = Math.floor(totalSeconds / 3600) % 24; // 화면 표시는 24 넘어가면 다시 0으로
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = Math.floor(totalSeconds % 60);
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-};
-
-export default function SubwayTracker() {
-  const [activeTab, setActiveTab] = useState('route'); 
-  const [isAutoScroll, setIsAutoScroll] = useState(true); 
-  const [selectedTrainId, setSelectedTrainId] = useState(null);
-  
-  const scrollContainerRef = useRef(null); 
-  const routePathRef = useRef(null);
-  const mapPathRef = useRef(null);
-  const [routeLength, setRouteLength] = useState(0);
-  const [mapLength, setMapLength] = useState(0);
-  const [currentSec, setCurrentSec] = useState(0);
-
-  // CSV 파싱
-  const parsedTrains = useMemo(() => {
-    const lines = rawTimetableCsv.trim().split('\n');
-    const headers = lines[0].split(',');
-    const trainIds = headers.slice(1);
-    const trains = trainIds.map(id => ({ id: id.trim(), schedule: [] }));
-
-    for (let i = 1; i < lines.length; i++) {
-      const row = lines[i].split(',');
-      const stationName = row[0].trim();
-      const stationData = STATIONS[stationName];
-      if (!stationData) continue;
-
-      for (let j = 1; j < row.length; j++) {
-        const timeStr = row[j].trim();
-        if (timeStr) {
-          trains[j-1].schedule.push({
-            name: stationName,
-            time: timeStr,
-            sec: timeToSeconds(timeStr),
-            progress: stationData.progress
-          });
-        }
-      }
-    }
-    
-    // 시간순 정렬 및 유효한 열차 필터링
-    trains.forEach(t => t.schedule.sort((a, b) => a.sec - b.sec));
-    return trains.filter(t => t.id && t.schedule.length >= 2);
-  }, []);
-
-  // 실제 시계 연동 (Real-time Clock)
-  useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
-      let h = now.getHours();
-      if (h < 4) h += 24; // 자정 이후(0~3시)는 24~27시로 변환하여 로직 상 오류 방지
-      setCurrentSec(h * 3600 + now.getMinutes() * 60 + now.getSeconds());
-    };
-    
-    updateClock(); // 초기 로드 시 1회 즉시 실행
-    const interval = setInterval(updateClock, 1000); // 1초마다 동기화
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  // 현재 운행 중인 열차 상태 계산 (30초 정차 로직 포함)
-  const activeTrains = useMemo(() => {
-    const active = parsedTrains.map(train => {
-      const firstStop = train.schedule[0];
-      const lastStop = train.schedule[train.schedule.length - 1];
-
-      // 첫 역 출발 전이거나, 종착역 도착 후 30초 정차가 끝난 열차는 렌더링 제외
-      if (currentSec < firstStop.sec || currentSec > lastStop.sec + STOP_DURATION) return null;
-
-      let currentIdx = 0;
-      for (let i = 0; i < train.schedule.length; i++) {
-        if (currentSec >= train.schedule[i].sec) {
-          currentIdx = i;
-        } else {
-          break;
-        }
-      }
-
-      const currentStation = train.schedule[currentIdx];
-      const nextStation = train.schedule[currentIdx + 1] || currentStation;
-      
-      let overallProgress = currentStation.progress;
-      let isStopped = false;
-      let timeRemaining = 0;
-
-      // 종착역 처리
-      if (currentIdx === train.schedule.length - 1) {
-        if (currentSec <= currentStation.sec + STOP_DURATION) {
-          isStopped = true;
-          timeRemaining = 0;
-        } else {
-          return null; 
-        }
-      } else {
-        const timePassedSinceArrival = currentSec - currentStation.sec;
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- 모바일 화면에 완벽하게 핏(Fit) 되도록 설정 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>대경선 평일 상행 실시간 트래커</title>
+    <!-- Tailwind CSS (디자인) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 커스텀 스크롤바 숨김 (React 버전과 동일) */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        // 역에 도착한 직후 30초 이내면 '정차중'
-        if (timePassedSinceArrival <= STOP_DURATION) {
-          isStopped = true;
-          overallProgress = currentStation.progress;
-          timeRemaining = nextStation.sec - currentSec;
-        } else {
-          // 30초 정차 후 다음 역으로 '이동중'
-          const segmentDuration = Math.max(1, nextStation.sec - (currentStation.sec + STOP_DURATION));
-          const timeMoving = currentSec - (currentStation.sec + STOP_DURATION);
-          const segmentProgress = Math.min(1, Math.max(0, timeMoving / segmentDuration));
-          
-          overallProgress = currentStation.progress + (nextStation.progress - currentStation.progress) * segmentProgress;
-          timeRemaining = nextStation.sec - currentSec;
+        /* 핑 & 펄스 애니메이션 설정 */
+        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+        .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        @keyframes pulse { 50% { opacity: .5; } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes bounce { 
+            0%, 100% { transform: translateY(-25%) translateX(-50%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 
+            50% { transform: none translateX(-50%); animation-timing-function: cubic-bezier(0,0,0.2,1); } 
         }
-      }
-
-      return {
-        ...train,
-        currentStation,
-        nextStation,
-        overallProgress,
-        timeRemaining,
-        isStopped
-      };
-    }).filter(t => t !== null);
-
-    // 구미(0.0)에 가까운 순서대로 정렬 (상행선이므로 값이 작을수록 맨 앞차)
-    return active.sort((a, b) => a.overallProgress - b.overallProgress);
-  }, [currentSec, parsedTrains]);
-
-  // 맨 앞차 자동 선택
-  useEffect(() => {
-    if (activeTrains.length > 0) {
-      if (!selectedTrainId || !activeTrains.find(t => t.id === selectedTrainId)) {
-        setSelectedTrainId(activeTrains[0].id);
-      }
-    } else {
-      setSelectedTrainId(null);
-    }
-  }, [activeTrains, selectedTrainId]);
-
-  // 운행 종료 시 첫차 대기 시간 계산
-  const nextTrainInfo = useMemo(() => {
-    if (activeTrains.length > 0) return null;
-    
-    let nextTrain = null;
-    let minDiff = Infinity;
-    
-    for (const train of parsedTrains) {
-      const firstStop = train.schedule[0];
-      const diff = firstStop.sec - currentSec;
-      if (diff > 0 && diff < minDiff) {
-        minDiff = diff;
-        nextTrain = { train, timeToWait: diff };
-      }
-    }
-    
-    // 오늘 남은 열차가 없으면, 내일 첫차로 설정
-    if (!nextTrain && parsedTrains.length > 0) {
-      let firstTrain = parsedTrains[0];
-      for (const train of parsedTrains) {
-        if (train.schedule[0].sec < firstTrain.schedule[0].sec) {
-          firstTrain = train;
-        }
-      }
-      nextTrain = { train: firstTrain, timeToWait: (firstTrain.schedule[0].sec + 86400) - currentSec };
-    }
-    return nextTrain;
-  }, [activeTrains.length, currentSec, parsedTrains]);
-
-  const handleUserInteraction = () => { if (isAutoScroll) setIsAutoScroll(false); };
-
-  useEffect(() => {
-    if (routePathRef.current) setRouteLength(routePathRef.current.getTotalLength());
-    if (mapPathRef.current) setMapLength(mapPathRef.current.getTotalLength());
-  }, [activeTab]);
-
-  // 화면에 그릴 열차 좌표 및 각도 계산
-  const renderedTrains = useMemo(() => {
-    const activeRef = activeTab === 'route' ? routePathRef : mapPathRef;
-    const activeLength = activeTab === 'route' ? routeLength : mapLength;
-
-    return activeTrains.map(train => {
-      let point = { x: 0, y: 0 };
-      let angle = 0;
-
-      if (activeLength > 0 && activeRef.current) {
-        const currentLen = activeLength * train.overallProgress;
-        point = activeRef.current.getPointAtLength(currentLen);
-
-        // 상행선: 진행 방향(길이가 줄어드는 방향)을 바라보게 각도 계산
-        let nextLen = currentLen - 1;
-        if (nextLen < 0) nextLen = 0;
-        const nextPoint = activeRef.current.getPointAtLength(nextLen);
-        angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI);
-      }
-      return { ...train, point, angle };
-    });
-  }, [activeTrains, activeTab, routeLength, mapLength]);
-
-  const selectedData = renderedTrains.find(t => t.id === selectedTrainId);
-
-  // 스크롤 포커싱
-  useEffect(() => {
-    if (isAutoScroll && scrollContainerRef.current && selectedData?.point?.y > 0) {
-      const container = scrollContainerRef.current;
-      const visibleCenterOffset = (container.clientHeight - 150) / 2;
-      const scrollTargetY = selectedData.point.y + 120 - visibleCenterOffset;
-      container.scrollTo({ top: scrollTargetY, behavior: 'auto' });
-    }
-  }, [selectedData?.point?.y, isAutoScroll, activeTab]);
-
-  return (
-    <div className="w-full h-[100dvh] md:max-w-md mx-auto bg-[#F5F5F7] overflow-hidden relative font-sans flex flex-col shadow-2xl bg-white">
-      
-      {/* 1. 상단 헤더 & 열차 선택 UI */}
-      <div className="absolute top-0 left-0 w-full z-20 bg-white/90 backdrop-blur-xl border-b border-gray-100/50 flex flex-col pt-10 pb-2 shadow-sm">
-        <div className="px-5 flex justify-between items-center mb-3">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">대경선 평일 상행</h1>
-            <p className="text-xs text-[#0052FF] font-bold mt-0.5 flex items-center gap-1 bg-[#0052FF]/10 w-max px-2 py-0.5 rounded-full">
-              <Clock size={12} /> 실시간 위치 ({secondsToTime(currentSec)})
-            </p>
-          </div>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${THEME_COLOR}15`, color: THEME_COLOR }}>
-            <TrainFront size={16} />
-          </div>
-        </div>
+        .animate-bounce { animation: bounce 1s infinite; }
         
-        {/* 상단 현재 운행 중인 열차 리스트 */}
-        <div className="flex gap-2 overflow-x-auto px-5 pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {renderedTrains.length === 0 && (
-            <span className="text-xs text-gray-400 font-medium py-1">운행 대기 중...</span>
-          )}
-          {renderedTrains.map(train => {
-            const isSelected = selectedTrainId === train.id;
-            return (
-              <button
-                key={train.id}
-                onClick={() => { setSelectedTrainId(train.id); setIsAutoScroll(true); }}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-                  isSelected 
-                    ? 'bg-[#0052FF] text-white shadow-md scale-105' 
-                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                {train.id}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        /* 모달 슬라이드 애니메이션 */
+        @keyframes slide-in-from-bottom { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+        .animate-in { animation: slide-in-from-bottom 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center h-[100dvh] overflow-hidden text-gray-900">
 
-      {/* 2. 메인 스크롤 뷰 */}
-      <div 
-        ref={scrollContainerRef}
-        className="flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-[#F5F5F7] scroll-smooth relative pt-[120px]"
-        onTouchStart={handleUserInteraction}
-        onWheel={handleUserInteraction}
-        onMouseDown={handleUserInteraction}
-      >
-        <div className="relative w-full h-[1500px]">
-          
-          {/* 노선도 뷰 */}
-          <div className={`absolute top-0 left-0 w-full transition-opacity duration-500 ${activeTab === 'route' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-            <svg viewBox="0 0 400 1300" className="w-full h-[1300px] mt-4">
-              <path
-                d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200"
-                fill="none" stroke={THEME_COLOR} strokeWidth="6" strokeLinecap="round" opacity="0.25"
-              />
-              <path
-                ref={routePathRef}
-                d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200"
-                fill="none" stroke="transparent" strokeWidth="8"
-              />
-              
-              {Object.keys(STATIONS).map((stationName) => {
-                const station = STATIONS[stationName];
-                let point = { x: 0, y: 0 };
-                if (routeLength > 0 && routePathRef.current) point = routePathRef.current.getPointAtLength(routeLength * station.progress);
-                
-                return (
-                  <g key={`route-${stationName}`} transform={`translate(${point.x}, ${point.y})`}>
-                    <circle r="6" fill="#FFFFFF" stroke="#A0ABC0" strokeWidth="3" />
-                    <text x={station.xOff} y={station.yOff} textAnchor={station.align} className="text-[13px] font-extrabold tracking-tight text-gray-800">
-                      {stationName}
-                    </text>
-                    {station.ktx && (
-                      <text x={station.xOff} y={station.yOff + 13} textAnchor={station.align} fill={THEME_COLOR} className="text-[8px] font-black italic opacity-80">KTX</text>
-                    )}
-                  </g>
-                );
-              })}
-
-              {/* 열차 렌더링 */}
-              {activeTab === 'route' && renderedTrains.map(train => {
-                const isSelected = train.id === selectedTrainId;
-                return (
-                  <g key={train.id} transform={`translate(${train.point.x}, ${train.point.y}) rotate(${train.angle})`}>
-                    {/* 정차 중일 땐 파동 애니메이션을 끄고 깔끔하게 표시 */}
-                    {isSelected && !train.isStopped && <circle r="26" fill={THEME_COLOR} opacity="0.2" className="animate-ping" />}
-                    {isSelected && train.isStopped && <circle r="22" fill={THEME_COLOR} opacity="0.15" />}
-                    
-                    <rect x="-16" y="-7" width="32" height="14" rx="3" fill={isSelected ? THEME_COLOR : "#6B7280"} stroke="#FFFFFF" strokeWidth="2" className="shadow-lg" />
-                    <rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
-                    <rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
-                    <rect x="8" y="-4" width="4" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
-                    <path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill={isSelected ? THEME_COLOR : "#6B7280"} />
-                    <circle cx="15" cy="-3" r="1.5" fill={isSelected ? "#FFE600" : "#FFFFFF"} />
-                    <circle cx="15" cy="3" r="1.5" fill={isSelected ? "#FFE600" : "#FFFFFF"} />
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
-          {/* 지도 뷰 */}
-          <div className={`absolute top-0 left-0 w-full bg-[#E8F0F4] transition-opacity duration-500 ${activeTab === 'map' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-            <svg viewBox="0 0 400 1300" className="w-full h-[1300px] mt-4">
-              <path d="M 0 100 C 150 300, 100 500, 50 1300" fill="none" stroke="#CDE1F4" strokeWidth="40" strokeLinecap="round" />
-              <path d="M 400 450 C 300 500, 200 600, 90 550" fill="none" stroke="#CDE1F4" strokeWidth="20" strokeLinecap="round" />
-              <path d="M 100 0 L 180 1300" stroke="#FFFFFF" strokeWidth="6" fill="none" /> 
-              <path d="M 0 600 L 400 500" stroke="#FFFFFF" strokeWidth="8" fill="none" /> 
-
-              <path
-                d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200"
-                fill="none" stroke={THEME_COLOR} strokeWidth="6" strokeLinecap="round" opacity="0.25"
-              />
-              <path
-                ref={mapPathRef}
-                d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200"
-                fill="none" stroke="transparent" strokeWidth="8"
-              />
-              
-              {Object.keys(STATIONS).map((stationName) => {
-                const station = STATIONS[stationName];
-                let point = { x: 0, y: 0 };
-                if (mapLength > 0 && mapPathRef.current) point = mapPathRef.current.getPointAtLength(mapLength * station.progress);
-                
-                return (
-                  <g key={`map-${stationName}`} transform={`translate(${point.x}, ${point.y})`}>
-                    <circle r="6" fill="#FFFFFF" stroke="#A0ABC0" strokeWidth="3" />
-                    <rect x="-24" y="-30" width="48" height="20" rx="10" fill="white" opacity="0.95" className="shadow-sm" />
-                    <text x="0" y="-16" textAnchor="middle" className="text-[11px] font-bold text-gray-700">{stationName}</text>
-                  </g>
-                );
-              })}
-
-              {activeTab === 'map' && renderedTrains.map(train => {
-                const isSelected = train.id === selectedTrainId;
-                return (
-                  <g key={train.id} transform={`translate(${train.point.x}, ${train.point.y}) rotate(${train.angle})`}>
-                    {isSelected && !train.isStopped && <circle r="26" fill={THEME_COLOR} opacity="0.2" className="animate-ping" />}
-                    {isSelected && train.isStopped && <circle r="22" fill={THEME_COLOR} opacity="0.15" />}
-                    
-                    <rect x="-16" y="-7" width="32" height="14" rx="3" fill={isSelected ? THEME_COLOR : "#6B7280"} stroke="#FFFFFF" strokeWidth="2" className="shadow-lg" />
-                    <rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
-                    <rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
-                    <rect x="8" y="-4" width="4" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
-                    <path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill={isSelected ? THEME_COLOR : "#6B7280"} />
-                    <circle cx="15" cy="-3" r="1.5" fill={isSelected ? "#FFE600" : "#FFFFFF"} />
-                    <circle cx="15" cy="3" r="1.5" fill={isSelected ? "#FFE600" : "#FFFFFF"} />
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. 플로팅 UI (위치 찾기 및 정보 패널) */}
-      {!isAutoScroll && selectedData && (
-        <button
-          onClick={() => setIsAutoScroll(true)}
-          className="absolute bottom-[140px] left-1/2 -translate-x-1/2 bg-white text-gray-900 border border-gray-200 px-4 py-2.5 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-xs font-bold flex items-center gap-1.5 z-40 transition-all hover:bg-gray-50 animate-bounce"
-          style={{ color: THEME_COLOR }}
-        >
-          <LocateFixed size={14} />
-          선택한 열차 따라가기
-        </button>
-      )}
-
-      <div className="absolute bottom-[70px] left-3 right-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-gray-100/80 p-4 z-30 min-h-[72px] flex flex-col justify-center">
-        {!selectedData ? (
-           <div className="flex flex-col justify-center items-center py-1 gap-1.5">
-             <p className="text-sm font-bold text-gray-800">운행 종료 (현재 운행 중인 열차 없음)</p>
-             {nextTrainInfo && (
-               <p className="text-[11px] font-semibold text-[#0052FF] bg-[#0052FF]/10 px-3 py-1 rounded-full">
-                 첫차 대기중: {nextTrainInfo.train.id} ({Math.ceil(nextTrainInfo.timeToWait / 60)}분 후 출발)
-               </p>
-             )}
-           </div>
-        ) : (
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="flex items-baseline gap-1.5 mb-0.5">
-                <span className="bg-[#0052FF] text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold">{selectedData.id}</span>
-                <span className="text-[10px] font-semibold text-gray-500">
-                  {selectedData.isStopped ? '도착' : `(${selectedData.currentStation.name} 출발)`}
-                </span>
-              </div>
-              <h2 className="text-lg font-extrabold text-gray-900 tracking-tight flex items-center gap-1">
-                {selectedData.isStopped ? selectedData.currentStation.name : selectedData.nextStation.name}역 
-                <span className="text-sm font-medium text-gray-500 font-normal">
-                  {selectedData.isStopped ? '정차중' : '도착 예정'}
-                </span>
-              </h2>
+    <!-- 메인 앱 컨테이너 -->
+    <div id="app" class="w-full h-full md:max-w-md bg-[#F5F5F7] overflow-hidden relative font-sans flex flex-col shadow-2xl bg-white">
+        
+        <!-- 1. 상단 헤더 & 열차 선택 UI -->
+        <div class="absolute top-0 left-0 w-full z-20 bg-white/90 backdrop-blur-xl border-b border-gray-100/50 flex flex-col pt-10 pb-2 shadow-sm">
+            <div class="px-5 flex justify-between items-center mb-3">
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">대경선 평일 상행</h1>
+                    <p class="text-xs text-[#0052FF] font-bold mt-0.5 flex items-center gap-1 bg-[#0052FF]/10 w-max px-2 py-0.5 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        실시간 (<span id="clock-display">00:00:00</span>)
+                    </p>
+                </div>
+                <div class="w-8 h-8 rounded-full flex items-center justify-center bg-[#0052FF]/15 text-[#0052FF]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>
+                </div>
             </div>
-            {!selectedData.isStopped && (
-              <div className="text-right flex items-baseline gap-0.5">
-                <p className="text-2xl font-black tracking-tighter" style={{ color: THEME_COLOR }}>
-                  {Math.ceil(selectedData.timeRemaining / 60)}<span className="text-xs text-gray-900 ml-0.5 font-bold tracking-normal">분 전</span>
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+            <!-- 열차 버튼 리스트 영역 -->
+            <div id="train-list" class="flex gap-2 overflow-x-auto px-5 pb-1 hide-scrollbar"></div>
+        </div>
 
-      {/* 4. 하단 네비게이션 */}
-      <div className="absolute bottom-0 w-full h-[60px] bg-white/95 backdrop-blur-md border-t border-gray-100 flex justify-around items-center px-4 pb-2 pt-1 z-30">
-        <button 
-          onClick={() => setActiveTab('route')}
-          className={`flex flex-col items-center gap-0.5 transition-colors ${activeTab === 'route' ? 'text-[#0052FF]' : 'text-gray-400'}`}
-        >
-          <Route size={20} className={activeTab === 'route' ? 'drop-shadow-sm' : ''} />
-          <span className="text-[9px] font-bold">노선도</span>
+        <!-- 2. 메인 스크롤 뷰 -->
+        <div id="scroll-container" class="flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-[#F5F5F7] scroll-smooth relative pt-[120px]">
+            <div class="relative w-full h-[1500px]">
+                
+                <!-- 노선도 뷰 -->
+                <div id="route-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-100 z-10">
+                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
+                        <path d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="#0052FF" stroke-width="6" stroke-linecap="round" opacity="0.25" />
+                        <path id="route-path" d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="transparent" stroke-width="8" />
+                        <g id="route-stations"></g>
+                        <g id="route-trains"></g>
+                    </svg>
+                </div>
+
+                <!-- 지도 뷰 -->
+                <div id="map-view" class="absolute top-0 left-0 w-full bg-[#E8F0F4] transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
+                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
+                        <path d="M 0 100 C 150 300, 100 500, 50 1300" fill="none" stroke="#CDE1F4" stroke-width="40" stroke-linecap="round" />
+                        <path d="M 400 450 C 300 500, 200 600, 90 550" fill="none" stroke="#CDE1F4" stroke-width="20" stroke-linecap="round" />
+                        <path d="M 100 0 L 180 1300" stroke="#FFFFFF" stroke-width="6" fill="none" /> 
+                        <path d="M 0 600 L 400 500" stroke="#FFFFFF" stroke-width="8" fill="none" /> 
+                        <path d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="#0052FF" stroke-width="6" stroke-linecap="round" opacity="0.25" />
+                        <path id="map-path" d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="transparent" stroke-width="8" />
+                        <g id="map-stations"></g>
+                        <g id="map-trains"></g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 수동 스크롤 복귀 버튼 -->
+        <button id="auto-scroll-btn" class="hidden absolute bottom-[140px] left-1/2 -translate-x-1/2 bg-white text-[#0052FF] border border-gray-200 px-4 py-2.5 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] text-xs font-bold flex items-center gap-1.5 z-40 transition-all hover:bg-gray-50 animate-bounce">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
+            선택한 열차 따라가기
         </button>
-        <button 
-          onClick={() => setActiveTab('map')}
-          className={`flex flex-col items-center gap-0.5 transition-colors ${activeTab === 'map' ? 'text-[#0052FF]' : 'text-gray-400'}`}
-        >
-          <Map size={20} className={activeTab === 'map' ? 'drop-shadow-sm' : ''} />
-          <span className="text-[9px] font-bold">지도</span>
-        </button>
-      </div>
+
+        <!-- 하단 플로팅 패널 -->
+        <div id="floating-panel" class="absolute bottom-[70px] left-3 right-3 z-30 min-h-[72px]"></div>
+
+        <!-- 하단 네비게이션 -->
+        <div class="absolute bottom-0 w-full h-[60px] bg-white/95 backdrop-blur-md border-t border-gray-100 flex justify-around items-center px-4 pb-2 pt-1 z-30">
+            <button id="tab-route" class="flex flex-col items-center gap-0.5 transition-colors text-[#0052FF]">
+                <svg class="drop-shadow-sm" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+                <span class="text-[9px] font-bold">노선도</span>
+            </button>
+            <button id="tab-map" class="flex flex-col items-center gap-0.5 transition-colors text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+                <span class="text-[9px] font-bold">지도</span>
+            </button>
+        </div>
+
+        <!-- 전체 시간표 모달 -->
+        <div id="timetable-modal" class="hidden absolute inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm transition-opacity">
+            <div class="bg-white w-full h-[85%] rounded-t-3xl shadow-2xl flex flex-col animate-in">
+                <!-- 드래그 핸들 및 타이틀 -->
+                <div class="flex flex-col items-center pt-3 pb-4 border-b border-gray-100 shrink-0 relative">
+                    <div class="w-12 h-1.5 bg-gray-200 rounded-full mb-3"></div>
+                    <h2 id="modal-title" class="text-lg font-extrabold text-gray-900">역 시간표</h2>
+                    <p class="text-xs text-gray-500 font-medium">대경선 평일 상행 (구미 방면)</p>
+                    <button id="close-modal-btn" class="absolute right-4 top-4 p-2 bg-gray-50 rounded-full text-gray-500 hover:text-gray-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <!-- 스크롤 영역 -->
+                <div id="modal-content" class="flex-1 overflow-y-auto px-5 py-2 pb-10"></div>
+            </div>
+        </div>
     </div>
-  );
-}
+
+    <!-- 순수 자바스크립트 구현 (Vanilla JS) -->
+    <script>
+        // --- 1. 상태 및 상수 데이터 설정 --- //
+        const THEME_COLOR = "#0052FF";
+        const STOP_DURATION = 30; 
+
+        const STATIONS = {
+            "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4 },
+            "사곡": { progress: 0.08, align: "start", xOff: 15, yOff: 4 },
+            "북삼": { progress: 0.23, align: "middle", xOff: 0, yOff: -20 },
+            "왜관": { progress: 0.39, align: "end", xOff: -15, yOff: 4 },
+            "서대구": { progress: 0.54, align: "middle", xOff: 0, yOff: 24, ktx: true },
+            "대구": { progress: 0.67, align: "start", xOff: 15, yOff: 4 },
+            "동대구": { progress: 0.80, align: "start", xOff: 15, yOff: 4, ktx: true },
+            "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true }
+        };
+
+        const rawTimetableCsv = `역명,K1702,K1704,K1706,K1708,K1710,K1712,K1714,K1716,K1718,K1720,K1722,K1724,K1726,K1728,K1730,K1732,K1734,K1736,K1738,K1740,K1742,K1744,K1746,K1748,K1750,K1752,K1754,K1756,K1758,K1760,K1762,K1764,K1766,K1768,K1770,K1772,K1774,K1776,K1778,K1780,K1782,K1784,K1786,K1788,K1790,K1792,K1794,K1796
+경산,,05:30:00,,05:57:00,06:07:00,06:36:00,06:45:00,07:10:00,07:34:00,07:57:00,08:08:00,08:27:00,08:42:00,08:58:00,09:38:00,10:06:00,10:28:00,10:48:00,11:13:00,11:38:00,11:58:00,12:28:00,12:53:00,13:13:00,13:38:00,14:03:00,14:23:00,14:41:00,15:01:00,15:32:00,16:03:00,16:23:00,16:48:00,17:08:30,17:26:00,17:52:30,18:12:00,18:38:00,19:04:00,19:36:00,19:56:30,20:22:00,20:42:00,21:05:00,21:35:00,22:01:00,22:28:00,22:46:30,23:10:00,23:29:30
+동대구,05:15:00,05:42:00,05:57:00,06:11:00,06:19:00,06:48:00,06:57:00,07:22:00,07:46:00,08:09:00,08:20:00,08:39:00,08:54:00,09:10:00,09:50:00,10:18:00,10:40:00,11:00:00,11:25:00,11:50:00,12:10:00,12:40:00,13:05:00,13:25:00,13:50:00,14:15:00,14:35:00,14:53:00,15:13:00,15:44:00,16:15:00,16:35:00,17:00:00,17:20:30,17:38:00,18:04:30,18:24:00,18:50:00,19:16:00,19:48:00,20:08:30,20:34:00,20:54:00,21:17:00,21:47:00,22:13:00,22:40:00,22:58:30,23:22:00,23:41:30
+대구,05:20:00,05:47:00,06:02:00,06:16:00,06:24:00,06:53:00,07:02:00,07:27:00,07:51:00,08:14:00,08:25:00,08:44:00,08:59:00,09:15:00,09:55:00,10:23:00,10:45:00,11:05:00,11:30:00,11:55:00,12:15:00,12:45:00,13:10:00,13:30:00,13:55:00,14:20:00,14:40:00,14:58:00,15:18:00,15:49:00,16:20:00,16:40:00,17:05:00,17:25:30,17:43:00,18:09:30,18:29:00,18:55:00,19:21:00,19:53:00,20:13:30,20:39:00,20:59:00,21:22:00,21:52:00,22:18:00,22:45:00,23:03:30,23:27:00,23:46:30
+서대구,05:25:00,05:52:00,06:07:00,06:21:00,06:29:00,06:58:00,07:07:00,07:32:00,07:56:00,08:19:00,08:30:00,08:49:00,09:04:00,09:20:00,10:00:00,10:28:00,10:50:00,11:10:00,11:35:00,12:00:00,12:20:00,12:50:00,13:15:00,13:35:00,14:00:00,14:25:00,14:45:00,15:03:00,15:23:00,15:54:00,16:25:00,16:45:00,17:10:00,17:30:30,17:48:00,18:14:30,18:34:00,19:00:00,19:26:00,19:58:00,20:18:30,20:44:00,21:04:00,21:27:00,21:57:00,22:23:00,22:50:00,23:08:30,23:32:00,23:51:30
+왜관,05:37:00,06:04:00,06:19:00,06:33:00,06:41:00,07:10:00,07:19:00,07:44:00,08:08:00,08:31:00,08:42:00,09:01:00,09:16:00,09:32:00,10:12:00,10:40:00,11:02:00,11:22:00,11:47:00,12:12:00,12:32:00,13:02:00,13:27:00,13:47:00,14:12:00,14:37:00,14:57:00,15:15:00,15:35:00,16:06:00,16:37:00,16:57:00,17:22:00,17:42:30,18:00:00,18:26:30,18:46:00,19:12:00,19:38:00,20:10:00,20:30:30,20:56:00,21:16:00,21:39:00,22:09:00,22:35:00,23:02:00,23:20:30,23:44:00,00:03:30
+북삼,05:42:00,06:09:00,06:24:00,06:38:00,06:46:00,07:15:00,07:24:00,07:49:00,08:13:00,08:36:00,08:47:00,09:06:00,09:21:00,09:37:00,10:17:00,10:45:00,11:07:00,11:27:00,11:52:00,12:17:00,12:37:00,13:07:00,13:32:00,13:52:00,14:17:00,14:42:00,15:02:00,15:20:00,15:40:00,16:11:00,16:42:00,17:02:00,17:27:00,17:47:30,18:05:00,18:31:30,18:51:00,19:17:00,19:43:00,20:15:00,20:35:30,21:01:00,21:21:00,21:44:00,22:14:00,22:40:00,23:07:00,23:25:30,23:49:00,00:08:30
+사곡,05:47:00,06:14:00,06:29:00,06:43:00,06:51:00,07:20:00,07:29:00,07:54:00,08:18:00,08:41:00,08:52:00,09:11:00,09:26:00,09:42:00,10:22:00,10:50:00,11:12:00,11:32:00,11:57:00,12:22:00,12:42:00,13:12:00,13:37:00,13:57:00,14:22:00,14:47:00,15:07:00,15:25:00,15:45:00,16:16:00,16:47:00,17:07:00,17:32:00,17:52:30,18:10:00,18:36:30,18:56:00,19:22:00,19:48:00,20:20:00,20:40:30,21:06:00,21:26:00,21:49:00,22:19:00,22:45:00,23:12:00,23:30:30,23:54:00,00:13:30
+구미,05:51:00,06:18:00,06:33:00,06:47:00,06:55:00,07:24:00,07:33:00,07:58:00,08:22:00,08:45:00,08:56:00,09:15:00,09:30:00,09:46:00,10:26:00,10:54:00,11:16:00,11:36:00,12:01:00,12:26:00,12:46:00,13:16:00,13:41:00,14:01:00,14:26:00,14:51:00,15:11:00,15:29:00,15:49:00,16:20:00,16:51:00,17:11:00,17:36:00,17:56:30,18:14:00,18:40:30,19:00:00,19:26:00,19:52:00,20:24:00,20:44:30,21:10:00,21:30:00,21:53:00,22:23:00,22:49:00,23:16:00,23:34:30,23:58:00,00:17:30`;
+
+        let activeTab = 'route';
+        let isAutoScroll = true;
+        let selectedTrainId = null;
+        let selectedStation = null;
+        let currentSec = 0;
+        let routeLength = 0;
+        let mapLength = 0;
+
+        // 시간 유틸리티 함수
+        const timeToSeconds = (timeStr) => {
+            if (!timeStr) return 0;
+            let [h, m, s] = timeStr.split(':').map(Number);
+            if (h < 4) h += 24; 
+            return h * 3600 + m * 60 + s;
+        };
+
+        const secondsToTime = (totalSeconds) => {
+            const h = Math.floor(totalSeconds / 3600) % 24; 
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = Math.floor(totalSeconds % 60);
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        };
+
+        // --- 2. CSV 견고한 파싱 (오류 원천 차단) --- //
+        const parsedTrains = (() => {
+            const lines = rawTimetableCsv.trim().split(/\r?\n/);
+            const headers = lines[0].split(',');
+            const trainIds = headers.slice(1);
+            const trains = trainIds.map(id => ({ id: id ? id.trim() : '', schedule: [] }));
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const row = lines[i].split(',');
+                const stationName = row[0] ? row[0].trim() : '';
+                const stationData = STATIONS[stationName];
+                if (!stationData) continue;
+
+                for (let j = 1; j < row.length; j++) {
+                    if (j - 1 >= trains.length) continue; 
+                    const timeStr = row[j] ? row[j].trim() : '';
+                    if (timeStr) {
+                        trains[j-1].schedule.push({
+                            name: stationName,
+                            time: timeStr,
+                            sec: timeToSeconds(timeStr),
+                            progress: stationData.progress
+                        });
+                    }
+                }
+            }
+            trains.forEach(t => t.schedule.sort((a, b) => a.sec - b.sec));
+            return trains.filter(t => t.id && t.schedule.length >= 2);
+        })();
+
+        // --- 3. DOM 요소 연결 및 초기화 --- //
+        const dom = {
+            clock: document.getElementById('clock-display'),
+            trainList: document.getElementById('train-list'),
+            scrollContainer: document.getElementById('scroll-container'),
+            routeView: document.getElementById('route-view'),
+            mapView: document.getElementById('map-view'),
+            routePath: document.getElementById('route-path'),
+            mapPath: document.getElementById('map-path'),
+            routeStations: document.getElementById('route-stations'),
+            mapStations: document.getElementById('map-stations'),
+            routeTrains: document.getElementById('route-trains'),
+            mapTrains: document.getElementById('map-trains'),
+            autoScrollBtn: document.getElementById('auto-scroll-btn'),
+            floatingPanel: document.getElementById('floating-panel'),
+            tabRoute: document.getElementById('tab-route'),
+            tabMap: document.getElementById('tab-map'),
+            timetableModal: document.getElementById('timetable-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalContent: document.getElementById('modal-content'),
+            closeModalBtn: document.getElementById('close-modal-btn')
+        };
+
+        // 스크롤 방해 감지
+        const stopAutoScroll = () => { if(isAutoScroll) { isAutoScroll = false; render(); } };
+        dom.scrollContainer.addEventListener('touchstart', stopAutoScroll, {passive: true});
+        dom.scrollContainer.addEventListener('wheel', stopAutoScroll, {passive: true});
+        dom.scrollContainer.addEventListener('mousedown', stopAutoScroll);
+
+        dom.autoScrollBtn.addEventListener('click', () => { isAutoScroll = true; render(); });
+        dom.closeModalBtn.addEventListener('click', () => { dom.timetableModal.classList.add('hidden'); });
+
+        // 하단 탭 스위치
+        dom.tabRoute.addEventListener('click', () => { 
+            activeTab = 'route'; selectedStation = null; isAutoScroll = true; 
+            dom.routeView.classList.replace('opacity-0', 'opacity-100');
+            dom.routeView.classList.remove('pointer-events-none');
+            dom.mapView.classList.replace('opacity-100', 'opacity-0');
+            dom.mapView.classList.add('pointer-events-none');
+            dom.tabRoute.classList.replace('text-gray-400', 'text-[#0052FF]');
+            dom.tabMap.classList.replace('text-[#0052FF]', 'text-gray-400');
+            render(); 
+        });
+        dom.tabMap.addEventListener('click', () => { 
+            activeTab = 'map'; selectedStation = null; isAutoScroll = true; 
+            dom.mapView.classList.replace('opacity-0', 'opacity-100');
+            dom.mapView.classList.remove('pointer-events-none');
+            dom.routeView.classList.replace('opacity-100', 'opacity-0');
+            dom.routeView.classList.add('pointer-events-none');
+            dom.tabMap.classList.replace('text-gray-400', 'text-[#0052FF]');
+            dom.tabRoute.classList.replace('text-[#0052FF]', 'text-gray-400');
+            render(); 
+        });
+
+        // 역 클릭 핸들러 (전역)
+        window.handleStationClick = (stationName) => {
+            selectedStation = stationName;
+            isAutoScroll = false;
+            render();
+        };
+
+        // 열차 클릭 핸들러 (전역)
+        window.handleTrainClick = (trainId) => {
+            selectedTrainId = trainId;
+            isAutoScroll = true;
+            selectedStation = null;
+            render();
+        };
+
+        // 모달 열기 핸들러 (전역)
+        window.openModal = () => { dom.timetableModal.classList.remove('hidden'); };
+
+        // --- 4. 렌더링 함수들 --- //
+
+        function drawStaticStations() {
+            let routeHTML = '', mapHTML = '';
+            for (const stationName in STATIONS) {
+                const s = STATIONS[stationName];
+                const isSel = selectedStation === stationName;
+                
+                // Route Station
+                let rPt = {x:0, y:0};
+                if(routeLength > 0) rPt = dom.routePath.getPointAtLength(routeLength * s.progress);
+                
+                routeHTML += `
+                    <g transform="translate(${rPt.x}, ${rPt.y})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="20" fill="transparent" />
+                        <circle r="${isSel ? '8' : '6'}" fill="#FFFFFF" stroke="${isSel ? THEME_COLOR : '#A0ABC0'}" stroke-width="${isSel ? '4' : '3'}" class="transition-all" />
+                        <text x="${s.xOff}" y="${s.yOff}" text-anchor="${s.align}" class="text-[13px] font-extrabold tracking-tight ${isSel ? 'text-[#0052FF]' : 'text-gray-800'}">${stationName}</text>
+                        ${s.ktx ? `<text x="${s.xOff}" y="${s.yOff + 13}" text-anchor="${s.align}" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}
+                    </g>
+                `;
+
+                // Map Station
+                let mPt = {x:0, y:0};
+                if(mapLength > 0) mPt = dom.mapPath.getPointAtLength(mapLength * s.progress);
+                mapHTML += `
+                    <g transform="translate(${mPt.x}, ${mPt.y})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="20" fill="transparent" />
+                        <circle r="${isSel ? '8' : '6'}" fill="#FFFFFF" stroke="${isSel ? THEME_COLOR : '#A0ABC0'}" stroke-width="${isSel ? '4' : '3'}" class="transition-all" />
+                        <rect x="-24" y="-30" width="48" height="20" rx="10" fill="white" opacity="0.95" class="shadow-sm" />
+                        <text x="0" y="-16" text-anchor="middle" class="text-[11px] font-bold ${isSel ? 'text-[#0052FF]' : 'text-gray-700'}">${stationName}</text>
+                    </g>
+                `;
+            }
+            // 상태 변화로 크기/색이 바뀌므로 매번 렌더(SVG는 빠름)
+            dom.routeStations.innerHTML = routeHTML;
+            dom.mapStations.innerHTML = mapHTML;
+        }
+
+        // 재렌더링 시 깜빡임(애니메이션 초기화)을 방지하기 위해 존재하는 DOM 재활용
+        function updateTrainsSVG(layer, trains) {
+            const currentIds = trains.map(t => t.id);
+            // 없어진 열차 삭제
+            Array.from(layer.children).forEach(child => {
+                if (!currentIds.includes(child.dataset.id)) child.remove();
+            });
+
+            trains.forEach(t => {
+                let g = layer.querySelector(`g[data-id="${t.id}"]`);
+                const isSelected = t.id === selectedTrainId;
+                if (!g) {
+                    g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    g.dataset.id = t.id;
+                    layer.appendChild(g);
+                }
+                
+                g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
+                
+                const stateStr = `${isSelected}-${t.isStopped}-${t.isWaiting}`;
+                if (g.dataset.state !== stateStr) {
+                    g.innerHTML = `
+                        ${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${THEME_COLOR}" opacity="0.2" class="animate-ping" />` : ''}
+                        ${isSelected && (t.isStopped || t.isWaiting) ? `<circle r="22" fill="${THEME_COLOR}" opacity="0.15" />` : ''}
+                        <rect x="-16" y="-7" width="32" height="14" rx="3" fill="${isSelected ? THEME_COLOR : '#6B7280'}" stroke="#FFFFFF" stroke-width="2" class="shadow-lg" />
+                        <rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
+                        <rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
+                        <rect x="8" y="-4" width="4" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
+                        <path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${isSelected ? THEME_COLOR : '#6B7280'}" />
+                        <circle cx="15" cy="-3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />
+                        <circle cx="15" cy="3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />
+                        ${t.isWaiting ? `<text x="0" y="-18" text-anchor="middle" fill="${THEME_COLOR}" class="text-[10px] font-bold animate-pulse" transform="rotate(${-t.angle})">첫차 대기중</text>` : ''}
+                    `;
+                    g.dataset.state = stateStr;
+                }
+            });
+        }
+
+        // 전체 화면 갱신 메인 함수
+        function render() {
+            dom.clock.textContent = secondsToTime(currentSec);
+
+            // 대기중인 첫차 계산
+            let waitingFirstTrain = null;
+            if (parsedTrains.length > 0) {
+                const firstTrainOfDay = parsedTrains.reduce((prev, curr) => prev.schedule[0].sec < curr.schedule[0].sec ? prev : curr);
+                if (currentSec >= 25 * 3600 || currentSec < firstTrainOfDay.schedule[0].sec) {
+                    waitingFirstTrain = {
+                        ...firstTrainOfDay,
+                        currentStation: firstTrainOfDay.schedule[0],
+                        nextStation: firstTrainOfDay.schedule[1],
+                        overallProgress: firstTrainOfDay.schedule[0].progress,
+                        timeRemaining: firstTrainOfDay.schedule[0].sec - currentSec,
+                        isStopped: true, isWaiting: true
+                    };
+                }
+            }
+
+            // 활성 열차 계산
+            let activeTrains = parsedTrains.map(train => {
+                const firstStop = train.schedule[0];
+                const lastStop = train.schedule[train.schedule.length - 1];
+                if (currentSec < firstStop.sec || currentSec > lastStop.sec + STOP_DURATION) return null;
+
+                let currentIdx = 0;
+                for (let i = 0; i < train.schedule.length; i++) {
+                    if (currentSec >= train.schedule[i].sec) currentIdx = i; else break;
+                }
+
+                const currentStation = train.schedule[currentIdx];
+                const nextStation = train.schedule[currentIdx + 1] || currentStation;
+                let overallProgress = currentStation.progress, isStopped = false, timeRemaining = 0;
+
+                if (currentIdx === train.schedule.length - 1) {
+                    if (currentSec <= currentStation.sec + STOP_DURATION) {
+                        isStopped = true; timeRemaining = 0;
+                    } else return null; 
+                } else {
+                    const timePassedSinceArrival = currentSec - currentStation.sec;
+                    if (timePassedSinceArrival <= STOP_DURATION) {
+                        isStopped = true; overallProgress = currentStation.progress; timeRemaining = nextStation.sec - currentSec;
+                    } else {
+                        const segmentDuration = Math.max(1, nextStation.sec - (currentStation.sec + STOP_DURATION));
+                        const timeMoving = currentSec - (currentStation.sec + STOP_DURATION);
+                        const segmentProgress = Math.min(1, Math.max(0, timeMoving / segmentDuration));
+                        overallProgress = currentStation.progress + (nextStation.progress - currentStation.progress) * segmentProgress;
+                        timeRemaining = nextStation.sec - currentSec;
+                    }
+                }
+                return { ...train, currentStation, nextStation, overallProgress, timeRemaining, isStopped, isWaiting: false };
+            }).filter(t => t !== null);
+
+            if (activeTrains.length === 0 && waitingFirstTrain) activeTrains.push(waitingFirstTrain);
+            activeTrains.sort((a, b) => a.overallProgress - b.overallProgress);
+
+            // 자동 선택 유지
+            if (activeTrains.length > 0 && (!selectedTrainId || !activeTrains.find(t => t.id === selectedTrainId))) {
+                selectedTrainId = activeTrains[0].id;
+            } else if (activeTrains.length === 0) {
+                selectedTrainId = null;
+            }
+
+            // 좌표 계산
+            const renderedTrains = activeTrains.map(train => {
+                const aRef = activeTab === 'route' ? dom.routePath : dom.mapPath;
+                const aLen = activeTab === 'route' ? routeLength : mapLength;
+                let point = { x: 0, y: 0 }, angle = 0;
+
+                if (aLen > 0) {
+                    const currentLen = aLen * train.overallProgress;
+                    point = aRef.getPointAtLength(currentLen);
+                    let nextLen = currentLen - 1;
+                    if (nextLen < 0) nextLen = 0;
+                    const nextPoint = aRef.getPointAtLength(nextLen);
+                    angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI);
+                }
+                return { ...train, point, angle };
+            });
+
+            const selectedData = renderedTrains.find(t => t.id === selectedTrainId);
+
+            // UI 업데이트: 상단 버튼 리스트
+            let btnHtml = renderedTrains.length === 0 ? `<span class="text-xs text-gray-400 font-medium py-1">운행 종료 (첫차 대기중)</span>` : '';
+            renderedTrains.forEach(t => {
+                const isSel = t.id === selectedTrainId;
+                btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${isSel ? 'bg-[#0052FF] text-white shadow-md scale-105' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}">${t.id} ${t.isWaiting ? ' (대기중)' : ''}</button>`;
+            });
+            if(dom.trainList.innerHTML !== btnHtml) dom.trainList.innerHTML = btnHtml;
+
+            // UI 업데이트: SVG
+            drawStaticStations();
+            if(activeTab === 'route') updateTrainsSVG(dom.routeTrains, renderedTrains);
+            if(activeTab === 'map') updateTrainsSVG(dom.mapTrains, renderedTrains);
+
+            // UI 업데이트: Auto Scroll
+            if (isAutoScroll && selectedData && !selectedStation) {
+                dom.autoScrollBtn.classList.add('hidden');
+                const vOff = (dom.scrollContainer.clientHeight - 150) / 2;
+                dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - vOff, behavior: 'auto' });
+            } else {
+                if (selectedData && !selectedStation) dom.autoScrollBtn.classList.remove('hidden');
+                else dom.autoScrollBtn.classList.add('hidden');
+            }
+
+            // UI 업데이트: 플로팅 패널
+            let panelHtml = '';
+            if (selectedStation) {
+                // 특정 역 클릭 패널
+                const upcoming = parsedTrains.map(t => {
+                    const stop = t.schedule.find(s => s.name === selectedStation);
+                    return stop ? { id: t.id, sec: stop.sec, time: stop.time } : null;
+                }).filter(t => t !== null && t.sec >= currentSec).sort((a, b) => a.sec - b.sec).slice(0, 3);
+
+                panelHtml = `
+                    <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.15)] border border-gray-100/80 p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-lg font-extrabold text-gray-900 flex items-center gap-1.5">
+                                ${selectedStation}역 <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-sm">상행(구미 방면)</span>
+                            </h3>
+                            <button onclick="handleStationClick(null)" class="p-1 text-gray-400 hover:text-gray-900 bg-gray-50 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="flex flex-col gap-2 mb-3">
+                            ${upcoming.length > 0 ? upcoming.map(t => `
+                                <div class="flex justify-between items-center bg-gray-50 rounded-lg p-2.5 border border-gray-100">
+                                    <div class="flex items-center gap-2">
+                                        <span class="bg-[#0052FF]/10 text-[#0052FF] text-[10px] px-1.5 py-0.5 rounded font-bold">${t.id}</span>
+                                        <span class="text-sm font-bold text-gray-900">${t.time.slice(0,5)}</span>
+                                    </div>
+                                    <span class="text-xs font-bold text-[#0052FF]">${Math.ceil((t.sec - currentSec)/60)}분 후</span>
+                                </div>
+                            `).join('') : `<div class="py-4 text-center text-sm font-bold text-gray-400">금일 상행 열차 운행이 모두 종료되었습니다.</div>`}
+                        </div>
+                        <button onclick="openModal()" class="w-full flex items-center justify-center gap-1.5 bg-[#0052FF] text-white py-2.5 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                            전체 시간표 보기
+                        </button>
+                    </div>`;
+
+                // 모달 내용 갱신
+                const fullTimetable = parsedTrains.map(t => {
+                    const stop = t.schedule.find(s => s.name === selectedStation);
+                    return stop ? { id: t.id, sec: stop.sec, time: stop.time } : null;
+                }).filter(t => t !== null).sort((a, b) => a.sec - b.sec);
+                
+                dom.modalTitle.textContent = `${selectedStation}역 시간표`;
+                dom.modalContent.innerHTML = fullTimetable.map((t, idx) => {
+                    const isPast = t.sec < currentSec;
+                    const isNext = !isPast && (idx === 0 || fullTimetable[idx-1].sec < currentSec);
+                    return `
+                        <div class="flex justify-between items-center py-3.5 border-b border-gray-50 ${isNext ? 'bg-[#0052FF]/5 -mx-5 px-5 border-l-4 border-l-[#0052FF]' : ''}">
+                            <div class="flex items-center gap-3">
+                                <span class="w-12 text-[10px] font-bold text-center py-1 rounded-sm ${isPast ? 'bg-gray-100 text-gray-400' : 'bg-gray-100 text-gray-700'}">${t.id}</span>
+                                <span class="text-base font-bold ${isPast ? 'text-gray-400 line-through decoration-gray-300' : isNext ? 'text-[#0052FF]' : 'text-gray-900'}">${t.time.slice(0,5)}</span>
+                            </div>
+                            ${isNext ? `<span class="text-xs font-extrabold text-[#0052FF] animate-pulse">다음 열차</span>` : isPast ? `<span class="text-[10px] font-bold text-gray-300">출발됨</span>` : ''}
+                        </div>`;
+                }).join('');
+
+            } else {
+                // 기본 현재 열차 정보 패널
+                panelHtml = `<div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] border border-gray-100/80 p-4 min-h-[72px] flex flex-col justify-center">`;
+                if (!selectedData) {
+                    panelHtml += `<div class="flex flex-col justify-center items-center py-1"><p class="text-sm font-bold text-gray-800">운행 종료 (현재 운행 중인 열차 없음)</p></div>`;
+                } else {
+                    panelHtml += `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="flex items-baseline gap-1.5 mb-0.5">
+                                    <span class="bg-[#0052FF] text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold">${selectedData.id}</span>
+                                    <span class="text-[10px] font-semibold text-gray-500">${selectedData.isWaiting ? '첫차 대기중' : selectedData.isStopped ? '도착' : `(${selectedData.currentStation.name} 출발)`}</span>
+                                </div>
+                                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight flex items-center gap-1">
+                                    ${selectedData.isStopped || selectedData.isWaiting ? selectedData.currentStation.name : selectedData.nextStation.name}역 
+                                    <span class="text-sm font-medium text-gray-500 font-normal">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span>
+                                </h2>
+                            </div>
+                            ${!selectedData.isStopped && !selectedData.isWaiting ? `
+                                <div class="text-right flex items-baseline gap-0.5">
+                                    <p class="text-2xl font-black tracking-tighter" style="color: ${THEME_COLOR}">${Math.ceil(selectedData.timeRemaining / 60)}<span class="text-xs text-gray-900 ml-0.5 font-bold tracking-normal">분 전</span></p>
+                                </div>` : ''}
+                            ${selectedData.isWaiting ? `
+                                <div class="text-right flex items-baseline gap-0.5">
+                                    <p class="text-xl font-black tracking-tighter" style="color: ${THEME_COLOR}">${selectedData.currentStation.time.slice(0,5)}<span class="text-[10px] text-gray-500 ml-0.5 font-bold tracking-normal block">출발</span></p>
+                                </div>` : ''}
+                        </div>`;
+                }
+                panelHtml += `</div>`;
+            }
+            if(dom.floatingPanel.innerHTML !== panelHtml) dom.floatingPanel.innerHTML = panelHtml;
+        }
+
+        // --- 5. 앱 실행 --- //
+        window.addEventListener('DOMContentLoaded', () => {
+            // SVG Path 길이가 계산 가능해진 직후 값 저장
+            setTimeout(() => {
+                routeLength = dom.routePath.getTotalLength();
+                mapLength = dom.mapPath.getTotalLength();
+                
+                // 실제 시계 타이머 시작 (1초마다 업데이트 및 렌더링)
+                const tick = () => {
+                    const now = new Date();
+                    let h = now.getHours();
+                    if (h < 4) h += 24; 
+                    currentSec = h * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                    render();
+                };
+                tick(); // 최초 1회 즉시 실행
+                setInterval(tick, 1000); 
+            }, 50);
+        });
+
+    </script>
+</body>
+</html>
