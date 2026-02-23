@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Enjoy Vote - Firebase Fixed</title>
+    <title>Enjoy Vote - Dark Mode</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
@@ -17,8 +17,9 @@
             overflow: hidden; /* 브라우저 자체 스크롤 방지 */
             position: fixed; /* iOS 바운스 방지 */
             top: 0; left: 0;
-            background-color: #202020;
+            background-color: #000000;
             font-family: 'Pretendard', sans-serif;
+            color-scheme: dark; /* 네이티브 요소 다크모드 대응 */
         }
 
         /* 중앙 정렬용 래퍼 (PC 화면 대응) */
@@ -30,7 +31,7 @@
         #mobile-frame {
             width: 100%; max-width: 430px; 
             height: 100%; /* 부모 높이 꽉 채움 */
-            background: #F2F4F6; 
+            background: #111111; /* 다크 모드 배경 */
             position: relative; 
             overflow: hidden;
             display: flex; flex-direction: column;
@@ -43,7 +44,7 @@
                 height: 100dvh; /* PC에서는 dvh 사용 */
                 max-height: 900px; /* 너무 길어지지 않게 제한 */
                 border-radius: 30px; /* 모서리 둥글게 */
-                box-shadow: 0 0 50px rgba(0,0,0,0.5);
+                box-shadow: 0 0 50px rgba(0,0,0,0.8);
             }
         }
 
@@ -60,29 +61,29 @@
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         
         .toss-card {
-            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 24px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04); 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2); 
             transition: transform 0.1s; cursor: pointer;
         }
         .toss-card:active { transform: scale(0.97); }
 
         .screen {
-            position: absolute; inset: 0; background: #F2F4F6;
+            position: absolute; inset: 0; background: #111111;
             display: flex; flex-direction: column; overflow: hidden;
             opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10;
         }
         .screen.active { opacity: 1; pointer-events: auto; z-index: 20; }
 
         .full-modal {
-            position: absolute; inset: 0; background: #F2F4F6; z-index: 100;
+            position: absolute; inset: 0; background: #111111; z-index: 100;
             transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex; flex-direction: column;
         }
         .full-modal.open { transform: translateY(0); }
 
         .cert-modal-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 200;
+            position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 200;
             backdrop-filter: blur(4px); opacity: 0; pointer-events: none;
             transition: opacity 0.3s; display: flex; align-items: center; justify-content: center;
             padding: 20px;
@@ -90,13 +91,13 @@
         .cert-modal-overlay.active { opacity: 1; pointer-events: auto; }
         
         .cert-card-bg {
-            background: radial-gradient(circle at top right, #F3E8FF, #FFFFFF 60%);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8) inset;
+            background: radial-gradient(circle at top right, #3b0764, #111111 60%);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset;
         }
 
         .rank-1-card {
-            background: linear-gradient(135deg, #FFF 0%, #FDF4FF 100%);
-            border: 2px solid #D8B4FE; box-shadow: 0 8px 32px rgba(168, 85, 247, 0.15);
+            background: linear-gradient(135deg, #2e1065 0%, #111111 100%);
+            border: 2px solid #9333ea; box-shadow: 0 8px 32px rgba(147, 51, 234, 0.15);
         }
         .bar-gradient { background: linear-gradient(90deg, #C084FC 0%, #A855F7 100%); }
         .number-counting { font-variant-numeric: tabular-nums; }
@@ -130,95 +131,139 @@
             <div id="screen-home" class="screen active">
                 
                 <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-safe pb-safe-scroll">
-                    <!-- 배너 -->
-                    <div class="fade-in-up delay-100 mb-8 w-full h-72 rounded-[28px] relative overflow-hidden cursor-pointer group shadow-lg shadow-purple-200" onclick="window.openPollDetail(0)">
-                        <div class="absolute inset-0 bg-gradient-to-br from-[#F3E8FF] via-[#E9D5FF] to-[#D8B4FE]"></div>
-                        <div class="absolute -right-4 -top-4 w-40 h-40 bg-white/40 rounded-full blur-2xl"></div>
-                        <div class="absolute -left-4 bottom-4 w-32 h-32 bg-purple-300/30 rounded-full blur-2xl"></div>
-                        <img src="program_logo.png" alt="Logo" class="absolute right-4 bottom-4 w-36 h-36 object-contain drop-shadow-xl rotate-[-5deg] filter brightness-105" onerror="this.style.display='none'; document.getElementById('fb-icon').style.display='block'">
-                        <div id="fb-icon" class="hidden absolute right-6 bottom-6 text-[80px] drop-shadow-lg rotate-[-10deg] filter brightness-105">🎤</div>
-                        <div class="relative z-10 h-full p-6 flex flex-col justify-between">
+                    <!-- 배너 (배너는 시각적 포인트를 위해 밝은 톤 유지) -->
+                    <div class="fade-in-up delay-100 mb-8 w-full h-72 rounded-[28px] relative overflow-hidden shadow-2xl shadow-purple-900/30 border border-white/10 group">
+                        <!-- 배경 그라데이션 및 장식 패턴 -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900/80 to-black"></div>
+                        <div class="absolute inset-0" style="background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.5;"></div>
+                        
+                        <!-- 빛나는 오라 효과 -->
+                        <div class="absolute -right-10 -top-10 w-60 h-60 bg-purple-500/30 rounded-full blur-3xl group-hover:bg-purple-500/40 transition-all duration-700"></div>
+                        <div class="absolute -left-10 bottom-0 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-700"></div>
+                        
+                        <!-- 장식용 배경 아이콘 (은은하게) -->
+                        <i class="fa-solid fa-music absolute top-8 right-12 text-purple-300/10 text-3xl rotate-12"></i>
+                        <i class="fa-solid fa-crown absolute bottom-24 left-1/2 text-yellow-300/10 text-4xl rotate-[-15deg]"></i>
+                        <i class="fa-solid fa-star absolute top-1/2 right-1/3 text-pink-300/10 text-xl rotate-45"></i>
+
+                        <!-- 프로그램 로고 -->
+                        <img src="program_logo.png" alt="Logo" class="absolute right-2 bottom-4 w-40 h-40 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] rotate-[-5deg] group-hover:scale-105 group-hover:rotate-[-2deg] transition-transform duration-500 z-10" onerror="this.style.display='none'; document.getElementById('fb-icon').style.display='block'">
+                        <div id="fb-icon" class="hidden absolute right-6 bottom-6 text-[80px] drop-shadow-2xl rotate-[-10deg] filter brightness-105 z-10">🎤</div>
+                        
+                        <!-- 콘텐츠 영역 -->
+                        <div class="relative z-20 h-full p-6 flex flex-col justify-between">
                             <div>
-                                <span class="inline-flex items-center gap-1 bg-white/70 text-purple-700 text-[10px] font-bold px-2.5 py-1 rounded-full mb-2 backdrop-blur-sm shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span> VOTE NOW</span>
-                                <h2 class="text-[26px] font-extrabold text-[#191F28] leading-[1.15]">설날특선<br>엔조이 인기가요2<br><span class="text-purple-600">사전투표</span></h2>
-                                <p class="text-gray-600 font-medium mt-3 text-xs opacity-80">🎵 너의 모든 순간<br>🎵 흰수염 고래</p>
+                                <!-- 상단 뱃지 -->
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-purple-500/30 tracking-wide">
+                                        <i class="fa-solid fa-trophy text-yellow-300"></i> WINNER
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 bg-white/10 text-purple-300 text-[10px] font-bold px-2.5 py-1.5 rounded-full backdrop-blur-sm border border-purple-500/30 shadow-sm">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span> CLOSED
+                                    </span>
+                                </div>
+                                
+                                <!-- 메인 타이틀 -->
+                                <h2 class="text-[28px] font-extrabold text-white leading-[1.2] tracking-tight drop-shadow-lg">
+                                    엔조이 인기가요2<br>
+                                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-300">전시기 1위 선정</span>
+                                </h2>
+                                
+                                <!-- 노래 정보 -->
+                                <div class="mt-4 flex items-center gap-2.5">
+                                    <div class="w-1 h-8 bg-gradient-to-b from-purple-400 to-pink-400 rounded-full"></div>
+                                    <div>
+                                        <p class="text-purple-300/80 font-bold text-[10px] uppercase tracking-wider mb-0.5">선정곡</p>
+                                        <p class="text-white font-bold text-sm drop-shadow-md">🎵 너의 모든 순간</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-2"><span class="text-xs font-bold text-white bg-gray-600 px-5 py-2.5 rounded-full shadow-md">결과 보기 →</span></div>
+
+                            <!-- 하단 감사 카드 (빈 공간 채우기 용도) -->
+                            <div class="w-[65%] sm:w-[70%] bg-white/5 backdrop-blur-md border border-white/10 rounded-[18px] p-3 flex items-center gap-3 shadow-inner">
+                                <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30 shrink-0">
+                                    <i class="fa-solid fa-heart text-pink-400 text-xs animate-pulse"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p class="text-[9px] text-gray-400 font-bold tracking-wider">THANK YOU</p>
+                                    <p class="text-xs text-white font-medium truncate">투표해주셔서 감사합니다!</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- 결과 리스트 -->
                     <div class="fade-in-up delay-200">
-                        <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 결과</h3>
+                        <h3 class="text-lg font-bold text-gray-100 mb-3 px-1">투표 결과</h3>
                         <div id="result-list" class="space-y-3"></div>
                     </div>
 
                     <!-- 투표 반영 비율 -->
                     <div class="fade-in-up delay-300 mt-8 mb-6">
-                        <h3 class="text-lg font-bold text-[#191F28] mb-3 px-1">투표 반영 비율</h3>
+                        <h3 class="text-lg font-bold text-gray-100 mb-3 px-1">투표 반영 비율</h3>
                         <div class="grid grid-cols-2 gap-3">
                             <!-- 아티스트 -->
-                            <div class="bg-white/80 p-4 rounded-[24px] shadow-sm relative overflow-hidden flex flex-col justify-between h-[110px]">
-                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-blue-50 rounded-full blur-lg"></div>
+                            <div class="bg-gray-800/60 p-4 rounded-[24px] shadow-sm border border-gray-700/50 relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-blue-900/30 rounded-full blur-lg"></div>
                                 <div class="relative z-10">
                                     <div class="flex items-center justify-between mb-1">
-                                        <p class="text-[11px] text-gray-500 font-bold">아티스트</p>
-                                        <i class="fa-solid fa-microphone text-blue-200 text-sm"></i>
+                                        <p class="text-[11px] text-gray-400 font-bold">아티스트</p>
+                                        <i class="fa-solid fa-microphone text-blue-400 text-sm"></i>
                                     </div>
                                     <div class="flex items-baseline gap-0.5">
-                                        <span class="text-3xl font-black text-[#191F28] tracking-tight">15</span>
-                                        <span class="text-xs font-bold text-blue-500">%</span>
+                                        <span class="text-3xl font-black text-white tracking-tight">15</span>
+                                        <span class="text-xs font-bold text-blue-400">%</span>
                                     </div>
                                 </div>
-                                <div class="w-full bg-gray-100/80 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-400 h-full rounded-full" style="width: 15%"></div></div>
+                                <div class="w-full bg-gray-700/80 rounded-full h-1.5 overflow-hidden"><div class="bg-blue-400 h-full rounded-full" style="width: 15%"></div></div>
                             </div>
 
                             <!-- 노래제목 -->
-                            <div class="bg-white/80 p-4 rounded-[24px] shadow-sm relative overflow-hidden flex flex-col justify-between h-[110px]">
-                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-green-50 rounded-full blur-lg"></div>
+                            <div class="bg-gray-800/60 p-4 rounded-[24px] shadow-sm border border-gray-700/50 relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-green-900/30 rounded-full blur-lg"></div>
                                 <div class="relative z-10">
                                     <div class="flex items-center justify-between mb-1">
-                                        <p class="text-[11px] text-gray-500 font-bold">노래제목</p>
-                                        <i class="fa-solid fa-music text-green-200 text-sm"></i>
+                                        <p class="text-[11px] text-gray-400 font-bold">노래제목</p>
+                                        <i class="fa-solid fa-headset text-green-400 text-sm"></i>
                                     </div>
                                     <div class="flex items-baseline gap-0.5">
-                                        <span class="text-3xl font-black text-[#191F28] tracking-tight">15</span>
-                                        <span class="text-xs font-bold text-green-500">%</span>
+                                        <span class="text-3xl font-black text-white tracking-tight">15</span>
+                                        <span class="text-xs font-bold text-green-400">%</span>
                                     </div>
                                 </div>
-                                <div class="w-full bg-gray-100/80 rounded-full h-1.5 overflow-hidden"><div class="bg-green-400 h-full rounded-full" style="width: 15%"></div></div>
+                                <div class="w-full bg-gray-700/80 rounded-full h-1.5 overflow-hidden"><div class="bg-green-400 h-full rounded-full" style="width: 15%"></div></div>
                             </div>
 
                             <!-- AI 실력평가 -->
-                            <div class="bg-white/80 p-4 rounded-[24px] shadow-sm relative overflow-hidden flex flex-col justify-between h-[110px]">
-                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-pink-50 rounded-full blur-lg"></div>
+                            <div class="bg-gray-800/60 p-4 rounded-[24px] shadow-sm border border-gray-700/50 relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-2 -top-2 w-16 h-16 bg-pink-900/30 rounded-full blur-lg"></div>
                                 <div class="relative z-10">
                                     <div class="flex items-center justify-between mb-1">
-                                        <p class="text-[11px] text-gray-500 font-bold">AI 실력평가</p>
-                                        <i class="fa-solid fa-robot text-pink-200 text-sm"></i>
+                                        <p class="text-[11px] text-gray-400 font-bold">AI 실력평가</p>
+                                        <i class="fa-solid fa-robot text-pink-400 text-sm"></i>
                                     </div>
                                     <div class="flex items-baseline gap-0.5">
-                                        <span class="text-3xl font-black text-[#191F28] tracking-tight">30</span>
-                                        <span class="text-xs font-bold text-pink-500">%</span>
+                                        <span class="text-3xl font-black text-white tracking-tight">30</span>
+                                        <span class="text-xs font-bold text-pink-400">%</span>
                                     </div>
                                 </div>
-                                <div class="w-full bg-gray-100/80 rounded-full h-1.5 overflow-hidden"><div class="bg-pink-400 h-full rounded-full" style="width: 30%"></div></div>
+                                <div class="w-full bg-gray-700/80 rounded-full h-1.5 overflow-hidden"><div class="bg-pink-400 h-full rounded-full" style="width: 30%"></div></div>
                             </div>
 
                             <!-- 본투표 -->
-                            <div class="bg-purple-50 p-4 rounded-[24px] shadow-sm border border-purple-100 relative overflow-hidden flex flex-col justify-between h-[110px]">
-                                <div class="absolute -right-4 -top-4 w-20 h-20 bg-purple-200/40 rounded-full blur-xl"></div>
+                            <div class="bg-purple-900/20 p-4 rounded-[24px] shadow-sm border border-purple-800/50 relative overflow-hidden flex flex-col justify-between h-[110px]">
+                                <div class="absolute -right-4 -top-4 w-20 h-20 bg-purple-600/20 rounded-full blur-xl"></div>
                                 <div class="relative z-10">
                                     <div class="flex items-center justify-between mb-1">
-                                        <p class="text-[11px] text-purple-600 font-bold">생방송 본투표</p>
-                                        <i class="fa-solid fa-check-to-slot text-purple-300 text-sm"></i>
+                                        <p class="text-[11px] text-purple-400 font-bold">생방송 본투표</p>
+                                        <i class="fa-solid fa-check-to-slot text-purple-400 text-sm"></i>
                                     </div>
                                     <div class="flex items-baseline gap-0.5">
-                                        <span class="text-3xl font-black text-purple-700 tracking-tight">40</span>
-                                        <span class="text-xs font-bold text-purple-500">%</span>
+                                        <span class="text-3xl font-black text-purple-400 tracking-tight">40</span>
+                                        <span class="text-xs font-bold text-purple-300">%</span>
                                     </div>
                                 </div>
-                                <div class="w-full bg-purple-200/50 rounded-full h-1.5 overflow-hidden"><div class="bg-purple-600 h-full rounded-full" style="width: 40%"></div></div>
+                                <div class="w-full bg-purple-900/50 rounded-full h-1.5 overflow-hidden"><div class="bg-purple-500 h-full rounded-full" style="width: 40%"></div></div>
                             </div>
                         </div>
                     </div>
@@ -227,26 +272,88 @@
                 </div>
             </div>
 
+            <!-- 선물 화면 -->
+            <div id="screen-present" class="screen">
+                <header class="flex-none px-5 pt-safe pb-2 flex justify-center items-center bg-[#111111]/80 backdrop-blur-md border-b border-gray-800 z-20 h-14">
+                    <span class="text-sm font-bold text-white">선물 뽑기</span>
+                </header>
+                <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-safe pb-safe-scroll flex flex-col items-center justify-center">
+                    <div id="gift-login-area" class="w-full px-4">
+                        <div class="text-center mb-6">
+                            <div class="w-16 h-16 bg-purple-900/50 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                                <i class="fa-solid fa-gift"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2">당신은 1위 입니까, 2위입니까?</h3>
+                            <p class="text-sm text-gray-400 mb-6">이름을 정확히 입력해야 입장 가능합니다.</p>
+                        </div>
+                        <input type="text" id="gift-name-input" placeholder="" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3.5 text-center text-lg font-bold mb-4 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-900 transition-all">
+                        <button onclick="window.checkGiftLogin()" class="w-full bg-purple-600 text-white font-bold text-lg py-4 rounded-[24px] shadow-lg active:scale-95 transition-transform">입장하기</button>
+                    </div>
+                    
+                    <div id="gift-content-area" class="hidden w-full px-4 text-center">
+                        <div id="gift-box-icon" class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-700 transition-transform">
+                            <i class="fa-solid fa-gift text-3xl text-purple-500"></i>
+                        </div>
+                        <h2 id="gift-welcome-title" class="text-2xl font-bold text-white mb-2"></h2>
+                        
+                        <div id="gift-result-box" class="hidden mt-6 bg-gray-800 border border-purple-500/50 rounded-[20px] p-6 shadow-lg shadow-purple-900/20">
+                            <p class="text-xs text-purple-400 font-bold mb-2">당첨된 선물</p>
+                            <h3 id="gift-result-text" class="text-xl font-extrabold text-white break-keep"></h3>
+                        </div>
+
+                        <button id="btn-draw-gift" onclick="window.drawGift()" class="w-full mt-6 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-lg py-4 rounded-[24px] shadow-lg active:scale-95 transition-transform disabled:opacity-50">선물 뽑기 🎁</button>
+                    </div>
+
+                    <!-- 설정(마스터키) 영역 -->
+                    <div id="gift-settings-area" class="hidden w-full px-4 text-center">
+                        <h2 class="text-2xl font-bold text-white mb-6">⚙️ 마스터 설정</h2>
+                        <div class="bg-gray-800 border border-gray-700 rounded-[20px] p-6 text-left space-y-4 shadow-lg shadow-purple-900/20">
+                            <div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-sm text-gray-400 font-bold">🥇 전시기 당첨 결과</p>
+                                    <button onclick="window.resetGiftCount('전시기')" class="text-[10px] bg-red-500/20 text-red-400 px-2 py-1 rounded border border-red-500/50 hover:bg-red-500/40 transition-colors">초기화</button>
+                                </div>
+                                <p id="setting-result-1" class="text-lg text-purple-400 font-bold mt-1 break-keep">미참여</p>
+                            </div>
+                            <div class="h-px bg-gray-700 w-full"></div>
+                            <div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-sm text-gray-400 font-bold">🥈 홍박사 당첨 결과</p>
+                                    <button onclick="window.resetGiftCount('홍박사')" class="text-[10px] bg-red-500/20 text-red-400 px-2 py-1 rounded border border-red-500/50 hover:bg-red-500/40 transition-colors">초기화</button>
+                                </div>
+                                <p id="setting-result-2" class="text-lg text-purple-400 font-bold mt-1 break-keep">미참여</p>
+                            </div>
+                            <div class="h-px bg-gray-700 w-full"></div>
+                            <div>
+                                <p class="text-sm text-gray-400 font-bold">🧪 테스트 당첨 결과</p>
+                                <p id="setting-result-test" class="text-lg text-purple-400 font-bold mt-1 break-keep">미참여</p>
+                            </div>
+                        </div>
+                        <button onclick="location.reload()" class="w-full mt-6 bg-gray-700 text-white font-bold text-lg py-4 rounded-[24px] shadow-lg active:scale-95 transition-transform">처음으로 돌아가기</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 모달 (상세) -->
             <div id="modal-detail" class="full-modal">
-                <header class="flex-none px-5 pt-safe pb-2 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-gray-100 z-20 h-14">
-                    <button onclick="window.closeModal()" class="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-lg text-[#191F28]"></i></button>
-                    <span class="text-sm font-bold text-[#191F28]">투표 상세</span>
+                <header class="flex-none px-5 pt-safe pb-2 flex justify-between items-center bg-[#111111]/80 backdrop-blur-md border-b border-gray-800 z-20 h-14">
+                    <button onclick="window.closeModal()" class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-lg text-white"></i></button>
+                    <span class="text-sm font-bold text-white">투표 상세</span>
                     <div class="w-8"></div>
                 </header>
                 <div class="flex-1 overflow-y-auto scrollbar-hide px-5 pt-6 pb-safe-scroll">
                     <div class="text-center mb-8">
-                        <span id="poll-badge" class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded mb-2">상태</span>
-                        <h2 id="detail-title" class="text-2xl font-bold text-[#191F28] mb-1.5 leading-tight break-keep">제목</h2>
-                        <p id="detail-info" class="text-xs text-gray-500 font-medium">정보</p>
+                        <span id="poll-badge" class="inline-block px-2 py-1 bg-gray-800 text-gray-300 text-[10px] font-bold rounded mb-2">상태</span>
+                        <h2 id="detail-title" class="text-2xl font-bold text-white mb-1.5 leading-tight break-keep">제목</h2>
+                        <p id="detail-info" class="text-xs text-gray-400 font-medium">정보</p>
                     </div>
                     <div id="detail-options" class="space-y-3 pb-8"></div>
                     <div class="mt-4 pb-12">
-                        <button id="btn-submit" onclick="window.submitVote()" class="w-full bg-purple-500 text-white font-bold text-lg py-4 rounded-[24px] shadow-lg active:scale-95 transition-transform disabled:bg-gray-300">투표하기</button>
+                        <button id="btn-submit" onclick="window.submitVote()" class="w-full bg-purple-600 text-white font-bold text-lg py-4 rounded-[24px] shadow-lg active:scale-95 transition-transform disabled:bg-gray-800 disabled:text-gray-500 disabled:shadow-none">투표하기</button>
                         <!-- 결과 버튼들 -->
                         <div id="result-buttons" class="hidden space-y-3 mt-3">
-                            <button onclick="window.voteAgain()" class="w-full bg-white border border-gray-200 text-gray-600 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform">한 번 더 투표하기 ↺</button>
-                            <button onclick="window.openCertInput()" class="w-full bg-purple-50 border border-purple-200 text-purple-600 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
+                            <button onclick="window.voteAgain()" class="w-full bg-gray-800 border border-gray-700 text-gray-300 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform">한 번 더 투표하기 ↺</button>
+                            <button onclick="window.openCertInput()" class="w-full bg-purple-900/30 border border-purple-800 text-purple-400 font-bold text-lg py-4 rounded-[24px] shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-certificate"></i> 인증서 발급받기
                             </button>
                         </div>
@@ -256,70 +363,71 @@
             
             <!-- 인증서 모달 -->
             <div id="modal-cert" class="cert-modal-overlay">
-                <div id="cert-step-1" class="w-full bg-white rounded-[28px] p-6 shadow-2xl transform transition-all scale-100">
+                <div id="cert-step-1" class="w-full bg-gray-900 border border-gray-800 rounded-[28px] p-6 shadow-2xl transform transition-all scale-100">
                     <div class="text-center mb-6">
-                        <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl animate-bounce">
+                        <div class="w-16 h-16 bg-purple-900/50 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl animate-bounce">
                             <i class="fa-solid fa-pen-nib"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-[#191F28]">투표 인증서 발급</h3>
-                        <p class="text-sm text-gray-500 mt-1">인증서에 표시될 이름을 입력해주세요.</p>
+                        <h3 class="text-xl font-bold text-white">투표 인증서 발급</h3>
+                        <p class="text-sm text-gray-400 mt-1">인증서에 표시될 이름을 입력해주세요.</p>
                     </div>
-                    <input type="text" id="cert-name-input" placeholder="이름 또는 닉네임 (최대 6자)" maxlength="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-center text-lg font-bold mb-4 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    <input type="text" id="cert-name-input" placeholder="이름 또는 닉네임 (최대 6자)" maxlength="6" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3.5 text-center text-lg font-bold mb-4 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-900 transition-all placeholder-gray-500">
                     <div class="flex gap-2">
-                        <button onclick="window.closeCertModal()" class="flex-1 py-3.5 rounded-xl bg-gray-100 text-gray-500 font-bold">취소</button>
-                        <button onclick="window.generateCert()" class="flex-1 py-3.5 rounded-xl bg-purple-500 text-white font-bold shadow-md">발급하기</button>
+                        <button onclick="window.closeCertModal()" class="flex-1 py-3.5 rounded-xl bg-gray-800 text-gray-400 font-bold hover:bg-gray-700">취소</button>
+                        <button onclick="window.generateCert()" class="flex-1 py-3.5 rounded-xl bg-purple-600 text-white font-bold shadow-md hover:bg-purple-500">발급하기</button>
                     </div>
                 </div>
 
                 <div id="cert-step-2" class="hidden w-full relative">
                     <button onclick="window.closeCertModal()" class="absolute -top-12 right-0 text-white/80 hover:text-white text-2xl z-50 p-2"><i class="fa-solid fa-xmark"></i></button>
                     <div id="cert-capture-area" class="cert-card-bg rounded-[24px] p-6 text-center relative overflow-hidden transform transition-transform">
-                        <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-400/10 rounded-full blur-xl"></div>
+                        <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-600/20 rounded-full blur-xl"></div>
                         <div class="relative z-10 pt-2">
-                            <div class="inline-block px-3 py-1 rounded-full border border-purple-200 bg-purple-50 text-[10px] text-purple-600 font-bold tracking-widest mb-4">OFFICIAL CERTIFICATE</div>
-                            <h2 class="text-[22px] font-extrabold text-[#191F28] leading-tight mb-6" id="cert-poll-title">투표 제목</h2>
-                            <div class="bg-white/60 rounded-xl p-4 border border-white/50 mb-6 backdrop-blur-sm">
-                                <p class="text-[11px] text-gray-500 font-bold mb-1">VOTE STATUS</p>
-                                <div class="text-xl font-black text-gray-400 tracking-wider">SECRET 🔒</div>
+                            <div class="inline-block px-3 py-1 rounded-full border border-purple-700/50 bg-purple-900/30 text-[10px] text-purple-300 font-bold tracking-widest mb-4">OFFICIAL CERTIFICATE</div>
+                            <h2 class="text-[22px] font-extrabold text-white leading-tight mb-6" id="cert-poll-title">투표 제목</h2>
+                            <div class="bg-black/40 rounded-xl p-4 border border-white/10 mb-6 backdrop-blur-md">
+                                <p class="text-[11px] text-gray-400 font-bold mb-1">VOTE STATUS</p>
+                                <div class="text-xl font-black text-gray-300 tracking-wider">SECRET 🔒</div>
                             </div>
-                            <div class="flex justify-between items-end border-t border-gray-200 pt-5 mt-2">
+                            <div class="flex justify-between items-end border-t border-gray-700 pt-5 mt-2">
                                 <div class="text-left">
-                                    <p class="text-[10px] text-gray-400 font-bold mb-0.5">VOTER</p>
-                                    <p class="text-base font-bold text-[#191F28]" id="cert-user-name">이름</p>
+                                    <p class="text-[10px] text-gray-500 font-bold mb-0.5">VOTER</p>
+                                    <p class="text-base font-bold text-white" id="cert-user-name">이름</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-[10px] text-gray-400 font-bold mb-0.5">DATE & TIME</p>
-                                    <p class="text-sm font-medium text-gray-600 tracking-tight" id="cert-date">2024.02.09 14:00</p>
+                                    <p class="text-[10px] text-gray-500 font-bold mb-0.5">DATE & TIME</p>
+                                    <p class="text-sm font-medium text-gray-400 tracking-tight" id="cert-date">2024.02.09 14:00</p>
                                 </div>
                             </div>
                             <div class="absolute bottom-16 right-4 opacity-0 stamp-ani" style="animation-delay: 0.3s;">
-                                <div class="w-20 h-20 border-[3px] border-red-500/40 rounded-full flex items-center justify-center rotate-[-15deg]">
-                                    <div class="w-[72px] h-[72px] border border-red-500/40 rounded-full flex items-center justify-center text-red-500/50 font-black text-xs uppercase tracking-tighter text-center leading-3">VOTE<br>COMPLETE</div>
+                                <div class="w-20 h-20 border-[3px] border-red-500/60 rounded-full flex items-center justify-center rotate-[-15deg]">
+                                    <div class="w-[72px] h-[72px] border border-red-500/60 rounded-full flex items-center justify-center text-red-500 font-black text-xs uppercase tracking-tighter text-center leading-3">VOTE<br>COMPLETE</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="mt-4 flex flex-col gap-2">
-                        <button onclick="window.saveCertImage()" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-[20px] shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                        <button onclick="window.saveCertImage()" class="w-full bg-white text-black font-bold py-3.5 rounded-[20px] shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-gray-200">
                             <i class="fa-solid fa-download"></i> 이미지로 저장하기
                         </button>
-                        <p class="text-white/70 text-xs text-center">또는 화면을 캡쳐해서 공유하세요!</p>
+                        <p class="text-white/50 text-xs text-center">또는 화면을 캡쳐해서 공유하세요!</p>
                     </div>
                 </div>
             </div>
 
             <!-- 하단바 (약한 블러: backdrop-blur-sm) -->
-            <!-- 24px 여백을 8px로 축소하여 더 아래로 이동 -->
             <nav id="bottom-nav" class="absolute left-1/2 -translate-x-1/2 z-50 w-auto" style="bottom: calc(8px + env(safe-area-inset-bottom));">
-                <div class="flex items-center bg-white/50 backdrop-blur-sm border border-white/50 shadow-2xl p-1 gap-1 rounded-full">
-                    <div id="nav-bg" class="absolute top-1 bottom-1 bg-white shadow-md rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
+                <div class="flex items-center bg-[#1a1a1a]/80 backdrop-blur-md border border-gray-800 shadow-2xl p-1 gap-1 rounded-full">
+                    <div id="nav-bg" class="absolute top-1 bottom-1 bg-gray-800 shadow-md rounded-full z-0 transition-all duration-300 ease-out" style="left: 4px; width: 56px;"></div>
                     
                     <!-- 0: Home -->
-                    <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-house text-lg text-[#191F28]"></i><span class="text-[9px] font-bold text-[#191F28]">홈</span></button>
+                    <button onclick="window.switchTab(0)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-0"><i class="fa-solid fa-house text-lg text-white"></i><span class="text-[9px] font-bold text-white">홈</span></button>
                     <!-- 1: Vote (Current) -->
-                    <button onclick="window.switchTab(1)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-1"><i class="fa-solid fa-check-to-slot text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">투표</span></button>
-                    <!-- 2: My Info -->
-                    <button onclick="window.switchTab(2)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-2"><i class="fa-solid fa-user text-lg text-[#B0B8C1]"></i><span class="text-[9px] font-medium text-[#B0B8C1]">내 정보</span></button>
+                    <button onclick="window.switchTab(1)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-1"><i class="fa-solid fa-check-to-slot text-lg text-gray-500"></i><span class="text-[9px] font-medium text-gray-500">투표</span></button>
+                    <!-- 2: Present (선물) -->
+                    <button onclick="window.switchTab(2)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-2"><i class="fa-solid fa-gift text-lg text-gray-500"></i><span class="text-[9px] font-medium text-gray-500">선물</span></button>
+                    <!-- 3: My Info -->
+                    <button onclick="window.switchTab(3)" class="relative z-10 w-14 py-1.5 flex flex-col items-center gap-0.5 group" id="btn-tab-3"><i class="fa-solid fa-user text-lg text-gray-500"></i><span class="text-[9px] font-medium text-gray-500">내 정보</span></button>
                 </div>
             </nav>
         </div>
@@ -329,7 +437,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, increment, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- [1] 파이어베이스 설정 ---
         const firebaseConfig = {
@@ -358,17 +466,15 @@
         window.updateDoc = updateDoc;
         window.onSnapshot = onSnapshot;
         window.increment = increment;
+        window.deleteField = deleteField;
 
         initApp();
 
         async function initApp() {
             try {
-                // 1. 익명 로그인 (중요: 콘솔에서 켜져있어야 함)
                 await signInAnonymously(auth);
                 console.log("Firebase Auth Success");
 
-                // 2. 초기 데이터 확인 및 생성
-                // (투표 문서가 아예 없으면 작동을 안 하므로, 처음 1회 자동 생성)
                 const pollRef = doc(db, 'polls', 'poll_0');
                 const docSnap = await getDoc(pollRef);
                 
@@ -376,11 +482,10 @@
                     console.log("Initializing Poll 0...");
                     await setDoc(pollRef, {
                         total: 0,
-                        options: [0, 0] // 0번째 옵션 0표, 1번째 옵션 0표
+                        options: [0, 0]
                     });
                 }
 
-                // 3. 실시간 리스너 연결 (단순화된 경로: 'polls' 컬렉션)
                 const pollCollectionRef = collection(db, 'polls');
                 
                 onSnapshot(pollCollectionRef, (snapshot) => {
@@ -391,7 +496,6 @@
                             
                             const localPoll = window.polls.find(p => p.id === pollId);
                             if (localPoll && data.options) {
-                                // DB 데이터를 로컬에 반영
                                 localPoll.options.forEach((opt, idx) => {
                                     if (data.options[idx] !== undefined) {
                                         opt.count = data.options[idx];
@@ -399,11 +503,9 @@
                                 });
                                 localPoll.total = data.total || 0;
                                 
-                                // 화면 갱신 (상세화면이 열려있다면)
                                 if (window.currentPollId === pollId) {
                                     window.renderDetailContent(localPoll);
                                 }
-                                // 리스트 갱신
                                 window.renderResultList();
                             }
                         }
@@ -412,15 +514,15 @@
 
             } catch (e) {
                 console.error("Firebase Init Error:", e);
-                // alert("파이어베이스 연결 실패: 콘솔의 Auth 설정을 확인해주세요.");
             }
         }
     </script>
 
     <script>
         window.polls = [
-            { id: 0, type: 'result', title: "설날특선 엔조이 인기가요2 사전투표 🎤", author: "엔조이 제작진", total: 0, options: [{ text: "너의 모든 순간", count: 0 }, { text: "흰수염 고래", count: 0 }], icon: "🎤", color: "bg-purple-50 text-purple-500", myPick: null, hasVoted: false },
-            { id: 1, type: 'result', title: "인기가요2 아티스트 사전투표 👨‍🎤", author: "엔조이 제작진", total: 5, options: [{ text: "전시기", count: 3 }, { text: "홍박사", count: 2 }], icon: "👨‍🎤", color: "bg-blue-50 text-blue-500", myPick: null, hasVoted: true }
+            { id: 2, type: 'result', title: "엔조이 인기가요2 본투표 🏆", author: "엔조이 제작진", total: 2, options: [{ text: "전시기", count: 2 }, { text: "홍박사", count: 0 }], icon: "🏆", color: "bg-pink-900/40 text-pink-400 border border-pink-800", myPick: null, hasVoted: true },
+            { id: 0, type: 'result', title: "설날특선 엔조이 인기가요2 사전투표 🎤", author: "엔조이 제작진", total: 0, options: [{ text: "너의 모든 순간", count: 0 }, { text: "흰수염 고래", count: 0 }], icon: "🎤", color: "bg-purple-900/40 text-purple-400 border border-purple-800", myPick: null, hasVoted: false },
+            { id: 1, type: 'result', title: "인기가요2 아티스트 사전투표 👨‍🎤", author: "엔조이 제작진", total: 5, options: [{ text: "전시기", count: 3 }, { text: "홍박사", count: 2 }], icon: "👨‍🎤", color: "bg-blue-900/40 text-blue-400 border border-blue-800", myPick: null, hasVoted: true }
         ];
         window.currentPollId = null;
         window.selectedOptionIdx = null;
@@ -456,7 +558,7 @@
                 window.location.href = 'https://won429.github.io/enjoysite/';
                 return;
             }
-            if (index === 2) { 
+            if (index === 3) { 
                 alert('내 정보 기능은 준비중입니다.'); 
                 return; 
             }
@@ -464,26 +566,211 @@
             const navBg = document.getElementById('nav-bg');
             navBg.style.transform = `translateX(${index * 60}px)`;
 
-            [0, 1, 2].forEach(i => {
+            [0, 1, 2, 3].forEach(i => {
                 const btn = document.getElementById(`btn-tab-${i}`);
                 if (!btn) return;
                 const icon = btn.querySelector('i');
                 const text = btn.querySelector('span');
                 
                 if (i === index) {
-                    icon.className = icon.className.replace('text-[#B0B8C1]', 'text-[#191F28]');
-                    text.className = text.className.replace('font-medium', 'font-bold').replace('text-[#B0B8C1]', 'text-[#191F28]');
+                    icon.className = icon.className.replace('text-gray-500', 'text-white');
+                    text.className = text.className.replace('font-medium', 'font-bold').replace('text-gray-500', 'text-white');
                 } else {
-                    icon.className = icon.className.replace('text-[#191F28]', 'text-[#B0B8C1]');
-                    text.className = text.className.replace('font-bold', 'font-medium').replace('text-[#191F28]', 'text-[#B0B8C1]');
+                    icon.className = icon.className.replace('text-white', 'text-gray-500');
+                    text.className = text.className.replace('font-bold', 'font-medium').replace('text-white', 'text-gray-500');
                 }
             });
+
+            const screenHome = document.getElementById('screen-home');
+            const screenPresent = document.getElementById('screen-present');
+            
+            if (index === 1) {
+                if(screenHome) screenHome.classList.add('active');
+                if(screenPresent) screenPresent.classList.remove('active');
+            } else if (index === 2) {
+                if(screenHome) screenHome.classList.remove('active');
+                if(screenPresent) screenPresent.classList.add('active');
+            }
+        };
+
+        window.currentGiftUser = null;
+
+        window.checkGiftLogin = async function() {
+            const name = document.getElementById('gift-name-input').value.trim();
+            if(name === '전시기' || name === '홍박사' || name === '테스트') {
+                window.currentGiftUser = name;
+                document.getElementById('gift-login-area').classList.add('hidden');
+                document.getElementById('gift-content-area').classList.remove('hidden');
+                if(document.getElementById('gift-settings-area')) document.getElementById('gift-settings-area').classList.add('hidden');
+                
+                const title = document.getElementById('gift-welcome-title');
+                if(name === '전시기') {
+                    title.innerHTML = '🥇 1위 전시기 님<br>환영합니다!';
+                } else if(name === '홍박사') {
+                    title.innerHTML = '🥈 2위 홍박사 님<br>환영합니다!';
+                } else {
+                    title.innerHTML = '🧪 테스트 계정<br>환영합니다!';
+                }
+                
+                // 상태 초기화 및 파이어베이스 연동 확인
+                document.getElementById('gift-result-box').classList.add('hidden');
+                const btnDraw = document.getElementById('btn-draw-gift');
+                btnDraw.disabled = true;
+                btnDraw.innerText = "정보 확인 중...";
+                
+                let savedGift = null;
+                try {
+                    const docSnap = await window.getDoc(window.doc(window.db, 'gifts', 'results'));
+                    if (docSnap.exists()) {
+                        savedGift = docSnap.data()[name];
+                    }
+                } catch(e) {
+                    console.error("Firebase fetch error:", e);
+                }
+                
+                if (savedGift && name !== '테스트') {
+                    btnDraw.classList.add('hidden');
+                    document.getElementById('gift-result-box').classList.remove('hidden');
+                    document.getElementById('gift-result-text').innerText = savedGift;
+                } else {
+                    btnDraw.classList.remove('hidden');
+                    btnDraw.disabled = false;
+                    btnDraw.innerText = "선물 뽑기 🎁";
+                }
+                document.getElementById('gift-box-icon').classList.remove('animate-bounce');
+                
+            } else if (name === '설정') {
+                document.getElementById('gift-login-area').classList.add('hidden');
+                document.getElementById('gift-content-area').classList.add('hidden');
+                
+                const settingsArea = document.getElementById('gift-settings-area');
+                if(settingsArea) {
+                    settingsArea.classList.remove('hidden');
+                    document.getElementById('setting-result-1').innerText = "데이터 불러오는 중...";
+                    document.getElementById('setting-result-2').innerText = "데이터 불러오는 중...";
+                    document.getElementById('setting-result-test').innerText = "데이터 불러오는 중...";
+                    
+                    try {
+                        const docSnap = await window.getDoc(window.doc(window.db, 'gifts', 'results'));
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            document.getElementById('setting-result-1').innerText = data['전시기'] || '미참여';
+                            document.getElementById('setting-result-2').innerText = data['홍박사'] || '미참여';
+                            document.getElementById('setting-result-test').innerText = data['테스트'] || '미참여';
+                        } else {
+                            document.getElementById('setting-result-1').innerText = '미참여';
+                            document.getElementById('setting-result-2').innerText = '미참여';
+                            document.getElementById('setting-result-test').innerText = '미참여';
+                        }
+                    } catch(e) {
+                        console.error("Firebase fetch error:", e);
+                        document.getElementById('setting-result-1').innerText = '오류 발생';
+                        document.getElementById('setting-result-2').innerText = '오류 발생';
+                        document.getElementById('setting-result-test').innerText = '오류 발생';
+                    }
+                }
+            } else {
+                alert("'전시기', '홍박사', '테스트', '설정'만 입력해야 입장이 가능합니다.");
+            }
+        };
+
+        window.resetGiftCount = async function(name) {
+            if(!confirm(`${name} 님의 뽑기 내역을 초기화하시겠습니까?`)) return;
+            
+            try {
+                if(window.db && window.auth && window.auth.currentUser) {
+                    const giftRef = window.doc(window.db, 'gifts', 'results');
+                    const updateData = {};
+                    updateData[name] = window.deleteField();
+                    
+                    await window.updateDoc(giftRef, updateData);
+                    localStorage.removeItem('gift_' + name);
+                    
+                    alert(`${name} 님의 뽑기 내역이 초기화되었습니다. 이제 다시 뽑을 수 있습니다.`);
+                    
+                    // 설정 화면의 결과 텍스트 즉시 '미참여'로 반영
+                    if(name === '전시기') document.getElementById('setting-result-1').innerText = '미참여';
+                    if(name === '홍박사') document.getElementById('setting-result-2').innerText = '미참여';
+                }
+            } catch(e) {
+                console.error("Reset Error:", e);
+                // 문서가 없는 등 에러 발생 시에도 로컬 기록은 삭제해줌
+                localStorage.removeItem('gift_' + name);
+                if(name === '전시기') document.getElementById('setting-result-1').innerText = '미참여';
+                if(name === '홍박사') document.getElementById('setting-result-2').innerText = '미참여';
+                alert(`${name} 님의 뽑기 내역이 초기화되었습니다.`);
+            }
+        };
+
+        window.drawGift = async function() {
+            if (window.currentGiftUser === '전시기' || window.currentGiftUser === '홍박사') {
+                try {
+                    const docSnap = await window.getDoc(window.doc(window.db, 'gifts', 'results'));
+                    if (docSnap.exists() && docSnap.data()[window.currentGiftUser]) {
+                        alert("이미 선물을 뽑으셨습니다!");
+                        const savedGift = docSnap.data()[window.currentGiftUser];
+                        document.getElementById('btn-draw-gift').classList.add('hidden');
+                        document.getElementById('gift-result-box').classList.remove('hidden');
+                        document.getElementById('gift-result-text').innerText = savedGift;
+                        return;
+                    }
+                } catch(e) {
+                    console.error("Duplicate check error:", e);
+                }
+            }
+
+            const baseGifts = [
+                '배달의 민족 {amount} 상품권', '다이소 상품권 {amount}', 'GS25 편의점 {amount} 상품권', 
+                'CU {amount}권', '세븐일레븐 {amount}권', 'emart 24 {amount}권', 
+                '쿠팡이츠 {amount}권', '요기요 {amount}권', '카페 {amount}권', 
+                '올리브영 {amount}권', '맥도날드 {amount}권', '써브웨이 {amount}권', 
+                '영화관 금액권 {amount}', '맘스터치 {amount}권', '롯데리아 {amount}권', 
+                '성심당 {amount}권', '햄버거 {amount}권', '성원이가 직접가서 놀아드림', '현금 {amount}'
+            ];
+            
+            // 이름에 따라 1만원 또는 5천원 배정 (테스트는 1만원)
+            const amountStr = (window.currentGiftUser === '홍박사') ? '5천원' : '1만원';
+            
+            // 랜덤으로 선물 뽑기 및 금액 텍스트 치환
+            let drawnGift = baseGifts[Math.floor(Math.random() * baseGifts.length)];
+            drawnGift = drawnGift.replace(/{amount}/g, amountStr);
+
+            const btn = document.getElementById('btn-draw-gift');
+            const resultBox = document.getElementById('gift-result-box');
+            const resultText = document.getElementById('gift-result-text');
+            const boxIcon = document.getElementById('gift-box-icon');
+            
+            // 버튼 상태 변경 및 애니메이션
+            btn.disabled = true;
+            btn.innerText = "🎁 뽑는 중...";
+            boxIcon.classList.add('animate-bounce');
+
+            // 파이어베이스에 저장 (merge 옵션으로 기존 데이터 유지)
+            try {
+                if(window.db && window.auth && window.auth.currentUser) {
+                    const giftRef = window.doc(window.db, 'gifts', 'results');
+                    await window.setDoc(giftRef, {
+                        [window.currentGiftUser]: drawnGift
+                    }, { merge: true });
+                }
+            } catch(e) {
+                console.error("Gift Save Error:", e);
+            }
+
+            // 1.5초 뒤 결과 노출
+            setTimeout(() => {
+                boxIcon.classList.remove('animate-bounce');
+                btn.classList.add('hidden'); // 뽑은 뒤 버튼 숨김 (한 번만 뽑기)
+                resultBox.classList.remove('hidden');
+                resultText.innerText = drawnGift;
+                window.fireConfetti('confetti-canvas'); // 폭죽 효과
+            }, 1500);
         };
 
         window.renderResultList = function() {
             const list = document.getElementById('result-list'); list.innerHTML = '';
             window.polls.filter(p => p.type === 'result').forEach(p => {
-                list.innerHTML += `<div class="toss-card p-5 flex items-center justify-between active:scale-[0.98] transition-transform" onclick="window.openPollDetail(${p.id})"><div class="flex items-center gap-4 flex-1 overflow-hidden"><div class="w-12 h-12 rounded-[20px] ${p.color} flex items-center justify-center text-xl shadow-sm shrink-0">${p.icon}</div><div class="overflow-hidden"><h4 class="text-base font-bold text-[#191F28] leading-tight mb-0.5 truncate pr-2">${p.title}</h4><p class="text-xs text-gray-500 font-medium">${p.total}명 참여 · 종료됨</p></div></div><div class="flex items-center gap-1.5 shrink-0 pl-2"><span class="text-xs font-medium text-gray-400">결과보기</span><i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i></div></div>`;
+                list.innerHTML += `<div class="toss-card p-5 flex items-center justify-between active:scale-[0.98] transition-transform" onclick="window.openPollDetail(${p.id})"><div class="flex items-center gap-4 flex-1 overflow-hidden"><div class="w-12 h-12 rounded-[20px] ${p.color} flex items-center justify-center text-xl shadow-sm shrink-0">${p.icon}</div><div class="overflow-hidden"><h4 class="text-base font-bold text-white leading-tight mb-0.5 truncate pr-2">${p.title}</h4><p class="text-xs text-gray-400 font-medium">${p.total}명 참여 · 종료됨</p></div></div><div class="flex items-center gap-1.5 shrink-0 pl-2"><span class="text-xs font-medium text-gray-500">결과보기</span><i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i></div></div>`;
             });
         };
 
@@ -493,8 +780,8 @@
             document.getElementById('detail-title').innerText = p.title;
             document.getElementById('detail-info').innerText = `작성자: ${p.author} · ${p.total}명 참여`;
             const badge = document.getElementById('poll-badge');
-            if(p.type === 'active') { badge.className = "inline-block px-2 py-1 bg-purple-100 text-purple-600 text-[10px] font-bold rounded mb-2"; badge.innerText = "진행중"; } 
-            else { badge.className = "inline-block px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded mb-2"; badge.innerText = "종료됨"; }
+            if(p.type === 'active') { badge.className = "inline-block px-2 py-1 bg-purple-900/50 text-purple-400 border border-purple-800 text-[10px] font-bold rounded mb-2"; badge.innerText = "진행중"; } 
+            else { badge.className = "inline-block px-2 py-1 bg-gray-800 text-gray-400 border border-gray-700 text-[10px] font-bold rounded mb-2"; badge.innerText = "종료됨"; }
             window.renderDetailContent(p);
             document.getElementById('modal-detail').classList.add('open');
         };
@@ -513,7 +800,7 @@
             if(!showResult) {
                 btnSubmit.classList.remove('hidden'); resultButtons.classList.add('hidden'); btnSubmit.disabled = true; btnSubmit.innerText = "투표하기";
                 p.options.forEach((opt, idx) => {
-                    container.innerHTML += `<label class="block cursor-pointer group active:scale-[0.98] transition-all"><input type="radio" name="v_opt" class="hidden peer" onchange="window.selectOption(${idx})"><div class="p-4 rounded-[20px] bg-white border border-white/60 shadow-sm flex items-center justify-between peer-checked:border-purple-500 peer-checked:ring-1 peer-checked:ring-purple-500 peer-checked:bg-purple-50 transition-all"><span class="font-bold text-[#191F28]">${opt.text}</span><div class="w-5 h-5 rounded-full border-2 border-gray-200 peer-checked:border-purple-500 peer-checked:bg-purple-500 flex items-center justify-center"><i class="fa-solid fa-check text-white text-[10px]"></i></div></div></label>`;
+                    container.innerHTML += `<label class="block cursor-pointer group active:scale-[0.98] transition-all"><input type="radio" name="v_opt" class="hidden peer" onchange="window.selectOption(${idx})"><div class="p-4 rounded-[20px] bg-gray-800 border border-gray-700 shadow-sm flex items-center justify-between peer-checked:border-purple-500 peer-checked:ring-1 peer-checked:ring-purple-500 peer-checked:bg-purple-900/30 transition-all"><span class="font-bold text-white">${opt.text}</span><div class="w-5 h-5 rounded-full border-2 border-gray-600 peer-checked:border-purple-500 peer-checked:bg-purple-500 flex items-center justify-center"><i class="fa-solid fa-check text-white text-[10px]"></i></div></div></label>`;
                 });
             } else {
                 btnSubmit.classList.add('hidden');
@@ -528,11 +815,11 @@
                     
                     const isWin = count === max && max > 0;
                     const isMy = idx === p.myPick;
-                    const wrapperClass = isWin ? "rank-1-card p-5 rounded-[24px] mb-4 relative overflow-hidden" : "bg-white p-4 rounded-[20px] mb-3 border border-gray-100 shadow-sm relative overflow-hidden";
-                    const barClass = isWin ? "bar-gradient" : "bg-gray-300";
+                    const wrapperClass = isWin ? "rank-1-card p-5 rounded-[24px] mb-4 relative overflow-hidden" : "bg-gray-800 p-4 rounded-[20px] mb-3 border border-gray-700 shadow-sm relative overflow-hidden";
+                    const barClass = isWin ? "bar-gradient" : "bg-gray-600";
                     const medal = isWin ? `<span class="ml-2 text-5xl inline-block align-middle drop-shadow-md">🥇</span>` : '';
                     
-                    container.innerHTML += `<div class="${wrapperClass}"><div class="flex justify-between items-end mb-2 relative z-10"><div><h4 class="text-base font-bold text-[#191F28] flex items-center">${opt.text} ${medal} ${isMy ? '<span class="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded font-bold ml-2 self-center">MY</span>' : ''}</h4><p class="text-xs text-gray-400 font-medium mt-0.5">${count}표</p></div><div class="text-right"><span class="text-2xl font-bold text-purple-600 number-counting" data-target="${pct}">${pct}</span><span class="text-sm font-bold text-purple-400">%</span></div></div><div class="w-full bg-gray-100 rounded-full overflow-hidden relative z-10 ${isWin?'h-3':'h-2'}"><div class="${barClass}" style="width: ${pct}%; height: 100%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); border-radius: 99px;"></div></div></div>`;
+                    container.innerHTML += `<div class="${wrapperClass}"><div class="flex justify-between items-end mb-2 relative z-10"><div><h4 class="text-base font-bold text-white flex items-center">${opt.text} ${medal} ${isMy ? '<span class="text-[10px] bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded font-bold ml-2 self-center border border-purple-800">MY</span>' : ''}</h4><p class="text-xs text-gray-400 font-medium mt-0.5">${count}표</p></div><div class="text-right"><span class="text-2xl font-bold text-purple-400 number-counting" data-target="${pct}">${pct}</span><span class="text-sm font-bold text-purple-400">%</span></div></div><div class="w-full bg-gray-700/80 rounded-full overflow-hidden relative z-10 ${isWin?'h-3':'h-2'}"><div class="${barClass}" style="width: ${pct}%; height: 100%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); border-radius: 99px;"></div></div></div>`;
                 });
             }
         };
@@ -554,18 +841,7 @@
 
             try {
                 if(window.db && window.auth && window.auth.currentUser) {
-                    // 루트 컬렉션 'polls' 사용 (경로 단순화)
                     const pollRef = window.doc(window.db, 'polls', 'poll_' + p.id);
-                    
-                    // Firestore increment 사용 -> 배열의 특정 인덱스 필드만 업데이트 불가 (배열 전체 덮어쓰기 필요)
-                    // 하지만 setDoc(merge)와 dot notation(점 표기법)을 사용하면 가능함
-                    // 예: { "options.0": increment(1) } -> 단, options가 Map이어야 함.
-                    // 만약 options가 Array라면 배열 전체를 읽고 써야 함.
-                    // 편의상 여기서는 options를 { 0: count, 1: count } 형태의 맵으로 저장하거나
-                    // 간단히 문서 전체를 읽고 +1 해서 다시 쓰는 트랜잭션을 쓰는게 정석이나,
-                    // 트래픽이 많지 않다면 dot notation으로 "options" 필드(배열)의 인덱스 접근 시도해볼 수 있음.
-                    // 그러나 Firestore에서 배열 인덱스 수정은 지원하지 않음.
-                    // 해결책: options 필드를 Array가 아니라 Map(Object)으로 저장하도록 초기화 로직을 짰음. (initApp 참고)
                     
                     const updateData = {};
                     updateData[`options.${window.selectedOptionIdx}`] = window.increment(1);
@@ -576,7 +852,6 @@
                 }
             } catch (e) {
                 console.error("Vote Error:", e);
-                // 문서가 없어서 업데이트 실패 시 (혹시 init이 안되었을 경우)
                 if (e.code === 'not-found') {
                      const pollRef = window.doc(window.db, 'polls', 'poll_' + p.id);
                      await window.setDoc(pollRef, {
@@ -642,4 +917,3 @@
     </script>
 </body>
 </html>
-
