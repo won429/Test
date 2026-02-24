@@ -40,7 +40,7 @@
                     <div class="flex items-center gap-2">
                         <h1 class="text-xl font-bold tracking-tight">지하철 현황</h1>
                         <!-- 상/하행 선택 토글 추가 -->
-                        <select id="direction-toggle" class="bg-gray-100 text-gray-700 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-gray-200 shadow-sm">
+                        <select id="direction-toggle" class="bg-gray-100 text-gray-700 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-gray-200 shadow-sm transition-all">
                             <option value="up">상행 (구미 방면)</option>
                             <option value="down">하행 (경산 방면)</option>
                         </select>
@@ -188,12 +188,24 @@
 사곡,05:47:00,06:14:00,06:29:00,06:43:00,06:51:00,07:20:00,07:29:00,07:54:00,08:18:00,08:41:00,08:52:00,09:11:00,09:26:00,09:42:00,10:22:00,10:50:00,11:12:00,11:32:00,11:57:00,12:22:00,12:42:00,13:12:00,13:37:00,13:57:00,14:22:00,14:47:00,15:07:00,15:25:00,15:45:00,16:16:00,16:47:00,17:07:00,17:32:00,17:52:30,18:10:00,18:36:30,18:56:00,19:22:00,19:48:00,20:20:00,20:40:30,21:06:00,21:26:00,21:49:00,22:19:00,22:45:00,23:12:00,23:30:30,23:54:00,00:13:30
 구미,05:51:00,06:18:00,06:33:00,06:47:00,06:55:00,07:24:00,07:33:00,07:58:00,08:22:00,08:45:00,08:56:00,09:15:00,09:30:00,09:46:00,10:26:00,10:54:00,11:16:00,11:36:00,12:01:00,12:26:00,12:46:00,13:16:00,13:41:00,14:01:00,14:26:00,14:51:00,15:11:00,15:29:00,15:49:00,16:20:00,16:51:00,17:11:00,17:36:00,17:56:30,18:14:00,18:40:30,19:00:00,19:26:00,19:52:00,20:24:00,20:44:30,21:10:00,21:30:00,21:53:00,22:23:00,22:49:00,23:16:00,23:34:30,23:58:00,00:17:30`;
 
+        // 2. 평일 하행
+        const CSV_WEEKDAY_DOWN = `역명,하행데이터_붙여넣기
+`;
+        
+        // 3. 주말/공휴일 상행
+        const CSV_WEEKEND_UP = `역명,주말상행데이터_붙여넣기
+`;
+
+        // 4. 주말/공휴일 하행
+        const CSV_WEEKEND_DOWN = `역명,주말하행데이터_붙여넣기
+`;
+
         // 💡 깃허브에 올린 CSV 파일명 매핑
         const FILE_URLS = {
             weekday_up: 'dae_up.csv',     // 평일 상행 (파일이 없을 경우 대비해 위의 CSV_WEEKDAY_UP 유지)
             weekday_down: 'dae_down.csv', // 평일 하행 (사용자 요청)
             weekend_up: 'daew_up.csv',    // 주말/휴일 상행 (사용자 요청)
-            weekend_down: 'daew_down.csv' // 주말/휴일 하행 (사용자 요청)
+            weekend_down: 'daew_down.csv' // 주말/휴일 하행 (사용자 요청 수정)
         };
 
         let activeTab = 'route';
@@ -372,7 +384,9 @@
 
         // 하단 탭 스위치
         dom.tabLine.addEventListener('click', () => { 
-            activeTab = 'line'; selectedStation = null; isAutoScroll = true; 
+            activeTab = 'line'; selectedStation = null; isAutoScroll = false; 
+            dom.directionToggle.classList.add('hidden'); // 노선 탭에서 상하행 선택기 숨김
+            
             dom.lineView.classList.replace('opacity-0', 'opacity-100');
             dom.lineView.classList.remove('pointer-events-none');
             dom.routeView.classList.replace('opacity-100', 'opacity-0');
@@ -388,6 +402,8 @@
 
         dom.tabRoute.addEventListener('click', () => { 
             activeTab = 'route'; selectedStation = null; isAutoScroll = true; 
+            dom.directionToggle.classList.remove('hidden'); // 다시 복구
+            
             dom.routeView.classList.replace('opacity-0', 'opacity-100');
             dom.routeView.classList.remove('pointer-events-none');
             dom.lineView.classList.replace('opacity-100', 'opacity-0');
@@ -403,6 +419,8 @@
 
         dom.tabMap.addEventListener('click', () => { 
             activeTab = 'map'; selectedStation = null; isAutoScroll = true; 
+            dom.directionToggle.classList.remove('hidden'); // 다시 복구
+            
             dom.mapView.classList.replace('opacity-0', 'opacity-100');
             dom.mapView.classList.remove('pointer-events-none');
             dom.routeView.classList.replace('opacity-100', 'opacity-0');
@@ -647,32 +665,39 @@
                 updateTrainsSVG(dom.lineTrainsDown, makeLineTrainData(parsedTrainsDown, 'down'));
             }
 
-            // UI 업데이트: Auto Scroll
-            if (isAutoScroll && selectedData && !selectedStation) {
+            // UI 업데이트: Auto Scroll (노선 탭 제외)
+            if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'line') {
                 dom.autoScrollBtn.classList.add('hidden');
                 const vOff = (dom.scrollContainer.clientHeight - 150) / 2;
                 dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - vOff, behavior: 'auto' });
             } else {
-                if (selectedData && !selectedStation) dom.autoScrollBtn.classList.remove('hidden');
+                if (selectedData && !selectedStation && activeTab !== 'line') dom.autoScrollBtn.classList.remove('hidden');
                 else dom.autoScrollBtn.classList.add('hidden');
             }
-
-            // 공통 텍스트 
-            const dirText = currentDirection === 'up' ? '상행(구미 방면)' : '하행(경산 방면)';
 
             // UI 업데이트: 플로팅 패널
             let panelHtml = '';
             if (selectedStation) {
-                const upcoming = parsedTrains.map(t => {
-                    const stop = t.schedule.find(s => s.name === selectedStation);
-                    return stop ? { id: t.id, sec: stop.sec, time: stop.time } : null;
-                }).filter(t => t !== null && t.sec >= currentSec).sort((a, b) => a.sec - b.sec).slice(0, 3);
+                // 상하행 모두에서 선택된 역의 정보를 수집하고 최종 목적지(행)를 파악
+                let upcomingAll = [];
+                [parsedTrainsUp, parsedTrainsDown].forEach((tList) => {
+                    tList.forEach(t => {
+                        const stop = t.schedule.find(s => s.name === selectedStation);
+                        if (stop) {
+                            const destination = t.schedule[t.schedule.length - 1].name;
+                            upcomingAll.push({ id: t.id, sec: stop.sec, time: stop.time, destination: destination });
+                        }
+                    });
+                });
+                
+                // 시간순으로 정렬하여 가장 가까운 4대만 표시
+                const upcoming = upcomingAll.filter(t => t.sec >= currentSec).sort((a, b) => a.sec - b.sec).slice(0, 4);
 
                 panelHtml = `
                     <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.15)] border border-gray-100/80 p-4">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="text-lg font-extrabold text-gray-900 flex items-center gap-1.5">
-                                ${selectedStation}역 <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-sm">${dirText}</span>
+                                ${selectedStation}역 <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-sm">전체 방면</span>
                             </h3>
                             <button onclick="handleStationClick(null)" class="p-1 text-gray-400 hover:text-gray-900 bg-gray-50 rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -683,11 +708,11 @@
                                 <div class="flex justify-between items-center bg-gray-50 rounded-lg p-2.5 border border-gray-100">
                                     <div class="flex items-center gap-2">
                                         <span class="bg-[#0052FF]/10 text-[#0052FF] text-[10px] px-1.5 py-0.5 rounded font-bold">${t.id}</span>
-                                        <span class="text-sm font-bold text-gray-900">${t.time.slice(0,5)}</span>
+                                        <span class="text-sm font-bold text-gray-900">${t.time.slice(0,5)} <span class="text-[10px] text-gray-500 font-medium ml-0.5">${t.destination}행</span></span>
                                     </div>
                                     <span class="text-xs font-bold text-[#0052FF]">${Math.ceil((t.sec - currentSec)/60)}분 후</span>
                                 </div>
-                            `).join('') : `<div class="py-4 text-center text-sm font-bold text-gray-400">금일 해당 방면 열차 운행이 모두 종료되었습니다.</div>`}
+                            `).join('') : `<div class="py-4 text-center text-sm font-bold text-gray-400">금일 해당 역 열차 운행이 모두 종료되었습니다.</div>`}
                         </div>
                         <button onclick="openModal()" class="w-full flex items-center justify-center gap-1.5 bg-[#0052FF] text-white py-2.5 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
@@ -695,16 +720,23 @@
                         </button>
                     </div>`;
 
-                // 모달 내용 갱신
-                const fullTimetable = parsedTrains.map(t => {
-                    const stop = t.schedule.find(s => s.name === selectedStation);
-                    return stop ? { id: t.id, sec: stop.sec, time: stop.time } : null;
-                }).filter(t => t !== null).sort((a, b) => a.sec - b.sec);
+                // 모달 내용 전체 방면으로 통합 갱신
+                let fullTimetableAll = [];
+                [parsedTrainsUp, parsedTrainsDown].forEach((tList) => {
+                    tList.forEach(t => {
+                        const stop = t.schedule.find(s => s.name === selectedStation);
+                        if (stop) {
+                            const destination = t.schedule[t.schedule.length - 1].name;
+                            fullTimetableAll.push({ id: t.id, sec: stop.sec, time: stop.time, destination: destination });
+                        }
+                    });
+                });
+                const fullTimetable = fullTimetableAll.sort((a, b) => a.sec - b.sec);
                 
                 dom.modalTitle.textContent = `${selectedStation}역 시간표`;
                 
                 const typeStr = currentDayType === 'weekday' ? '평일' : (currentDayType === 'holiday' ? '공휴일' : '주말');
-                dom.modalSubtitle.textContent = `대경선 ${typeStr} ${dirText}`;
+                dom.modalSubtitle.textContent = `대경선 ${typeStr} 전체 방면`;
 
                 dom.modalContent.innerHTML = fullTimetable.map((t, idx) => {
                     const isPast = t.sec < currentSec;
@@ -713,7 +745,9 @@
                         <div class="flex justify-between items-center py-3.5 border-b border-gray-50 ${isNext ? 'bg-[#0052FF]/5 -mx-5 px-5 border-l-4 border-l-[#0052FF]' : ''}">
                             <div class="flex items-center gap-3">
                                 <span class="w-12 text-[10px] font-bold text-center py-1 rounded-sm ${isPast ? 'bg-gray-100 text-gray-400' : 'bg-gray-100 text-gray-700'}">${t.id}</span>
-                                <span class="text-base font-bold ${isPast ? 'text-gray-400 line-through decoration-gray-300' : isNext ? 'text-[#0052FF]' : 'text-gray-900'}">${t.time.slice(0,5)}</span>
+                                <span class="text-base font-bold ${isPast ? 'text-gray-400 line-through decoration-gray-300' : isNext ? 'text-[#0052FF]' : 'text-gray-900'}">
+                                    ${t.time.slice(0,5)} <span class="text-xs ${isPast ? 'text-gray-400 line-through' : 'text-gray-500'} ml-1 font-medium">${t.destination}행</span>
+                                </span>
                             </div>
                             ${isNext ? `<span class="text-xs font-extrabold text-[#0052FF] animate-pulse">다음 열차</span>` : isPast ? `<span class="text-[10px] font-bold text-gray-300">출발됨</span>` : ''}
                         </div>`;
