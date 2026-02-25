@@ -15,6 +15,8 @@
     <!-- Tailwind safelist for dynamic colors: 
     bg-[#0054A6] border-[#0054A6] text-[#0054A6] bg-[#0054A6]/10 bg-[#0054A6]/20 border-[#0054A6]/50 border-[#0054A6]/20 shadow-[0_2px_8px_rgba(0,84,166,0.3)] shadow-[0_0_15px_rgba(0,84,166,0.2)] shadow-[0_0_15px_rgba(0,84,166,0.4)]
     bg-[#D93F5C] border-[#D93F5C] text-[#D93F5C] bg-[#D93F5C]/10 bg-[#D93F5C]/20 border-[#D93F5C]/50 border-[#D93F5C]/20 shadow-[0_2px_8px_rgba(217,63,92,0.3)] shadow-[0_0_15px_rgba(217,63,92,0.2)] shadow-[0_0_15px_rgba(217,63,92,0.4)]
+    bg-[#007448] border-[#007448] text-[#007448] bg-[#007448]/10 bg-[#007448]/20 border-[#007448]/50 border-[#007448]/20 shadow-[0_2px_8px_rgba(0,116,72,0.3)] shadow-[0_0_15px_rgba(0,116,72,0.2)] shadow-[0_0_15px_rgba(0,116,72,0.4)]
+    bg-[#009F62] border-[#009F62] text-[#009F62] bg-[#009F62]/10 bg-[#009F62]/20 border-[#009F62]/50 border-[#009F62]/20 shadow-[0_2px_8px_rgba(0,159,98,0.3)] shadow-[0_0_15px_rgba(0,159,98,0.2)] shadow-[0_0_15px_rgba(0,159,98,0.4)]
     -->
     <style>
         body { 
@@ -139,17 +141,20 @@
                     <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-2 pb-1">
                         <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">수도권</button>
                         <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">부산권</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대구권</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">대전</button>
+                        <button id="btn-region-daegu" onclick="switchRegion('daegu')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대구권</button>
+                        <button id="btn-region-daejeon" onclick="switchRegion('daejeon')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all">대전</button>
                         <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">광주</button>
                     </div>
 
                     <!-- 노선 선택 탭 -->
-                    <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
+                    <div id="line-tabs-daegu" class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
                         <button id="btn-line-daegyeong" onclick="switchLine('daegyeong')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대경선</button>
                         <button id="btn-line-1" onclick="switchLine('line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all">1호선</button>
                         <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">2호선</button>
                         <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">3호선</button>
+                    </div>
+                    <div id="line-tabs-daejeon" class="hidden gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
+                        <button id="btn-line-daejeon1" onclick="switchLine('daejeon_line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all">1호선</button>
                     </div>
 
                     <!-- 코레일 스타일 역명판 -->
@@ -328,6 +333,7 @@
     <script>
         let favoriteStation = localStorage.getItem('subway_fav_station') || null;
 
+        let currentRegion = 'daegu';
         let currentLineId = 'daegyeong';
         let THEME_COLOR = "#0054A6";
         let DOWN_COLOR = "#5998D6";
@@ -380,6 +386,30 @@
                 "대구한의대병원": { progress: 0.9411 },
                 "부호": { progress: 0.9705 },
                 "하양": { progress: 1.0000 }
+            },
+            'daejeon_line1': {
+                "반석": { progress: 0.0000 },
+                "지족": { progress: 0.0476 },
+                "노은": { progress: 0.0952 },
+                "월드컵경기장": { progress: 0.1428 },
+                "현충원": { progress: 0.1904 },
+                "구암": { progress: 0.2380 },
+                "유성온천": { progress: 0.2857 },
+                "갑천": { progress: 0.3333 },
+                "월평": { progress: 0.3809 },
+                "갈마": { progress: 0.4285 },
+                "정부청사": { progress: 0.4761 },
+                "시청": { progress: 0.5238 },
+                "탄방": { progress: 0.5714 },
+                "용문": { progress: 0.6190 },
+                "오룡": { progress: 0.6666 },
+                "서대전네거리": { progress: 0.7142 },
+                "중구청": { progress: 0.7619 },
+                "중앙로": { progress: 0.8095 },
+                "대전": { progress: 0.8571, ktx: true },
+                "대동": { progress: 0.9047 },
+                "신흥": { progress: 0.9523 },
+                "판암": { progress: 1.0000 }
             }
         };
 
@@ -410,6 +440,14 @@
                 saturday_down: 'dae_line1_sat_down.csv',
                 holiday_up: 'dae_line1_w_up.csv',
                 holiday_down: 'dae_line1_w_down.csv'
+            },
+            'daejeon_line1': {
+                weekday_up: 'jeon_line1_up.csv',
+                weekday_down: 'jeon_line1_down.csv',
+                saturday_up: 'jeon_line1_w_up.csv',
+                saturday_down: 'jeon_line1_w_down.csv',
+                holiday_up: 'jeon_line1_w_up.csv',
+                holiday_down: 'jeon_line1_w_down.csv'
             }
         };
 
@@ -526,6 +564,15 @@
             const statusDisplay = document.getElementById('data-status-display');
             const statusHome = document.getElementById('data-status-home');
             
+            if (currentLineId === 'line1' || currentLineId === 'daejeon_line1') {
+                parsedTrainsUp = createMockData('up');
+                parsedTrainsDown = createMockData('down');
+                parsedTrains = currentDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
+                if (statusDisplay) { statusDisplay.innerHTML = `<span class="text-red-400 font-extrabold animate-pulse">임의 데이터 사용중</span>`; statusDisplay.className = `text-[10px] font-bold`; statusDisplay.style.color = THEME_COLOR; }
+                if (statusHome) statusHome.classList.remove('hidden');
+                return;
+            }
+
             let targetUpUrl = FILE_URLS[currentLineId][currentDayType + '_up'];
             let targetDownUrl = FILE_URLS[currentLineId][currentDayType + '_down'];
             
@@ -575,16 +622,42 @@
             } catch (e) { }
         };
 
+        window.switchRegion = async (region, isInit = false) => {
+            if (currentRegion === region && !isInit) return;
+            currentRegion = region;
+            
+            const btnDaegu = document.getElementById('btn-region-daegu');
+            const btnDaejeon = document.getElementById('btn-region-daejeon');
+            const tabsDaegu = document.getElementById('line-tabs-daegu');
+            const tabsDaejeon = document.getElementById('line-tabs-daejeon');
+
+            if (region === 'daegu') {
+                btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all';
+                btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                tabsDaegu.classList.remove('hidden'); tabsDaegu.classList.add('flex');
+                tabsDaejeon.classList.add('hidden'); tabsDaejeon.classList.remove('flex');
+                if (!isInit) await window.switchLine('daegyeong');
+            } else if (region === 'daejeon') {
+                btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all';
+                btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                tabsDaegu.classList.add('hidden'); tabsDaegu.classList.remove('flex');
+                tabsDaejeon.classList.remove('hidden'); tabsDaejeon.classList.add('flex');
+                if (!isInit) await window.switchLine('daejeon_line1');
+            }
+        };
+
         window.switchLine = async (lineId, isInit = false) => {
             if (currentLineId === lineId && !isInit) return;
             currentLineId = lineId;
-            THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : '#0054A6';
-            DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : '#5998D6';
+            THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : (currentLineId === 'daejeon_line1' ? '#007448' : '#0054A6');
+            DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : '#5998D6');
             STATIONS = STATIONS_ALL[lineId];
 
             // 탭 버튼 UI 업데이트
             const btnD = document.getElementById('btn-line-daegyeong');
             const btn1 = document.getElementById('btn-line-1');
+            const btnDaejeon1 = document.getElementById('btn-line-daejeon1');
+
             if (lineId === 'daegyeong') {
                 btnD.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
                 btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
@@ -593,8 +666,8 @@
                 dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (구미 방면)</option><option value="down" class="text-gray-900">하행 (경산 방면)</option>';
                 document.getElementById('home-up-dir-label').textContent = '구미 방면';
                 document.getElementById('home-down-dir-label').textContent = '경산 방면';
-                document.getElementById('data-status-display').className = `text-[10px] text-[#0054A6] font-bold`;
-            } else {
+                document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
+            } else if (lineId === 'line1') {
                 btn1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(217,63,92,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
                 btnD.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '설화명곡';
@@ -602,7 +675,15 @@
                 dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (설화명곡 방면)</option><option value="down" class="text-gray-900">하행 (안심/하양 방면)</option>';
                 document.getElementById('home-up-dir-label').textContent = '설화명곡 방면';
                 document.getElementById('home-down-dir-label').textContent = '하양 방면';
-                document.getElementById('data-status-display').className = `text-[10px] text-[#D93F5C] font-bold`;
+                document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
+            } else if (lineId === 'daejeon_line1') {
+                btnDaejeon1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
+                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '반석';
+                document.querySelector('#home-screen h2').textContent = '대전 1호선 지하철역';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (반석 방면)</option><option value="down" class="text-gray-900">하행 (판암 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '반석 방면';
+                document.getElementById('home-down-dir-label').textContent = '판암 방면';
+                document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             }
 
             // 홈 화면 요소 동적 테마 업데이트
@@ -615,7 +696,7 @@
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
             // 역 개수에 따라 노선도 SVG 길이 동적 변경
-            const lineLen = currentLineId === 'line1' ? 3200 : 1600;
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : 1600);
             const svg = document.getElementById('line-svg');
             if (svg) {
                 svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
@@ -827,7 +908,7 @@
             let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
-            const lineLen = currentLineId === 'line1' ? 3200 : 1600;
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : 1600);
             const renderedT = activeT.map(t => {
                 const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
@@ -882,16 +963,28 @@
         };
 
         window.onload = async () => {
+            let foundFav = false;
             if (favoriteStation) {
                 if (STATIONS_ALL['line1'][favoriteStation]) {
-                    await switchLine('line1', true);
+                    await window.switchRegion('daegu', true);
+                    await window.switchLine('line1', true);
                     homeSelectedStation = favoriteStation;
+                    foundFav = true;
                 } else if (STATIONS_ALL['daegyeong'][favoriteStation]) {
-                    await switchLine('daegyeong', true);
+                    await window.switchRegion('daegu', true);
+                    await window.switchLine('daegyeong', true);
                     homeSelectedStation = favoriteStation;
+                    foundFav = true;
+                } else if (STATIONS_ALL['daejeon_line1'][favoriteStation]) {
+                    await window.switchRegion('daejeon', true);
+                    await window.switchLine('daejeon_line1', true);
+                    homeSelectedStation = favoriteStation;
+                    foundFav = true;
                 }
-            } else {
-                await switchLine('daegyeong', true);
+            }
+            if (!foundFav) {
+                await window.switchRegion('daegu', true);
+                await window.switchLine('daegyeong', true);
             }
 
             currentDayType = getDayType(new Date());
