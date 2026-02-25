@@ -110,7 +110,6 @@
             font-size: 13px;
             font-weight: 900;
             box-shadow: 0 2px 4px rgba(0, 84, 166, 0.4);
-            border: 2px solid white; /* 예쁜 흰색 테두리 추가 */
         }
 
         /* 리플렛 맵 z-index 오버라이드 (UI 가림 방지) */
@@ -283,26 +282,26 @@
         <div id="floating-panel" class="hidden absolute bottom-[100px] left-0 right-0 px-4 z-[90] min-h-[72px] transition-all duration-300"></div>
 
         <!-- 4. 하단 네비게이션 -->
-        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[65%] max-w-[200px] px-1.5 touch-pan-x select-none">
+        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[75%] max-w-[240px] px-1.5 touch-pan-x select-none">
             <div class="flex items-center justify-between bg-white/10 backdrop-blur-[8px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border border-white/20 rounded-full p-1 gap-0.5 relative transition-all duration-300">
                 <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white/20 shadow-sm rounded-full backdrop-blur-[2px] border border-white/10 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
-                <button id="tab-home" class="relative py-1 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-[1px] pointer-events-none">
-                        <i class="fa-solid fa-house text-[14px] text-gray-400 group-hover:text-white transition-colors"></i>
-                        <span class="text-[9px] font-medium text-gray-400 group-hover:text-white whitespace-nowrap transition-colors">홈</span>
+                <button id="tab-home" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
+                        <i class="fa-solid fa-house text-[15px] text-gray-400 group-hover:text-white transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-400 group-hover:text-white whitespace-nowrap transition-colors">홈</span>
                     </div>
                 </button>
-                <button id="tab-line" class="relative py-1 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-[1px] pointer-events-none">
-                        <i class="fa-solid fa-route text-[14px] text-gray-400 transition-colors"></i>
-                        <span class="text-[9px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선</span>
+                <button id="tab-line" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
+                        <i class="fa-solid fa-route text-[15px] text-gray-400 transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선</span>
                     </div>
                 </button>
-                <button id="tab-map" class="relative py-1 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-[1px] pointer-events-none">
-                        <i class="fa-solid fa-map-location-dot text-[14px] text-gray-400 transition-colors"></i>
-                        <span class="text-[9px] font-medium text-gray-400 whitespace-nowrap transition-colors">지도</span>
+                <button id="tab-map" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
+                        <i class="fa-solid fa-map-location-dot text-[15px] text-gray-400 transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">지도</span>
                     </div>
                 </button>
             </div>
