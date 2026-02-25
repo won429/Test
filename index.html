@@ -133,19 +133,19 @@
                 <div>
                     <!-- 지역 선택 탭 -->
                     <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-2 pb-1">
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">수도권</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">부산권</button>
+                        <button onclick="showPreparingPopup('수도권')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">수도권</button>
+                        <button onclick="showPreparingPopup('부산권')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">부산권</button>
                         <button id="btn-region-daegu" onclick="switchRegion('daegu')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대구권</button>
                         <button id="btn-region-daejeon" onclick="switchRegion('daejeon')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">대전</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">광주</button>
+                        <button onclick="showPreparingPopup('광주')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">광주</button>
                     </div>
 
                     <!-- 노선 선택 탭 -->
                     <div id="line-tabs-daegu" class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
                         <button id="btn-line-daegyeong" onclick="switchLine('daegyeong')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대경선</button>
                         <button id="btn-line-1" onclick="switchLine('line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">1호선</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">2호선</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">3호선</button>
+                        <button onclick="showPreparingPopup('2호선')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">2호선</button>
+                        <button onclick="showPreparingPopup('3호선')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">3호선</button>
                     </div>
                     <div id="line-tabs-daejeon" class="hidden gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
                         <button id="btn-line-daejeon1" onclick="switchLine('daejeon_line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all">1호선</button>
@@ -286,6 +286,12 @@
             <div class="flex items-center justify-between bg-white/90 backdrop-blur-[12px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-black/10 rounded-full p-1 gap-0.5 relative transition-all duration-300">
                 <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white shadow-sm rounded-full border border-black/5 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
+                <button id="tab-back" onclick="window.location.href='https://won429.github.io/enjoysite/'" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
+                        <i class="fa-solid fa-arrow-left text-[15px] text-gray-400 group-hover:text-black transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-400 group-hover:text-black whitespace-nowrap transition-colors">뒤로가기</span>
+                    </div>
+                </button>
                 <button id="tab-home" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
                     <div class="flex flex-col items-center gap-[2px] pointer-events-none">
                         <i class="fa-solid fa-house text-[15px] text-black drop-shadow-sm group-hover:text-black transition-colors"></i>
@@ -326,6 +332,18 @@
                     </button>
                 </div>
                 <div class="flex-1 overflow-y-auto px-4 py-3 pb-10 space-y-1.5 hide-scrollbar" id="selector-list-container"></div>
+            </div>
+        </div>
+
+        <!-- 준비중 팝업 -->
+        <div id="preparing-modal" class="hidden absolute inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity opacity-0">
+            <div class="bg-white w-[75%] max-w-[280px] rounded-[24px] shadow-2xl flex flex-col items-center p-6 text-center transform scale-95 transition-transform duration-300">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-person-digging text-[20px] text-[#0054A6]" id="preparing-icon"></i>
+                </div>
+                <h3 class="text-[17px] font-extrabold text-[#111827] mb-1.5 tracking-tight">서비스 준비 중</h3>
+                <p id="preparing-text" class="text-[13px] font-medium text-gray-500 mb-5 leading-relaxed">해당 지역 또는 노선은<br>현재 준비 중입니다.</p>
+                <button onclick="closePreparingPopup()" id="preparing-btn" class="w-full py-3 bg-[#0054A6] text-white rounded-[14px] font-bold text-[14px] shadow-sm active:scale-[0.98] transition-all">확인</button>
             </div>
         </div>
     </div>
@@ -820,7 +838,7 @@
         };
 
         function updateTabUI(activeTabId) {
-            const tabs = ['tab-home', 'tab-line'];
+            const tabs = ['tab-back', 'tab-home', 'tab-line'];
             const activeIndex = tabs.indexOf(activeTabId);
             const navButtons = document.querySelectorAll('#bottom-nav button');
             if (navButtons[activeIndex]) {
@@ -1004,6 +1022,39 @@
         dom.scrollContainer.addEventListener('wheel', () => isAutoScroll = false, {passive: true});
         dom.autoScrollBtn.addEventListener('click', () => { isAutoScroll = true; window.render(); });
         dom.closeModalBtn.addEventListener('click', () => { dom.timetableModal.classList.add('hidden'); });
+
+        window.showPreparingPopup = (name) => {
+            const modal = document.getElementById('preparing-modal');
+            const icon = document.getElementById('preparing-icon');
+            const btn = document.getElementById('preparing-btn');
+            const textElem = document.getElementById('preparing-text');
+            
+            if (textElem && name) {
+                textElem.innerHTML = `<b class="text-[#111827]">${name}</b> 서비스는<br>현재 준비 중입니다.`;
+            }
+            
+            // 현재 테마 색상으로 업데이트
+            if (icon && btn) {
+                icon.style.color = THEME_COLOR;
+                btn.style.backgroundColor = THEME_COLOR;
+            }
+            
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // 애니메이션 리플로우
+            modal.classList.remove('opacity-0');
+            modal.querySelector('div').classList.remove('scale-95');
+            modal.querySelector('div').classList.add('scale-100');
+        };
+
+        window.closePreparingPopup = () => {
+            const modal = document.getElementById('preparing-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        };
     </script>
 </body>
 </html>
