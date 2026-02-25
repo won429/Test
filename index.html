@@ -388,28 +388,28 @@
                 "하양": { progress: 1.0000 }
             },
             'daejeon_line1': {
-                "반석": { progress: 0.0000 },
-                "지족": { progress: 0.0476 },
-                "노은": { progress: 0.0952 },
-                "월드컵경기장": { progress: 0.1428 },
-                "현충원": { progress: 0.1904 },
-                "구암": { progress: 0.2380 },
-                "유성온천": { progress: 0.2857 },
-                "갑천": { progress: 0.3333 },
-                "월평": { progress: 0.3809 },
-                "갈마": { progress: 0.4285 },
-                "정부청사": { progress: 0.4761 },
-                "시청": { progress: 0.5238 },
-                "탄방": { progress: 0.5714 },
-                "용문": { progress: 0.6190 },
-                "오룡": { progress: 0.6666 },
-                "서대전네거리": { progress: 0.7142 },
-                "중구청": { progress: 0.7619 },
-                "중앙로": { progress: 0.8095 },
-                "대전": { progress: 0.8571, ktx: true },
-                "대동": { progress: 0.9047 },
-                "신흥": { progress: 0.9523 },
-                "판암": { progress: 1.0000 }
+                "판암": { progress: 0.0000 },
+                "신흥": { progress: 0.0476 },
+                "대동": { progress: 0.0952 },
+                "대전역": { progress: 0.1428, ktx: true },
+                "중앙로": { progress: 0.1904 },
+                "중구청": { progress: 0.2380 },
+                "서대전네거리": { progress: 0.2857 },
+                "오룡": { progress: 0.3333 },
+                "용문": { progress: 0.3809 },
+                "탄방": { progress: 0.4285 },
+                "시청": { progress: 0.4761 },
+                "정부청사": { progress: 0.5238 },
+                "갈마": { progress: 0.5714 },
+                "월평": { progress: 0.6190 },
+                "갑천": { progress: 0.6666 },
+                "유성온천": { progress: 0.7142 },
+                "구암": { progress: 0.7619 },
+                "현충원": { progress: 0.8095 },
+                "월드컵경기장": { progress: 0.8571 },
+                "노은": { progress: 0.9047 },
+                "지족": { progress: 0.9523 },
+                "반석": { progress: 1.0000 }
             }
         };
 
@@ -673,12 +673,12 @@
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             } else if (lineId === 'daejeon_line1') {
                 btnDaejeon1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
-                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '반석';
+                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '판암';
                 document.querySelector('#home-screen h2').textContent = '대전 1호선 지하철역';
                 dom.lineHeaderTitle.textContent = '대전 1호선 지하철 현황';
-                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (반석 방면)</option><option value="down" class="text-gray-900">하행 (판암 방면)</option>';
-                document.getElementById('home-up-dir-label').textContent = '반석 방면';
-                document.getElementById('home-down-dir-label').textContent = '판암 방면';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (판암 방면)</option><option value="down" class="text-gray-900">하행 (반석 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '판암 방면';
+                document.getElementById('home-down-dir-label').textContent = '반석 방면';
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             }
 
