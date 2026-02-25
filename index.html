@@ -8,6 +8,10 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Leaflet Map (실제 지도 라이브러리) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <!-- 폰트 및 아이콘 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -108,6 +112,10 @@
             box-shadow: 0 2px 4px rgba(0, 82, 255, 0.4);
             border: 2px solid white; /* 예쁜 흰색 테두리 추가 */
         }
+
+        /* 리플렛 맵 z-index 오버라이드 (UI 가림 방지) */
+        .leaflet-pane { z-index: 1 !important; }
+        .leaflet-top, .leaflet-bottom { z-index: 2 !important; }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex justify-center items-center overflow-hidden">
@@ -119,7 +127,7 @@
         <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-black flex-col overflow-y-auto hide-scrollbar pb-24">
             <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-40 sticky top-0 border-b border-white/5">
                 <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                    <h2 class="text-xl font-extrabold text-main tracking-tight">대구권 지하철역</h2>
+                    <h2 class="text-xl font-extrabold text-main tracking-tight">대경선 지하철역</h2>
                 </div>
             </header>
 
@@ -244,17 +252,8 @@
                     </svg>
                 </div>
 
-                <div id="map-view" class="absolute top-0 left-0 w-full bg-[#0a0a0a] transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
-                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
-                        <path d="M 0 100 C 150 300, 100 500, 50 1300" fill="none" stroke="#1A1A1D" stroke-width="40" stroke-linecap="round" />
-                        <path d="M 400 450 C 300 500, 200 600, 90 550" fill="none" stroke="#1A1A1D" stroke-width="20" stroke-linecap="round" />
-                        <path d="M 100 0 L 180 1300" stroke="#1C1C1E" stroke-width="6" fill="none" /> 
-                        <path d="M 0 600 L 400 500" stroke="#1C1C1E" stroke-width="8" fill="none" /> 
-                        <path d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="#0052FF" stroke-width="6" stroke-linecap="round" opacity="0.3" />
-                        <path id="map-path" d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="transparent" stroke-width="8" />
-                        <g id="map-stations"></g>
-                        <g id="map-trains"></g>
-                    </svg>
+                <div id="map-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
+                    <div id="real-map" class="fixed inset-0 w-full h-[100dvh] bg-[#0a0a0a]"></div>
                 </div>
             </div>
         </main>
@@ -330,16 +329,41 @@
         const THEME_COLOR = "#0052FF";
         const STOP_DURATION = 30; 
 
+        // 실제 지도(위도/경도) 연동을 위한 STATIONS 객체 업데이트
         const STATIONS = {
-            "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4 },
-            "사곡": { progress: 0.08, align: "start", xOff: 15, yOff: 4 },
-            "북삼": { progress: 0.23, align: "middle", xOff: 0, yOff: -20 },
-            "왜관": { progress: 0.39, align: "end", xOff: -15, yOff: 4 },
-            "서대구": { progress: 0.54, align: "middle", xOff: 0, yOff: 24, ktx: true },
-            "대구": { progress: 0.67, align: "start", xOff: 15, yOff: 4 },
-            "동대구": { progress: 0.80, align: "start", xOff: 15, yOff: 4, ktx: true },
-            "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true }
+            "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4, lat: 36.1284, lng: 128.3305 },
+            "사곡": { progress: 0.08, align: "start", xOff: 15, yOff: 4, lat: 36.0965, lng: 128.3496 },
+            "북삼": { progress: 0.23, align: "middle", xOff: 0, yOff: -20, lat: 36.0357, lng: 128.3698 },
+            "왜관": { progress: 0.39, align: "end", xOff: -15, yOff: 4, lat: 35.9934, lng: 128.4022 },
+            "서대구": { progress: 0.54, align: "middle", xOff: 0, yOff: 24, ktx: true, lat: 35.8776, lng: 128.5398 },
+            "대구": { progress: 0.67, align: "start", xOff: 15, yOff: 4, lat: 35.8763, lng: 128.5961 },
+            "동대구": { progress: 0.80, align: "start", xOff: 15, yOff: 4, ktx: true, lat: 35.8797, lng: 128.6285 },
+            "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true, lat: 35.8164, lng: 128.7351 }
         };
+
+        // 실제 경부선(대경선) 선로의 곡선을 완벽히 반영하기 위한 매우 상세한 구간별 웨이포인트 데이터
+        const RAIL_SEGMENTS = [
+            { start: "구미", end: "사곡", path: [[36.1284, 128.3305], [36.1230, 128.3325], [36.1170, 128.3355], [36.1100, 128.3400], [36.1030, 128.3450], [36.0965, 128.3496]] },
+            { start: "사곡", end: "북삼", path: [[36.0965, 128.3496], [36.0900, 128.3515], [36.0820, 128.3540], [36.0740, 128.3565], [36.0650, 128.3590], [36.0550, 128.3620], [36.0450, 128.3660], [36.0357, 128.3698]] },
+            { start: "북삼", end: "왜관", path: [[36.0357, 128.3698], [36.0300, 128.3725], [36.0230, 128.3765], [36.0160, 128.3815], [36.0090, 128.3870], [36.0030, 128.3930], [35.9980, 128.3980], [35.9934, 128.4022]] },
+            { start: "왜관", end: "서대구", path: [[35.9934, 128.4022], [35.9890, 128.4045], [35.9830, 128.4070], [35.9760, 128.4110], [35.9690, 128.4165], [35.9610, 128.4230], [35.9530, 128.4310], [35.9450, 128.4410], [35.9380, 128.4520], [35.9310, 128.4630], [35.9230, 128.4730], [35.9150, 128.4830], [35.9080, 128.4920], [35.9010, 128.5020], [35.8940, 128.5120], [35.8880, 128.5210], [35.8820, 128.5300], [35.8790, 128.5350], [35.8776, 128.5398]] },
+            { start: "서대구", end: "대구", path: [[35.8776, 128.5398], [35.8790, 128.5470], [35.8810, 128.5550], [35.8820, 128.5640], [35.8810, 128.5740], [35.8790, 128.5840], [35.8763, 128.5961]] },
+            { start: "대구", end: "동대구", path: [[35.8763, 128.5961], [35.8750, 128.6040], [35.8750, 128.6130], [35.8765, 128.6210], [35.8797, 128.6285]] },
+            { start: "동대구", end: "경산", path: [[35.8797, 128.6285], [35.8740, 128.6380], [35.8670, 128.6500], [35.8590, 128.6620], [35.8510, 128.6760], [35.8430, 128.6920], [35.8340, 128.7080], [35.8250, 128.7230], [35.8164, 128.7351]] }
+        ];
+
+        // 곡선 경로의 진행률 계산을 위한 거리 매핑
+        RAIL_SEGMENTS.forEach(seg => {
+            let totalDist = 0;
+            seg.distances = [0];
+            for (let i = 0; i < seg.path.length - 1; i++) {
+                const dx = seg.path[i][0] - seg.path[i+1][0];
+                const dy = seg.path[i][1] - seg.path[i+1][1];
+                totalDist += Math.sqrt(dx*dx + dy*dy);
+                seg.distances.push(totalDist);
+            }
+            seg.totalDist = totalDist;
+        });
 
         const KOR_HOLIDAYS = [
             "2025-01-01", "2025-01-28", "2025-01-29", "2025-01-30", "2025-03-03",
@@ -364,13 +388,146 @@
         let selectedStation = null;
         let currentSec = 0;
         let routeLength = 0;
-        let mapLength = 0;
         let currentDirection = 'up'; 
         let currentDayType = 'weekday'; 
         let stationDetailDirection = 'up'; 
         let parsedTrainsUp = [];
         let parsedTrainsDown = [];
         let parsedTrains = [];
+
+        // 실제 지도 인스턴스
+        let leafletMap;
+        let trainMarkers = {};
+
+        function initMap() {
+            leafletMap = L.map('real-map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([35.97, 128.53], 10);
+
+            // 어두운 테마 지도 타일 (CartoDB Dark Matter)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19
+            }).addTo(leafletMap);
+
+            // 곡선이 적용된 실제 선로 그리기
+            const allLatLngs = [];
+            RAIL_SEGMENTS.forEach((seg, idx) => {
+                if (idx === 0) allLatLngs.push(seg.path[0]);
+                for (let i = 1; i < seg.path.length; i++) allLatLngs.push(seg.path[i]);
+            });
+
+            L.polyline(allLatLngs, {color: '#333333', weight: 6, opacity: 0.8, lineJoin: 'round', smoothFactor: 1.5}).addTo(leafletMap);
+            L.polyline(allLatLngs, {color: '#0052FF', weight: 3, opacity: 0.5, lineJoin: 'round', smoothFactor: 1.5}).addTo(leafletMap);
+
+            Object.keys(STATIONS).forEach(name => {
+                const s = STATIONS[name];
+                const isKtx = s.ktx;
+                
+                L.circleMarker([s.lat, s.lng], {
+                    radius: 6,
+                    color: THEME_COLOR,
+                    weight: 3,
+                    fillColor: '#1C1C1E',
+                    fillOpacity: 1
+                }).addTo(leafletMap).on('click', () => {
+                    handleStationClick(name);
+                    leafletMap.setView([s.lat, s.lng], 13, {animate: true});
+                });
+
+                const html = `<div style="color:white; font-size:12px; font-weight:bold; text-shadow: 0 0 5px black; white-space:nowrap; transform: translate(-50%, 10px); text-align:center;">
+                    ${name}
+                    ${isKtx ? `<br><span style="color:${THEME_COLOR}; font-size:9px; font-style:italic; font-weight:900;">KTX</span>` : ''}
+                </div>`;
+                
+                L.marker([s.lat, s.lng], {
+                    icon: L.divIcon({ className: 'custom-station-label', html, iconSize: [0, 0] })
+                }).addTo(leafletMap);
+            });
+        }
+
+        function getLatLngAtProgress(prog) {
+            const stKeys = Object.keys(STATIONS);
+            for (let i = 0; i < stKeys.length - 1; i++) {
+                const s1Name = stKeys[i];
+                const s2Name = stKeys[i+1];
+                const s1 = STATIONS[s1Name];
+                const s2 = STATIONS[s2Name];
+                
+                if (prog >= s1.progress && prog <= s2.progress) {
+                    const localProg = (prog - s1.progress) / (s2.progress - s1.progress);
+                    const seg = RAIL_SEGMENTS.find(s => s.start === s1Name && s.end === s2Name);
+                    
+                    if (!seg || seg.totalDist === 0) {
+                        return [s1.lat + (s2.lat - s1.lat) * localProg, s1.lng + (s2.lng - s1.lng) * localProg];
+                    }
+                    
+                    const targetDist = localProg * seg.totalDist;
+                    for (let j = 0; j < seg.distances.length - 1; j++) {
+                        if (targetDist >= seg.distances[j] && targetDist <= seg.distances[j+1]) {
+                            const subProg = (targetDist - seg.distances[j]) / (seg.distances[j+1] - seg.distances[j]);
+                            const p1 = seg.path[j];
+                            const p2 = seg.path[j+1];
+                            return [p1[0] + (p2[0] - p1[0]) * subProg, p1[1] + (p2[1] - p1[1]) * subProg];
+                        }
+                    }
+                    return seg.path[seg.path.length-1];
+                }
+            }
+            if (prog <= 0) return [STATIONS[stKeys[0]].lat, STATIONS[stKeys[0]].lng];
+            return [STATIONS[stKeys[stKeys.length-1]].lat, STATIONS[stKeys[stKeys.length-1]].lng];
+        }
+
+        function updateMapTrains(trains) {
+            if (!leafletMap) return;
+            const currentIds = trains.map(t => t.id);
+            Object.keys(trainMarkers).forEach(id => {
+                if (!currentIds.includes(id)) {
+                    leafletMap.removeLayer(trainMarkers[id]);
+                    delete trainMarkers[id];
+                }
+            });
+
+            trains.forEach(t => {
+                const isSelected = t.id === selectedTrainId;
+                const tColor = t.direction === 'down' ? '#5998D6' : '#0052FF';
+                const fillColor = isSelected ? THEME_COLOR : '#3f3f46';
+                
+                const latlng = getLatLngAtProgress(t.overallProgress);
+                
+                const dirOffset = t.direction === 'up' ? -0.001 : 0.001;
+                let nextProg = Math.max(0, Math.min(1, t.overallProgress + dirOffset));
+                const nextLatlng = getLatLngAtProgress(nextProg);
+                
+                let angle = 0;
+                if (Math.abs(nextLatlng[0] - latlng[0]) > 0.00001 || Math.abs(nextLatlng[1] - latlng[1]) > 0.00001) {
+                    const dy = nextLatlng[0] - latlng[0]; 
+                    const dx = Math.cos(latlng[0] * Math.PI / 180) * (nextLatlng[1] - latlng[1]);
+                    angle = Math.atan2(dx, dy) * 180 / Math.PI; 
+                } else {
+                    angle = t.direction === 'up' ? 180 : 0; 
+                }
+
+                const html = `
+                    <div style="position:relative; width:14px; height:32px; background:${fillColor}; border-radius:3px; border:1px solid ${isSelected?'white':'#1C1C1E'}; box-shadow:0 2px 5px rgba(0,0,0,0.5); transform: rotate(${angle}deg); transform-origin: center center; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;">
+                        <div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div>
+                        <div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div>
+                        <div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div>
+                        ${isSelected ? `<div style="position:absolute; bottom:-28px; left:50%; transform:translateX(-50%) rotate(${-angle}deg); background:#1C1C1E; border:1px solid ${tColor}; color:white; font-size:10px; font-weight:900; padding:2px 8px; border-radius:10px; white-space:nowrap; z-index:1100;">${t.id}</div>` : ''}
+                    </div>
+                `;
+
+                if (!trainMarkers[t.id]) {
+                    const icon = L.divIcon({ className: '', html, iconSize: [14, 32], iconAnchor: [7, 16] });
+                    trainMarkers[t.id] = L.marker(latlng, {icon, zIndexOffset: isSelected ? 1000 : 0}).addTo(leafletMap);
+                    trainMarkers[t.id].on('click', () => handleTrainClick(t.id));
+                } else {
+                    trainMarkers[t.id].setLatLng(latlng);
+                    trainMarkers[t.id].setIcon(L.divIcon({ className: '', html, iconSize: [14, 32], iconAnchor: [7, 16] }));
+                    trainMarkers[t.id].setZIndexOffset(isSelected ? 1000 : 0);
+                }
+            });
+        }
 
         const getDayType = (dateObj) => {
             const day = dateObj.getDay();
@@ -516,14 +673,11 @@
             linePathDown: document.getElementById('line-path-down'),
             linePathUp: document.getElementById('line-path-up'),
             routePath: document.getElementById('route-path'),
-            mapPath: document.getElementById('map-path'),
             lineStations: document.getElementById('line-stations'),
             routeStations: document.getElementById('route-stations'),
-            mapStations: document.getElementById('map-stations'),
             lineTrainsDown: document.getElementById('line-trains-down'),
             lineTrainsUp: document.getElementById('line-trains-up'),
             routeTrains: document.getElementById('route-trains'),
-            mapTrains: document.getElementById('map-trains'),
             autoScrollBtn: document.getElementById('auto-scroll-btn'),
             floatingPanel: document.getElementById('floating-panel'),
             tabHome: document.getElementById('tab-home'),
@@ -638,7 +792,6 @@
                 dom.floatingPanel.classList.remove('hidden');
                 dom.directionToggle.classList.toggle('hidden', tabId === 'line');
                 
-                // 노선 탭에서는 "사진보낸 부분(상단 열차 버튼 리스트)"을 숨깁니다.
                 dom.trainList.classList.toggle('hidden', tabId === 'line'); 
                 
                 dom.lineView.style.opacity = tabId === 'line' ? '1' : '0';
@@ -648,8 +801,19 @@
                 dom.mapView.style.opacity = tabId === 'map' ? '1' : '0';
                 dom.mapView.classList.toggle('pointer-events-none', tabId !== 'map');
                 
-                // 탭 변경 시 무조건 자동 스크롤과 자동 선택을 강제 해제합니다. (사용자가 선택하기 전까지 멈춤)
+                // 지도 탭일 때 SVG 스크롤 컨테이너가 지도 드래그를 막지 않도록 조치
+                dom.scrollContainer.classList.toggle('overflow-y-auto', tabId !== 'map');
+                dom.scrollContainer.classList.toggle('overflow-hidden', tabId === 'map');
+                
+                // 탭 변경 시 무조건 자동 스크롤과 자동 선택을 강제 해제
                 isAutoScroll = false; 
+                
+                if (tabId === 'map' && leafletMap) {
+                    // 지도 화면 렌더링 타이밍 버그 방지를 위해 다중 리프레시 처리
+                    setTimeout(() => leafletMap.invalidateSize(), 50);
+                    setTimeout(() => leafletMap.invalidateSize(), 200);
+                    setTimeout(() => leafletMap.invalidateSize(), 500);
+                }
             }
             updateTabUI('tab-' + tabId);
         }
@@ -681,7 +845,7 @@
         window.openModal = () => dom.timetableModal.classList.remove('hidden');
 
         function drawStaticStations() {
-            let lineHTML = '', routeHTML = '', mapHTML = '';
+            let lineHTML = '', routeHTML = '';
             for (const stationName in STATIONS) {
                 const s = STATIONS[stationName];
                 const isSel = selectedStation === stationName;
@@ -708,21 +872,9 @@
                         ${s.ktx ? `<text x="${s.xOff}" y="${s.yOff + 13}" text-anchor="${s.align}" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}
                     </g>
                 `;
-
-                let mPt = {x:0, y:0};
-                if(mapLength > 0) mPt = dom.mapPath.getPointAtLength(mapLength * s.progress);
-                mapHTML += `
-                    <g transform="translate(${mPt.x}, ${mPt.y})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
-                        <circle r="20" fill="transparent" />
-                        <circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" class="transition-all" />
-                        <rect x="-24" y="-30" width="48" height="20" rx="10" fill="#1C1C1E" stroke="#333" stroke-width="1" opacity="0.95" class="shadow-sm" />
-                        <text x="0" y="-16" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[11px] font-bold">${stationName}</text>
-                    </g>
-                `;
             }
             dom.lineStations.innerHTML = lineHTML;
             dom.routeStations.innerHTML = routeHTML;
-            dom.mapStations.innerHTML = mapHTML;
         }
 
         function updateTrainsSVG(layer, trains, isLineView) {
@@ -815,35 +967,35 @@
             let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
-            // 자동 선택을 막아 열차를 터치하기 전에는 멋대로 스크롤되지 않게 유지
-            
             const renderedT = activeT.map(t => {
                 let ref, len;
                 if (activeTab === 'route') {
                     ref = dom.routePath;
                     len = routeLength;
                 } else if (activeTab === 'map') {
-                    ref = dom.mapPath;
-                    len = mapLength;
+                    ref = null;
+                    len = 0;
                 } else {
                     ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                     len = 1100;
                 }
                 
-                const currentLen = len * (t.overallProgress || 0);
-                const p = ref.getPointAtLength(currentLen);
-                
-                // 상행(up)은 progress가 감소(역방향)하므로 앞을 보려면 -1, 하행(down)은 +1
-                const dirOffset = t.direction === 'up' ? -1 : 1;
-                let nextLen = currentLen + dirOffset;
-                nextLen = Math.max(0, Math.min(len, nextLen));
-                const np = ref.getPointAtLength(nextLen);
-                
+                let p = {x: 0, y: 0};
                 let angle = 0;
-                if (Math.abs(np.x - p.x) > 0.001 || Math.abs(np.y - p.y) > 0.001) {
-                    angle = Math.atan2(np.y - p.y, np.x - p.x) * 180 / Math.PI;
-                } else {
-                    angle = t.direction === 'up' ? -90 : 90;
+                if (ref) {
+                    const currentLen = len * (t.overallProgress || 0);
+                    p = ref.getPointAtLength(currentLen);
+                    
+                    const dirOffset = t.direction === 'up' ? -1 : 1;
+                    let nextLen = currentLen + dirOffset;
+                    nextLen = Math.max(0, Math.min(len, nextLen));
+                    const np = ref.getPointAtLength(nextLen);
+                    
+                    if (Math.abs(np.x - p.x) > 0.001 || Math.abs(np.y - p.y) > 0.001) {
+                        angle = Math.atan2(np.y - p.y, np.x - p.x) * 180 / Math.PI;
+                    } else {
+                        angle = t.direction === 'up' ? -90 : 90;
+                    }
                 }
                 
                 return { ...t, point: p, angle: angle };
@@ -869,7 +1021,7 @@
             if (activeTab === 'route') {
                 updateTrainsSVG(dom.routeTrains, renderedT, false);
             } else if (activeTab === 'map') {
-                updateTrainsSVG(dom.mapTrains, renderedT, false);
+                updateMapTrains(renderedT);
             } else if (activeTab === 'line') {
                 const rUp = renderedT.filter(t => t.direction === 'up');
                 const rDown = renderedT.filter(t => t.direction === 'down');
@@ -881,8 +1033,13 @@
 
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
                 dom.autoScrollBtn.classList.add('hidden');
-                const vOff = (dom.scrollContainer.clientHeight - 150) / 2;
-                dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - vOff, behavior: 'auto' });
+                if (activeTab === 'map' && leafletMap) {
+                    const latlng = getLatLngAtProgress(selectedData.overallProgress);
+                    leafletMap.panTo(latlng, {animate: true});
+                } else {
+                    const vOff = (dom.scrollContainer.clientHeight - 150) / 2;
+                    dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - vOff, behavior: 'auto' });
+                }
             } else {
                 if (selectedData && !selectedStation && activeTab !== 'home') dom.autoScrollBtn.classList.remove('hidden');
                 else dom.autoScrollBtn.classList.add('hidden');
@@ -955,9 +1112,9 @@
         window.onload = async () => {
             currentDayType = getDayType(new Date());
             await loadTimetable();
+            initMap(); // Leaflet 지도 초기화
             setTimeout(() => {
                 routeLength = dom.routePath.getTotalLength();
-                mapLength = dom.mapPath.getTotalLength();
                 switchTab('home');
                 setInterval(() => {
                     const now = new Date();
