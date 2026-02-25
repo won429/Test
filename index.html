@@ -225,12 +225,19 @@
                         <option value="down" class="text-gray-900">하행 (경산 방면)</option>
                     </select>
                 </div>
-                <div class="flex items-center gap-1.5 bg-white/5 px-2.5 py-1.5 rounded-full border border-white/10 shrink-0">
-                    <i class="fa-regular fa-clock text-[10px] text-gray-400"></i>
-                    <span id="day-type-display" class="text-[10px] text-gray-300 font-bold">평일</span>
-                    <span class="text-gray-500 text-[10px] leading-none">·</span>
-                    <span id="data-status-display" class="text-[10px] text-[#0054A6] font-bold">실시간</span>
-                    <span id="clock-display" class="text-[10px] text-gray-300 font-mono tracking-tighter ml-0.5">00:00:00</span>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                    <div class="flex items-center gap-1.5 bg-white/5 px-2.5 py-1.5 rounded-full border border-white/10">
+                        <i class="fa-regular fa-clock text-[10px] text-gray-400"></i>
+                        <span id="day-type-display" class="text-[10px] text-gray-300 font-bold">평일</span>
+                        <span class="text-gray-500 text-[10px] leading-none">·</span>
+                        <span id="data-status-display" class="text-[10px] text-[#0054A6] font-bold">실시간</span>
+                        <span id="clock-display" class="text-[10px] text-gray-300 font-mono tracking-tighter ml-0.5">00:00:00</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] font-medium text-gray-400 mr-1">
+                        <span>상행 <b id="count-up" class="font-extrabold text-[#0054A6]">0</b></span>
+                        <span class="text-gray-600 text-[8px] leading-none">|</span>
+                        <span>하행 <b id="count-down" class="font-extrabold text-[#5998D6]">0</b></span>
+                    </div>
                 </div>
             </div>
             <!-- 열차 버튼 리스트 영역 -->
@@ -499,7 +506,9 @@
             stationSelectorModal: document.getElementById('station-selector-modal'),
             selectorListContainer: document.getElementById('selector-list-container'),
             favoriteIcon: document.getElementById('favorite-icon'),
-            svgWrapper: document.getElementById('svg-wrapper')
+            svgWrapper: document.getElementById('svg-wrapper'),
+            countUp: document.getElementById('count-up'),
+            countDown: document.getElementById('count-down')
         };
 
         const getDayType = (dateObj) => {
@@ -897,6 +906,10 @@
             }).filter(t => t) : [];
             let activeTrainsUp = getActiveTrains(parsedTrainsUp, 'up');
             let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
+            
+            if (dom.countUp) { dom.countUp.textContent = activeTrainsUp.length; dom.countUp.style.color = THEME_COLOR; }
+            if (dom.countDown) { dom.countDown.textContent = activeTrainsDown.length; dom.countDown.style.color = DOWN_COLOR; }
+            
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
             const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : 1600);
