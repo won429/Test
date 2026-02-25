@@ -261,11 +261,11 @@
             </div>
         </main>
 
-        <button id="auto-scroll-btn" class="hidden absolute bottom-[130px] left-1/2 -translate-x-1/2 bg-[#0052FF] text-white px-5 py-3 rounded-full shadow-[0_4px_20px_rgba(0,82,255,0.4)] text-[13px] font-bold flex items-center gap-2 z-40 transition-transform active:scale-95 animate-bounce">
+        <button id="auto-scroll-btn" class="hidden absolute bottom-[200px] left-1/2 -translate-x-1/2 bg-[#0052FF] text-white px-5 py-3 rounded-full shadow-[0_4px_20px_rgba(0,82,255,0.4)] text-[13px] font-bold flex items-center gap-2 z-40 transition-transform active:scale-95 animate-bounce">
             <i class="fa-solid fa-location-crosshairs text-base"></i> 선택한 열차 따라가기
         </button>
 
-        <div id="floating-panel" class="hidden absolute bottom-[80px] left-4 right-4 z-30 min-h-[72px]"></div>
+        <div id="floating-panel" class="hidden absolute bottom-[100px] left-0 right-0 px-4 z-[90] min-h-[72px] transition-all duration-300"></div>
 
         <!-- 4. 하단 네비게이션 -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[88%] max-w-[300px] px-2 touch-pan-x select-none">
@@ -758,6 +758,11 @@
                     const textWidth = t.id.length * 6 + 14; 
                     const rectX = -(textWidth / 2);
 
+                    const isUp = t.direction === 'up';
+                    const rectY = isUp ? 10 : -25;
+                    const textY = isUp ? 21 : -14;
+                    const waitingY = isLineView ? (isUp ? 36 : -29) : (isUp ? 24 : -18);
+
                     g.innerHTML = `
                         ${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}
                         ${isSelected && (t.isStopped || t.isWaiting) ? `<circle r="22" fill="${fillColor}" opacity="0.15" />` : ''}
@@ -774,12 +779,12 @@
                         <!-- 노선 탭에서만 열차 위에 번호(알약 모양 캡슐) 뚜렷하게 표시 -->
                         ${isLineView ? `
                         <g transform="rotate(${-t.angle})">
-                            <rect x="${rectX}" y="-25" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" />
-                            <text x="0" y="-14" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text>
+                            <rect x="${rectX}" y="${rectY}" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" />
+                            <text x="0" y="${textY}" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text>
                         </g>
                         ` : ''}
                         
-                        ${t.isWaiting ? `<text x="0" y="${isLineView ? '-29' : '-18'}" text-anchor="middle" fill="${fillColor}" class="text-[10px] font-bold animate-pulse" transform="rotate(${-t.angle})">첫차 대기중</text>` : ''}
+                        ${t.isWaiting ? `<text x="0" y="${waitingY}" text-anchor="middle" fill="${fillColor}" class="text-[10px] font-bold animate-pulse" transform="rotate(${-t.angle})">첫차 대기중</text>` : ''}
                     `;
                     g.dataset.state = stateStr;
                 }
@@ -795,7 +800,7 @@
                 const curr = t.schedule[idx], next = t.schedule[idx+1] || curr;
                 let prog = curr.progress, isStop = (currentSec - curr.sec <= 30), rem = next.sec - currentSec;
                 if (!isStop && idx < t.schedule.length-1) {
-                    const segDur = next.sec - (curr.sec + 30);
+                    const segDur = Math.max(1, next.sec - (curr.sec + 30));
                     const timeMov = currentSec - (curr.sec + 30);
                     const segProg = Math.min(1, Math.max(0, timeMov / segDur));
                     prog = curr.progress + (next.progress - curr.progress) * segProg;
@@ -815,11 +820,35 @@
             // 자동 선택을 막아 열차를 터치하기 전에는 멋대로 스크롤되지 않게 유지
             
             const renderedT = activeT.map(t => {
-                const ref = activeTab === 'route' ? dom.routePath : (t.direction === 'up' ? dom.linePathUp : dom.linePathDown);
-                const len = activeTab === 'route' ? routeLength : 1100;
-                const p = ref.getPointAtLength(len * (t.overallProgress || 0));
-                const np = ref.getPointAtLength(Math.min(len, len * (t.overallProgress || 0) + 1));
-                return { ...t, point: p, angle: Math.atan2(np.y-p.y, np.x-p.x) * 180 / Math.PI };
+                let ref, len;
+                if (activeTab === 'route') {
+                    ref = dom.routePath;
+                    len = routeLength;
+                } else if (activeTab === 'map') {
+                    ref = dom.mapPath;
+                    len = mapLength;
+                } else {
+                    ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
+                    len = 1100;
+                }
+                
+                const currentLen = len * (t.overallProgress || 0);
+                const p = ref.getPointAtLength(currentLen);
+                
+                // 상행(up)은 progress가 감소(역방향)하므로 앞을 보려면 -1, 하행(down)은 +1
+                const dirOffset = t.direction === 'up' ? -1 : 1;
+                let nextLen = currentLen + dirOffset;
+                nextLen = Math.max(0, Math.min(len, nextLen));
+                const np = ref.getPointAtLength(nextLen);
+                
+                let angle = 0;
+                if (Math.abs(np.x - p.x) > 0.001 || Math.abs(np.y - p.y) > 0.001) {
+                    angle = Math.atan2(np.y - p.y, np.x - p.x) * 180 / Math.PI;
+                } else {
+                    angle = t.direction === 'up' ? -90 : 90;
+                }
+                
+                return { ...t, point: p, angle: angle };
             });
 
             const selectedData = renderedT.find(t => t.id === selectedTrainId);
@@ -870,44 +899,52 @@
                     return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null;
                 }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
 
-                panelHtml = `<div class="toss-card p-5">
-                    <div class="flex justify-between items-start mb-4">
-                        <div><h3 class="text-xl font-extrabold text-white">${selectedStation}역</h3>
-                        <div class="flex gap-1 mt-2"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='up'?'bg-[#0052FF] text-white':'text-gray-400 bg-white/5'}">상행</button>
-                        <button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='down'?'bg-[#5998D6] text-white':'text-gray-400 bg-white/5'}">하행</button></div></div>
-                        <button onclick="handleStationClick(null)" class="text-gray-500"><i class="fa-solid fa-xmark"></i></button>
+                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[32px] p-5 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300">
+                    <div class="flex justify-between items-start mb-4 px-1">
+                        <div><h3 class="text-[22px] font-extrabold text-white tracking-tight">${selectedStation}역</h3>
+                        <div class="flex gap-1.5 mt-2">
+                            <button onclick="setStationDetailDirection('up')" class="px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-colors ${stationDetailDirection==='up'?'bg-[#0052FF] text-white':'text-gray-400 bg-white/10 hover:bg-white/20'}">상행</button>
+                            <button onclick="setStationDetailDirection('down')" class="px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-colors ${stationDetailDirection==='down'?'bg-[#5998D6] text-white':'text-gray-400 bg-white/10 hover:bg-white/20'}">하행</button>
+                        </div></div>
+                        <button onclick="handleStationClick(null)" class="text-gray-400 bg-white/10 w-8 h-8 rounded-full flex items-center justify-center hover:text-white hover:bg-white/20 transition-all"><i class="fa-solid fa-xmark text-[13px]"></i></button>
                     </div>
-                    <div class="space-y-2 mb-4">${upcoming.length ? upcoming.map(u => `<div class="list-card p-3 flex justify-between">
-                        <span class="text-white font-bold">${u.time.slice(0,5)} <span class="text-xs text-gray-500">${u.dest}행</span></span>
-                        <span class="text-[#0052FF] font-black">${Math.ceil((u.sec-currentSec)/60)}분 후</span></div>`).join('') : '<div class="text-center text-gray-500 py-2">운행 종료</div>'}</div>
-                    <button onclick="window.openModal()" class="w-full py-3 bg-[#0052FF] rounded-xl font-bold">시간표 보기</button></div>`;
+                    <div class="space-y-2 mb-4">${upcoming.length ? upcoming.map(u => `
+                        <div class="bg-white/5 rounded-[20px] p-3.5 flex justify-between items-center px-4">
+                            <span class="text-white font-bold text-[14px]">${u.time.slice(0,5)} <span class="text-[12px] text-gray-500 ml-1.5 font-medium">${u.dest}행</span></span>
+                            <span class="text-[#0052FF] font-black text-[15px]">${Math.ceil((u.sec-currentSec)/60)}분 후</span>
+                        </div>`).join('') : '<div class="text-center text-gray-500 py-4 text-[13px] font-medium">운행 종료</div>'}
+                    </div>
+                    <button onclick="window.openModal()" class="w-full py-3.5 bg-white/10 hover:bg-white/20 transition-colors rounded-[20px] font-bold text-white text-[14px]">시간표 보기</button>
+                </div>`;
             } else {
                 if (!selectedData) {
-                    // 열차나 역을 선택하기 전에는 방해되는 안내 문구를 아예 띄우지 않습니다.
                     dom.floatingPanel.classList.add('hidden');
                     panelHtml = ''; 
                 } else {
                     dom.floatingPanel.classList.remove('hidden');
                     const panelColor = selectedData.direction === 'down' ? '#5998D6' : '#0052FF';
-                    panelHtml = `<div class="toss-card p-5 min-h-[72px] flex flex-col justify-center">
-                        <div class="flex justify-between items-center">
+                    panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] min-h-[72px] flex flex-col justify-center transition-all duration-300 relative overflow-hidden">
+                        <div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                        <div class="flex justify-between items-center px-2">
                             <div>
-                                <div class="flex items-baseline gap-1.5 mb-1">
-                                    <span style="background-color: ${panelColor}" class="text-white text-[10px] px-2 py-0.5 rounded-sm font-bold shadow-[0_0_8px_rgba(0,0,0,0.3)]">${selectedData.id}</span>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span style="background-color: ${panelColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span>
                                     <span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '첫차 대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span>
                                 </div>
-                                <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                                <h2 class="text-[18px] font-extrabold text-white tracking-tight flex items-baseline gap-1.5">
                                     ${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역 
-                                    <span class="text-[13px] font-medium text-gray-400 font-normal">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span>
+                                    <span class="text-[12px] font-medium text-gray-400">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span>
                                 </h2>
                             </div>
                             ${!selectedData.isStopped && !selectedData.isWaiting ? `
                                 <div class="text-right flex items-baseline gap-0.5">
-                                    <p class="text-[26px] font-black tracking-tighter" style="color: ${panelColor}">${Math.ceil(selectedData.timeRemaining / 60)}<span class="text-[11px] text-gray-400 ml-0.5 font-bold tracking-normal">분 전</span></p>
+                                    <p class="text-[28px] font-black tracking-tighter" style="color: ${panelColor}">${Math.ceil(selectedData.timeRemaining / 60)}</p>
+                                    <span class="text-[11px] text-gray-400 ml-0.5 font-bold">분 전</span>
                                 </div>` : ''}
                             ${selectedData.isWaiting ? `
                                 <div class="text-right flex items-baseline gap-0.5">
-                                    <p class="text-[22px] font-black tracking-tighter" style="color: ${panelColor}">${selectedData.curr.time.slice(0,5)}<span class="text-[10px] text-gray-400 ml-1 font-bold tracking-normal block">출발</span></p>
+                                    <p class="text-[22px] font-black tracking-tighter" style="color: ${panelColor}">${selectedData.curr.time.slice(0,5)}</p>
+                                    <span class="text-[10px] text-gray-400 ml-1 font-bold">출발</span>
                                 </div>` : ''}
                         </div>
                     </div>`;
@@ -922,6 +959,7 @@
             await loadTimetable();
             setTimeout(() => {
                 routeLength = dom.routePath.getTotalLength();
+                mapLength = dom.mapPath.getTotalLength();
                 switchTab('home');
                 setInterval(() => {
                     const now = new Date();
