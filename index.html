@@ -206,10 +206,31 @@
             <div class="relative w-full h-[1500px]">
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
                     <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
+                        <!-- 노선 상단 표시 (흰색 배경 알약 모양 적용) -->
+                        <g>
+                            <rect x="94" y="64" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
+                            <text x="120" y="80.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
+                        </g>
+                        <g>
+                            <rect x="254" y="64" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0052FF" stroke-width="2" />
+                            <text x="280" y="80.5" text-anchor="middle" fill="#0052FF" class="text-[13px] font-extrabold tracking-widest">상행</text>
+                        </g>
+
                         <path d="M 120 100 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 하행 (시에라 블루) -->
                         <path d="M 280 100 L 280 1200" fill="none" stroke="#0052FF" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 상행 (코레일 블루) -->
                         <path id="line-path-down" d="M 120 100 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <path id="line-path-up" d="M 280 100 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
+                        
+                        <!-- 노선 하단 표시 (흰색 배경 알약 모양 적용) -->
+                        <g>
+                            <rect x="94" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
+                            <text x="120" y="1235.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
+                        </g>
+                        <g>
+                            <rect x="254" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0052FF" stroke-width="2" />
+                            <text x="280" y="1235.5" text-anchor="middle" fill="#0052FF" class="text-[13px] font-extrabold tracking-widest">상행</text>
+                        </g>
+
                         <g id="line-stations"></g>
                         <g id="line-trains-down"></g>
                         <g id="line-trains-up"></g>
@@ -332,10 +353,10 @@
         ];
 
         const FILE_URLS = {
-            weekday_up: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/dae_up.csv',
-            weekday_down: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/dae_down.csv',
-            weekend_up: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/daew_up.csv',
-            weekend_down: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/daew_down.csv'
+            weekday_up: 'dae_up.csv',
+            weekday_down: 'dae_down.csv',
+            weekend_up: 'daew_up.csv',
+            weekend_down: 'daew_down.csv'
         };
 
         let homeSelectedStation = '구미';
