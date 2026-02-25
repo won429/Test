@@ -12,6 +12,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Tailwind safelist for dynamic colors: 
+    bg-[#0054A6] border-[#0054A6] text-[#0054A6] bg-[#0054A6]/10 bg-[#0054A6]/20 border-[#0054A6]/50 border-[#0054A6]/20 shadow-[0_2px_8px_rgba(0,84,166,0.3)] shadow-[0_0_15px_rgba(0,84,166,0.2)] shadow-[0_0_15px_rgba(0,84,166,0.4)]
+    bg-[#D93F5C] border-[#D93F5C] text-[#D93F5C] bg-[#D93F5C]/10 bg-[#D93F5C]/20 border-[#D93F5C]/50 border-[#D93F5C]/20 shadow-[0_2px_8px_rgba(217,63,92,0.3)] shadow-[0_0_15px_rgba(217,63,92,0.2)] shadow-[0_0_15px_rgba(217,63,92,0.4)]
+    -->
     <style>
         body { 
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
@@ -79,6 +83,7 @@
             align-items: center;
             padding: 0 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
         }
         .station-plate-pill {
             background-color: white;
@@ -93,11 +98,12 @@
             left: 50%;
             transform: translateX(-50%);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: border-color 0.3s;
         }
         .metro-logo-circle {
-            width: 26px; /* 크기 약간 확대 */
+            width: 26px; 
             height: 26px;
-            background-color: #0054A6; /* 코레일 블루 적용 */
+            background-color: #0054A6; 
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -105,7 +111,8 @@
             color: white;
             font-size: 13px;
             font-weight: 900;
-            box-shadow: 0 2px 4px rgba(0, 84, 166, 0.4);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
         }
     </style>
 </head>
@@ -139,8 +146,8 @@
 
                     <!-- 노선 선택 탭 -->
                     <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대경선</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">1호선</button>
+                        <button id="btn-line-daegyeong" onclick="switchLine('daegyeong')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대경선</button>
+                        <button id="btn-line-1" onclick="switchLine('line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all">1호선</button>
                         <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">2호선</button>
                         <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">3호선</button>
                     </div>
@@ -180,22 +187,22 @@
 
                     <div class="grid grid-cols-2 gap-2.5">
                         <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
-                            <span class="text-[12px] font-bold text-gray-400 mb-2.5">구미 방면</span>
+                            <span id="home-up-dir-label" class="text-[12px] font-bold text-gray-400 mb-2.5">구미 방면</span>
                             <div id="home-up-info" class="flex-1 flex flex-col justify-center items-center gap-1.5"></div>
                         </div>
                         <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
-                            <span class="text-[12px] font-bold text-gray-400 mb-2.5">경산 방면</span>
+                            <span id="home-down-dir-label" class="text-[12px] font-bold text-gray-400 mb-2.5">경산 방면</span>
                             <div id="home-down-info" class="flex-1 flex flex-col justify-center gap-1.5"></div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2.5 mt-2">
                         <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
-                            <i class="fa-regular fa-clock text-[#0054A6] text-[15px]"></i>
+                            <i id="btn-icon-1" class="fa-regular fa-clock text-[#0054A6] text-[15px]"></i>
                             <span class="text-[12px] font-bold text-gray-300">전체 시간표 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-600"></i></span>
                         </button>
                         <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
-                            <i class="fa-solid fa-train-tram text-[#0054A6] text-[15px]"></i>
+                            <i id="btn-icon-2" class="fa-solid fa-train-tram text-[#0054A6] text-[15px]"></i>
                             <span class="text-[12px] font-bold text-gray-300">첫차·막차 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-600"></i></span>
                         </button>
                     </div>
@@ -227,32 +234,32 @@
 
         <!-- 3. 트래커 맵 스크롤 뷰 -->
         <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-black scroll-smooth relative pt-[80px] pb-32">
-            <div class="relative w-full h-[1500px]">
+            <div id="svg-wrapper" class="relative w-full h-[1500px]">
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
-                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px]">
+                    <svg id="line-svg" viewBox="0 0 400 1300" class="w-full h-[1300px]">
                         <!-- 노선 상단 표시 (흰색 배경 알약 모양 적용) -->
-                        <g>
+                        <g id="svg-down-top">
                             <rect x="94" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
                             <text x="120" y="40.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
                         </g>
-                        <g>
-                            <rect x="254" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" />
-                            <text x="280" y="40.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest">상행</text>
+                        <g id="svg-up-top">
+                            <rect x="254" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" transition="stroke 0.3s" />
+                            <text x="280" y="40.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest" transition="fill 0.3s">상행</text>
                         </g>
 
-                        <path d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 하행 (시에라 블루) -->
-                        <path d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 상행 (코레일 블루) -->
+                        <path id="line-path-down-bg" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 하행 (시에라 블루) -->
+                        <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" transition="stroke 0.3s" /> <!-- 상행 -->
                         <path id="line-path-down" d="M 120 60 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <path id="line-path-up" d="M 280 60 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
                         
                         <!-- 노선 하단 표시 (흰색 배경 알약 모양 적용) -->
-                        <g>
+                        <g id="svg-down-bottom" transform="translate(0,0)" transition="transform 0.3s">
                             <rect x="94" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
                             <text x="120" y="1235.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
                         </g>
-                        <g>
-                            <rect x="254" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" />
-                            <text x="280" y="1235.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest">상행</text>
+                        <g id="svg-up-bottom" transform="translate(0,0)" transition="transform 0.3s">
+                            <rect x="254" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" transition="stroke 0.3s" />
+                            <text x="280" y="1235.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest" transition="fill 0.3s">상행</text>
                         </g>
 
                         <g id="line-stations"></g>
@@ -264,7 +271,7 @@
         </main>
 
         <button id="auto-scroll-btn" class="hidden absolute bottom-[200px] left-1/2 -translate-x-1/2 bg-[#1C1C1E]/80 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full shadow-xl text-[11px] font-bold text-gray-200 flex items-center gap-1.5 z-40 transition-transform active:scale-95">
-            <i class="fa-solid fa-location-crosshairs text-[#0054A6] text-[13px]"></i> 선택한 열차 따라가기
+            <i class="fa-solid fa-location-crosshairs text-[#0054A6] text-[13px]" id="scroll-cross-icon"></i> 선택한 열차 따라가기
         </button>
 
         <div id="floating-panel" class="hidden absolute bottom-[100px] left-0 right-0 px-4 z-[90] min-h-[72px] transition-all duration-300"></div>
@@ -321,41 +328,61 @@
     <script>
         let favoriteStation = localStorage.getItem('subway_fav_station') || null;
 
-        const THEME_COLOR = "#0054A6";
+        let currentLineId = 'daegyeong';
+        let THEME_COLOR = "#0054A6";
         const STOP_DURATION = 25; 
 
-        const STATIONS = {
-            "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4, lat: 36.1284, lng: 128.3305 },
-            "사곡": { progress: 0.08, align: "start", xOff: 15, yOff: 4, lat: 36.0965, lng: 128.3496 },
-            "북삼": { progress: 0.23, align: "middle", xOff: 0, yOff: -20, lat: 36.0357, lng: 128.3698 },
-            "왜관": { progress: 0.39, align: "end", xOff: -15, yOff: 4, lat: 35.9934, lng: 128.4022 },
-            "서대구": { progress: 0.54, align: "middle", xOff: 0, yOff: 24, ktx: true, lat: 35.8776, lng: 128.5398 },
-            "대구": { progress: 0.67, align: "start", xOff: 15, yOff: 4, lat: 35.8763, lng: 128.5961 },
-            "동대구": { progress: 0.80, align: "start", xOff: 15, yOff: 4, ktx: true, lat: 35.8797, lng: 128.6285 },
-            "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true, lat: 35.8164, lng: 128.7351 }
+        const STATIONS_ALL = {
+            'daegyeong': {
+                "구미": { progress: 0.00 },
+                "사곡": { progress: 0.08 },
+                "북삼": { progress: 0.23 },
+                "왜관": { progress: 0.39 },
+                "서대구": { progress: 0.54, ktx: true },
+                "대구": { progress: 0.67 },
+                "동대구": { progress: 0.80, ktx: true },
+                "경산": { progress: 1.00, ktx: true }
+            },
+            'line1': {
+                "설화명곡": { progress: 0.0000 },
+                "화원": { progress: 0.0294 },
+                "대곡": { progress: 0.0588 },
+                "진천": { progress: 0.0882 },
+                "월배": { progress: 0.1176 },
+                "상인": { progress: 0.1470 },
+                "월촌": { progress: 0.1764 },
+                "송현": { progress: 0.2058 },
+                "서부정류장": { progress: 0.2352 },
+                "대명": { progress: 0.2647 },
+                "안지랑": { progress: 0.2941 },
+                "현충로": { progress: 0.3235 },
+                "영대병원": { progress: 0.3529 },
+                "교대": { progress: 0.3823 },
+                "명덕": { progress: 0.4117 },
+                "반월당": { progress: 0.4411 },
+                "중앙로": { progress: 0.4705 },
+                "대구": { progress: 0.5000, ktx: true },
+                "칠성시장": { progress: 0.5294 },
+                "신천": { progress: 0.5588 },
+                "동대구역": { progress: 0.5882, ktx: true },
+                "동구청": { progress: 0.6176 },
+                "아양교": { progress: 0.6470 },
+                "동촌": { progress: 0.6764 },
+                "해안": { progress: 0.7058 },
+                "방촌": { progress: 0.7352 },
+                "용계": { progress: 0.7647 },
+                "율하": { progress: 0.7941 },
+                "신기": { progress: 0.8235 },
+                "반야월": { progress: 0.8529 },
+                "각산": { progress: 0.8823 },
+                "안심": { progress: 0.9117 },
+                "대구한의대병원": { progress: 0.9411 },
+                "부호": { progress: 0.9705 },
+                "하양": { progress: 1.0000 }
+            }
         };
 
-        const RAIL_SEGMENTS = [
-            { start: "구미", end: "사곡", path: [[36.1284, 128.3305], [36.1230, 128.3325], [36.1170, 128.3355], [36.1100, 128.3400], [36.1030, 128.3450], [36.0965, 128.3496]] },
-            { start: "사곡", end: "북삼", path: [[36.0965, 128.3496], [36.0900, 128.3515], [36.0820, 128.3540], [36.0740, 128.3565], [36.0650, 128.3590], [36.0550, 128.3620], [36.0450, 128.3660], [36.0357, 128.3698]] },
-            { start: "북삼", end: "왜관", path: [[36.0357, 128.3698], [36.0300, 128.3725], [36.0230, 128.3765], [36.0160, 128.3815], [36.0090, 128.3870], [36.0030, 128.3930], [35.9980, 128.3980], [35.9934, 128.4022]] },
-            { start: "왜관", end: "서대구", path: [[35.9934, 128.4022], [35.9890, 128.4045], [35.9830, 128.4070], [35.9760, 128.4110], [35.9690, 128.4165], [35.9610, 128.4230], [35.9530, 128.4310], [35.9450, 128.4410], [35.9380, 128.4520], [35.9310, 128.4630], [35.9230, 128.4730], [35.9150, 128.4830], [35.9080, 128.4920], [35.9010, 128.5020], [35.8940, 128.5120], [35.8880, 128.5210], [35.8820, 128.5300], [35.8790, 128.5350], [35.8776, 128.5398]] },
-            { start: "서대구", end: "대구", path: [[35.8776, 128.5398], [35.8790, 128.5470], [35.8810, 128.5550], [35.8820, 128.5640], [35.8810, 128.5740], [35.8790, 128.5840], [35.8763, 128.5961]] },
-            { start: "대구", end: "동대구", path: [[35.8763, 128.5961], [35.8750, 128.6040], [35.8750, 128.6130], [35.8765, 128.6210], [35.8797, 128.6285]] },
-            { start: "동대구", end: "경산", path: [[35.8797, 128.6285], [35.8740, 128.6380], [35.8670, 128.6500], [35.8590, 128.6620], [35.8510, 128.6760], [35.8430, 128.6920], [35.8340, 128.7080], [35.8250, 128.7230], [35.8164, 128.7351]] }
-        ];
-
-        RAIL_SEGMENTS.forEach(seg => {
-            let totalDist = 0;
-            seg.distances = [0];
-            for (let i = 0; i < seg.path.length - 1; i++) {
-                const dx = seg.path[i][0] - seg.path[i+1][0];
-                const dy = seg.path[i][1] - seg.path[i+1][1];
-                totalDist += Math.sqrt(dx*dx + dy*dy);
-                seg.distances.push(totalDist);
-            }
-            seg.totalDist = totalDist;
-        });
+        let STATIONS = STATIONS_ALL[currentLineId];
 
         const KOR_HOLIDAYS = [
             "2025-01-01", "2025-01-28", "2025-01-29", "2025-01-30", "2025-03-03",
@@ -367,10 +394,22 @@
         ];
 
         const FILE_URLS = {
-            weekday_up: 'dae_up.csv',
-            weekday_down: 'dae_down.csv',
-            weekend_up: 'daew_up.csv',
-            weekend_down: 'daew_down.csv'
+            'daegyeong': {
+                weekday_up: 'dae_up.csv',
+                weekday_down: 'dae_down.csv',
+                saturday_up: 'daew_up.csv',
+                saturday_down: 'daew_down.csv',
+                holiday_up: 'daew_up.csv',
+                holiday_down: 'daew_down.csv'
+            },
+            'line1': {
+                weekday_up: 'dae_line1_up.csv',
+                weekday_down: 'dae_line1_down.csv',
+                saturday_up: 'dae_line1_sat_up.csv',
+                saturday_down: 'dae_line1_sat_down.csv',
+                holiday_up: 'dae_line1_w_up.csv',
+                holiday_down: 'dae_line1_w_down.csv'
+            }
         };
 
         let homeSelectedStation = '구미';
@@ -420,7 +459,8 @@
             homeDownInfo: document.getElementById('home-down-info'),
             stationSelectorModal: document.getElementById('station-selector-modal'),
             selectorListContainer: document.getElementById('selector-list-container'),
-            favoriteIcon: document.getElementById('favorite-icon')
+            favoriteIcon: document.getElementById('favorite-icon'),
+            svgWrapper: document.getElementById('svg-wrapper')
         };
 
         const getDayType = (dateObj) => {
@@ -430,7 +470,8 @@
             const dd = String(dateObj.getDate()).padStart(2, '0');
             const ymd = `${yyyy}-${mm}-${dd}`;
             if (KOR_HOLIDAYS.includes(ymd)) return 'holiday';
-            if (day === 0 || day === 6) return 'weekend';
+            if (day === 0) return 'holiday';
+            if (day === 6) return 'saturday';
             return 'weekday';
         };
 
@@ -481,8 +522,12 @@
         }
 
         const loadTimetable = async () => {
-            let targetUpUrl = currentDayType === 'weekday' ? FILE_URLS.weekday_up : FILE_URLS.weekend_up;
-            let targetDownUrl = currentDayType === 'weekday' ? FILE_URLS.weekday_down : FILE_URLS.weekend_down;
+            const statusDisplay = document.getElementById('data-status-display');
+            const statusHome = document.getElementById('data-status-home');
+            
+            let targetUpUrl = FILE_URLS[currentLineId][currentDayType + '_up'];
+            let targetDownUrl = FILE_URLS[currentLineId][currentDayType + '_down'];
+            
             const parseCsv = (csvStr) => {
                 if (!csvStr) return [];
                 const lines = csvStr.trim().split(/\r?\n/);
@@ -519,16 +564,85 @@
                 if (parsedTrainsUp.length === 0) { parsedTrainsUp = createMockData('up'); isMockUsed = true; }
                 if (parsedTrainsDown.length === 0) { parsedTrainsDown = createMockData('down'); isMockUsed = true; }
                 parsedTrains = currentDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
-                const statusDisplay = document.getElementById('data-status-display');
-                const statusHome = document.getElementById('data-status-home');
                 if (isMockUsed) {
-                    if (statusDisplay) statusDisplay.innerHTML = `<span class="text-red-400 font-extrabold animate-pulse">임의 데이터 사용중</span>`;
+                    if (statusDisplay) { statusDisplay.innerHTML = `<span class="text-red-400 font-extrabold animate-pulse">임의 데이터 사용중</span>`; }
                     if (statusHome) statusHome.classList.remove('hidden');
                 } else {
-                    if (statusDisplay) statusDisplay.textContent = '실시간';
+                    if (statusDisplay) { statusDisplay.textContent = '실시간'; }
                     if (statusHome) statusHome.classList.add('hidden');
                 }
             } catch (e) { }
+        };
+
+        window.switchLine = async (lineId, isInit = false) => {
+            if (currentLineId === lineId && !isInit) return;
+            currentLineId = lineId;
+            THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : '#0054A6';
+            STATIONS = STATIONS_ALL[lineId];
+
+            // 탭 버튼 UI 업데이트
+            const btnD = document.getElementById('btn-line-daegyeong');
+            const btn1 = document.getElementById('btn-line-1');
+            if (lineId === 'daegyeong') {
+                btnD.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
+                btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '구미';
+                document.querySelector('#home-screen h2').textContent = '대경선 지하철역';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (구미 방면)</option><option value="down" class="text-gray-900">하행 (경산 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '구미 방면';
+                document.getElementById('home-down-dir-label').textContent = '경산 방면';
+                document.getElementById('data-status-display').className = `text-[10px] text-[#0054A6] font-bold`;
+            } else {
+                btn1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(217,63,92,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
+                btnD.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '설화명곡';
+                document.querySelector('#home-screen h2').textContent = '1호선 지하철역';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (설화명곡 방면)</option><option value="down" class="text-gray-900">하행 (안심/하양 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '설화명곡 방면';
+                document.getElementById('home-down-dir-label').textContent = '하양 방면';
+                document.getElementById('data-status-display').className = `text-[10px] text-[#D93F5C] font-bold`;
+            }
+
+            // 홈 화면 요소 동적 테마 업데이트
+            document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : '1';
+            document.querySelector('.metro-logo-circle').style.backgroundColor = THEME_COLOR;
+            document.querySelector('.station-plate-base').style.backgroundColor = THEME_COLOR;
+            document.querySelector('.station-plate-pill').style.borderColor = THEME_COLOR;
+            document.getElementById('btn-icon-1').style.color = THEME_COLOR;
+            document.getElementById('btn-icon-2').style.color = THEME_COLOR;
+            document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
+
+            // 역 개수에 따라 노선도 SVG 길이 동적 변경
+            const lineLen = currentLineId === 'line1' ? 1800 : 1140;
+            const svg = document.getElementById('line-svg');
+            if (svg) {
+                svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
+                svg.style.height = `${lineLen + 160}px`;
+                dom.svgWrapper.style.height = `${lineLen + 160 + 80}px`;
+                
+                const pathY2 = 60 + lineLen;
+                document.getElementById('line-path-down-bg').setAttribute('d', `M 120 60 L 120 ${pathY2}`);
+                document.getElementById('line-path-up-bg').setAttribute('d', `M 280 60 L 280 ${pathY2}`);
+                dom.linePathDown.setAttribute('d', `M 120 60 L 120 ${pathY2}`);
+                dom.linePathUp.setAttribute('d', `M 280 60 L 280 ${pathY2}`);
+                
+                document.getElementById('svg-down-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
+                document.getElementById('svg-up-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
+                
+                document.querySelectorAll('#svg-up-top rect, #svg-up-bottom rect').forEach(r => r.setAttribute('stroke', THEME_COLOR));
+                document.querySelectorAll('#svg-up-top text, #svg-up-bottom text').forEach(t => t.setAttribute('fill', THEME_COLOR));
+                document.getElementById('line-path-up-bg').setAttribute('stroke', THEME_COLOR);
+            }
+
+            selectedStation = null;
+            selectedTrainId = null;
+
+            if (!isInit) {
+                await loadTimetable();
+                window.updateHomeUI();
+                window.renderHomeArrivalInfo();
+                window.render();
+            }
         };
 
         window.toggleFavorite = () => {
@@ -579,19 +693,24 @@
                 return trains.map(t => {
                     const diff = t.sec - currentSec;
                     const timeText = diff <= 0 ? '곧 도착' : (diff < 60 ? diff + '초' : Math.ceil(diff/60) + '분');
-                    return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2 rounded-xl border border-white/5"><span class="text-[12px] font-bold text-gray-200">${t.dest}</span><span class="text-[13px] font-extrabold text-[#0054A6] drop-shadow-sm">${timeText}</span></div>`;
+                    return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2 rounded-xl border border-white/5"><span class="text-[12px] font-bold text-gray-200">${t.dest}</span><span class="text-[13px] font-extrabold" style="color:${THEME_COLOR}">${timeText}</span></div>`;
                 }).join('');
             };
-            dom.homeUpInfo.innerHTML = homeSelectedStation === '구미' ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
-            dom.homeDownInfo.innerHTML = homeSelectedStation === '경산' ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(downTrains);
+            
+            const stationNames = Object.keys(STATIONS);
+            const isFirst = homeSelectedStation === stationNames[0];
+            const isLast = homeSelectedStation === stationNames[stationNames.length - 1];
+
+            dom.homeUpInfo.innerHTML = isFirst ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
+            dom.homeDownInfo.innerHTML = isLast ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(downTrains);
         };
 
         window.openStationSelector = () => {
             dom.stationSelectorModal.classList.remove('hidden');
             dom.selectorListContainer.innerHTML = Object.keys(STATIONS).map(name => `
-                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-4 py-3 rounded-[14px] ${name === homeSelectedStation ? 'bg-[#0054A6]/20 border border-[#0054A6]/50 shadow-[0_0_15px_rgba(0,84,166,0.2)]' : 'bg-white/5 border border-white/5 hover:bg-white/10'} cursor-pointer active:scale-[0.98] transition-all">
-                    <span class="text-[14px] font-bold ${name === homeSelectedStation ? 'text-[#3B82F6]' : 'text-gray-200'}">${name}역</span>
-                    ${name === homeSelectedStation ? '<i class="fa-solid fa-check text-[#3B82F6] text-[14px] drop-shadow-sm"></i>' : ''}
+                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-4 py-3 rounded-[14px] ${name === homeSelectedStation ? 'selected-station-card' : 'bg-white/5 border border-white/5 hover:bg-white/10'} cursor-pointer active:scale-[0.98] transition-all" style="${name === homeSelectedStation ? `background-color: ${THEME_COLOR}33; border-color: ${THEME_COLOR}80;` : ''}">
+                    <span class="text-[14px] font-bold ${name === homeSelectedStation ? '' : 'text-gray-200'}" style="${name === homeSelectedStation ? `color: ${THEME_COLOR};` : ''}">${name}역</span>
+                    ${name === homeSelectedStation ? `<i class="fa-solid fa-check text-[14px] drop-shadow-sm" style="color: ${THEME_COLOR};"></i>` : ''}
                 </div>`).join('');
         };
 
@@ -655,16 +774,23 @@
             const upTimes = getStationTimes(parsedTrainsUp);
             const downTimes = getStationTimes(parsedTrainsDown);
             const isDownDefault = stationDetailDirection === 'down';
+            
+            const stationNames = Object.keys(STATIONS);
+            const upLabel = `상행 (${stationNames[0]} 방면)`;
+            const downLabel = `하행 (${stationNames[stationNames.length - 1]} 방면)`;
+
             const renderList = (times, id, isHidden) => {
                 let listHtml = `<div id="${id}" class="space-y-1.5 mt-2 ${isHidden ? 'hidden' : ''}">`;
                 if(times.length === 0) listHtml += `<div class="text-center text-gray-500 py-10 font-medium text-[12px]">운행 정보가 없습니다.</div>`;
                 times.forEach(t => {
                     const isPast = t.sec < currentSec;
-                    listHtml += `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40 past-time' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-500' : 'text-white tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-600' : 'text-gray-400'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-600 bg-white/5' : 'text-[#0054A6] bg-[#0054A6]/10'} px-2 py-0.5 rounded border ${isPast ? 'border-white/5' : 'border-[#0054A6]/20'} shadow-sm">${t.id}</span></div>`;
+                    listHtml += `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40 past-time' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-500' : 'text-white tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-600' : 'text-gray-400'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-600 bg-white/5 border-white/5' : 'text-white shadow-sm'}" style="${!isPast ? `background-color: ${THEME_COLOR}; border-color: ${THEME_COLOR};` : ''} padding: 2px 8px; border-radius: 4px; border-width: 1px;">${t.id}</span></div>`;
                 });
                 listHtml += `</div>`; return listHtml;
             };
-            dom.modalSubtitle.innerHTML = `<div class="flex bg-white/5 rounded-full p-0.5 border border-white/5 w-fit mx-auto mt-1 mb-1"><button onclick="document.getElementById('tt-up').classList.remove('hidden'); document.getElementById('tt-down').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-sm transition-all'; this.nextElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-gray-400 hover:text-white' : 'bg-[#0054A6] text-white shadow-sm'}">상행 (구미 방면)</button><button onclick="document.getElementById('tt-down').classList.remove('hidden'); document.getElementById('tt-up').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold bg-[#5998D6] text-white shadow-sm transition-all'; this.previousElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'bg-[#5998D6] text-white shadow-sm' : 'text-gray-400 hover:text-white'}">하행 (경산 방면)</button></div>`;
+
+            dom.modalSubtitle.innerHTML = `<div class="flex bg-white/5 rounded-full p-0.5 border border-white/5 w-fit mx-auto mt-1 mb-1"><button onclick="document.getElementById('tt-up').classList.remove('hidden'); document.getElementById('tt-down').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${THEME_COLOR}'; this.nextElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.nextElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-gray-400 hover:text-white' : 'text-white shadow-sm'}" style="${!isDownDefault ? `background-color: ${THEME_COLOR};` : ''}">${upLabel}</button><button onclick="document.getElementById('tt-down').classList.remove('hidden'); document.getElementById('tt-up').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='#5998D6'; this.previousElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.previousElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-white shadow-sm' : 'text-gray-400 hover:text-white'}" style="${isDownDefault ? `background-color: #5998D6;` : ''}">${downLabel}</button></div>`;
+            
             let html = renderList(upTimes, 'tt-up', isDownDefault); html += renderList(downTimes, 'tt-down', !isDownDefault);
             dom.modalContent.innerHTML = html; dom.timetableModal.classList.remove('hidden');
             setTimeout(() => {
@@ -692,12 +818,14 @@
             let activeTrainsUp = getActiveTrains(parsedTrainsUp, 'up');
             let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
+            
+            const lineLen = currentLineId === 'line1' ? 1800 : 1140;
             const renderedT = activeT.map(t => {
                 const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
                 if (ref) {
-                    const currentLen = 1140 * (t.overallProgress || 0); p = ref.getPointAtLength(currentLen);
-                    const np = ref.getPointAtLength(Math.max(0, Math.min(1140, currentLen + (t.direction === 'up' ? -1 : 1))));
+                    const currentLen = lineLen * (t.overallProgress || 0); p = ref.getPointAtLength(currentLen);
+                    const np = ref.getPointAtLength(Math.max(0, Math.min(lineLen, currentLen + (t.direction === 'up' ? -1 : 1))));
                     angle = (Math.abs(np.x - p.x) > 0.001 || Math.abs(np.y - p.y) > 0.001) ? Math.atan2(np.y - p.y, np.x - p.x) * 180 / Math.PI : (t.direction === 'up' ? -90 : 90);
                 }
                 return { ...t, point: p, angle };
@@ -706,8 +834,8 @@
             let btnHtml = activeT.length === 0 ? `<span class="text-xs text-gray-400 font-medium py-1">운행 종료</span>` : '';
             activeT.forEach(t => {
                 const isSel = t.id === selectedTrainId; const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR;
-                let selClass = isSel ? (t.direction === 'down' ? 'bg-[#5998D6] text-white shadow-md border border-[#5998D6]' : `bg-[${THEME_COLOR}] text-white shadow-md border border-[${THEME_COLOR}]`) : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10';
-                btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}"><span style="color: ${isSel ? '#FFFFFF' : tColor};" class="mr-1">●</span>${t.id}${t.isWaiting ? ' (대기)' : ''}</button>`;
+                let selClass = isSel ? (t.direction === 'down' ? 'bg-[#5998D6] text-white shadow-md border border-[#5998D6]' : `text-white shadow-md border`) : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10';
+                btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}" style="${isSel && t.direction === 'up' ? `background-color: ${THEME_COLOR}; border-color: ${THEME_COLOR};` : ''}"><span style="color: ${isSel ? '#FFFFFF' : tColor};" class="mr-1">●</span>${t.id}${t.isWaiting ? ' (대기)' : ''}</button>`;
             });
             dom.trainList.innerHTML = btnHtml;
             
@@ -726,7 +854,7 @@
                 updateLayer(dom.lineTrainsUp, renderedT.filter(t => t.direction === 'up'), true); updateLayer(dom.lineTrainsDown, renderedT.filter(t => t.direction === 'down'), true);
             }
             let lineHTML = ''; for (const stationName in STATIONS) {
-                const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + 1140 * s.progress;
+                const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
                 lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#333" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<text x="0" y="14" text-anchor="middle" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
@@ -737,7 +865,7 @@
             let panelHtml = ''; if (selectedStation) {
                 dom.floatingPanel.classList.remove('hidden'); let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
                 let upcoming = target.map(t => { const s = t.schedule.find(st => st.name === selectedStation); return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null; }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
-                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'bg-[#0054A6] text-white shadow-sm':'text-gray-400 hover:text-white'}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'bg-[#5998D6] text-white shadow-sm':'text-gray-400 hover:text-white'}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="${stationDetailDirection==='up'?'text-[#0054A6]':'text-[#5998D6]'} font-black text-[13px]">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
+                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-white'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'bg-[#5998D6] text-white shadow-sm':'text-gray-400 hover:text-white'}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : 'color: #5998D6;'}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
             } else if (selectedData) {
                 dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? '#5998D6' : THEME_COLOR;
                 panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-white tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-400">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
@@ -746,9 +874,16 @@
         };
 
         window.onload = async () => {
-            if (favoriteStation && STATIONS[favoriteStation]) {
-                homeSelectedStation = favoriteStation;
-                window.updateHomeUI();
+            if (favoriteStation) {
+                if (STATIONS_ALL['line1'][favoriteStation]) {
+                    await switchLine('line1', true);
+                    homeSelectedStation = favoriteStation;
+                } else if (STATIONS_ALL['daegyeong'][favoriteStation]) {
+                    await switchLine('daegyeong', true);
+                    homeSelectedStation = favoriteStation;
+                }
+            } else {
+                await switchLine('daegyeong', true);
             }
 
             currentDayType = getDayType(new Date());
