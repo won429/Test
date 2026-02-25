@@ -12,41 +12,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Tailwind safelist for dynamic colors: 
-    bg-[#0054A6] border-[#0054A6] text-[#0054A6] bg-[#0054A6]/10 bg-[#0054A6]/20 border-[#0054A6]/50 border-[#0054A6]/20 shadow-[0_2px_8px_rgba(0,84,166,0.3)] shadow-[0_0_15px_rgba(0,84,166,0.2)] shadow-[0_0_15px_rgba(0,84,166,0.4)]
-    bg-[#D93F5C] border-[#D93F5C] text-[#D93F5C] bg-[#D93F5C]/10 bg-[#D93F5C]/20 border-[#D93F5C]/50 border-[#D93F5C]/20 shadow-[0_2px_8px_rgba(217,63,92,0.3)] shadow-[0_0_15px_rgba(217,63,92,0.2)] shadow-[0_0_15px_rgba(217,63,92,0.4)]
-    bg-[#007448] border-[#007448] text-[#007448] bg-[#007448]/10 bg-[#007448]/20 border-[#007448]/50 border-[#007448]/20 shadow-[0_2px_8px_rgba(0,116,72,0.3)] shadow-[0_0_15px_rgba(0,116,72,0.2)] shadow-[0_0_15px_rgba(0,116,72,0.4)]
-    bg-[#009F62] border-[#009F62] text-[#009F62] bg-[#009F62]/10 bg-[#009F62]/20 border-[#009F62]/50 border-[#009F62]/20 shadow-[0_2px_8px_rgba(0,159,98,0.3)] shadow-[0_0_15px_rgba(0,159,98,0.2)] shadow-[0_0_15px_rgba(0,159,98,0.4)]
-    -->
     <style>
         body { 
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             touch-action: pan-y;
-            background-color: #333333; /* 사이트 바탕색 다크그레이로 변경 */
+            background-color: #ffffff; /* 사이트 바탕색 흰색 */
         }
         
-        /* 유리 재질 공통 클래스 */
+        /* 유리 재질 공통 클래스 (화이트 테마용) */
         .toss-card {
-            background: rgba(28, 28, 30, 0.85);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
         }
         
         .list-card {
-            background: #1C1C1E;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #f9fafb;
+            border: 1px solid rgba(0, 0, 0, 0.05);
             border-radius: 20px;
             transition: transform 0.1s;
         }
         .list-card:active {
             transform: scale(0.97);
-            background: #2C2C2E;
+            background: #f3f4f6;
         }
 
         /* 하단 네비게이션 인디케이터 */
@@ -57,8 +51,8 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .text-main { color: #F2F4F6; }
-        .text-sub { color: #A1A1A6; }
+        .text-main { color: #111827; }
+        .text-sub { color: #6B7280; }
         .pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
         
         /* 애니메이션 설정 */
@@ -84,7 +78,7 @@
             display: flex;
             align-items: center;
             padding: 0 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: background-color 0.3s;
         }
         .station-plate-pill {
@@ -113,23 +107,23 @@
             color: white;
             font-size: 13px;
             font-weight: 900;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s;
         }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex justify-center items-center overflow-hidden">
 
-    <!-- 스마트폰 형태의 메인 래퍼 (bg-[#333333] 적용) -->
-    <div id="app" class="w-full h-full max-w-[430px] bg-[#333333] relative flex flex-col overflow-hidden sm:border-x border-black/10 sm:shadow-2xl">
+    <!-- 스마트폰 형태의 메인 래퍼 -->
+    <div id="app" class="w-full h-full max-w-[430px] bg-white relative flex flex-col overflow-hidden sm:border-x border-black/5 sm:shadow-2xl">
         
-        <!-- 1. 홈 화면 (bg-[#333333] 적용) -->
-        <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-[#333333] flex-col overflow-y-auto hide-scrollbar pb-24">
-            <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-40 sticky top-0 border-b border-white/5">
+        <!-- 1. 홈 화면 -->
+        <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-white flex-col overflow-y-auto hide-scrollbar pb-24">
+            <header class="flex-none pt-safe bg-white/90 backdrop-blur-md z-40 sticky top-0">
                 <div class="px-5 pb-1 flex justify-between items-center">
-                    <h2 class="text-[18px] font-extrabold text-main tracking-tight">대구권 대경선 지하철역</h2>
+                    <h2 class="text-[18px] font-extrabold text-[#111827] tracking-tight">대구권 대경선 지하철역</h2>
                     <!-- 즐겨찾기 버튼 추가 -->
-                    <button id="favorite-toggle-btn" onclick="toggleFavorite()" class="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full text-gray-500 hover:text-yellow-400 transition-colors">
+                    <button id="favorite-toggle-btn" onclick="toggleFavorite()" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-400 hover:text-yellow-400 transition-colors">
                         <i id="favorite-icon" class="fa-regular fa-star text-[14px]"></i>
                     </button>
                 </div>
@@ -139,19 +133,19 @@
                 <div>
                     <!-- 지역 선택 탭 -->
                     <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-2 pb-1">
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">수도권</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">부산권</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">수도권</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">부산권</button>
                         <button id="btn-region-daegu" onclick="switchRegion('daegu')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대구권</button>
-                        <button id="btn-region-daejeon" onclick="switchRegion('daejeon')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all">대전</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">광주</button>
+                        <button id="btn-region-daejeon" onclick="switchRegion('daejeon')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">대전</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">광주</button>
                     </div>
 
                     <!-- 노선 선택 탭 -->
                     <div id="line-tabs-daegu" class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
                         <button id="btn-line-daegyeong" onclick="switchLine('daegyeong')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대경선</button>
-                        <button id="btn-line-1" onclick="switchLine('line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all">1호선</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">2호선</button>
-                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">3호선</button>
+                        <button id="btn-line-1" onclick="switchLine('line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">1호선</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">2호선</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-not-allowed">3호선</button>
                     </div>
                     <div id="line-tabs-daejeon" class="hidden gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
                         <button id="btn-line-daejeon1" onclick="switchLine('daejeon_line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all">1호선</button>
@@ -181,7 +175,6 @@
                 <!-- 도착 정보 섹션 -->
                 <div class="flex flex-col gap-3.5">
                     <div class="flex justify-between items-end mb-1 px-1">
-                        <!-- 흰색 배경에서 보이도록 텍스트 색상을 검은색으로 변경 -->
                         <h3 class="text-lg font-bold text-[#111827] tracking-tight">도착 정보</h3>
                         <div class="flex items-center gap-2">
                             <span id="data-status-home" class="hidden text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded-md border border-red-500/20 animate-pulse">임의 데이터 사용중</span>
@@ -192,23 +185,23 @@
 
                     <div class="grid grid-cols-2 gap-2.5">
                         <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
-                            <span id="home-up-dir-label" class="text-[12px] font-bold text-gray-400 mb-2.5">구미 방면</span>
+                            <span id="home-up-dir-label" class="text-[12px] font-bold text-gray-500 mb-2.5">구미 방면</span>
                             <div id="home-up-info" class="flex-1 flex flex-col justify-center items-center gap-1.5"></div>
                         </div>
                         <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
-                            <span id="home-down-dir-label" class="text-[12px] font-bold text-gray-400 mb-2.5">경산 방면</span>
+                            <span id="home-down-dir-label" class="text-[12px] font-bold text-gray-500 mb-2.5">경산 방면</span>
                             <div id="home-down-info" class="flex-1 flex flex-col justify-center gap-1.5"></div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2.5 mt-2">
-                        <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                        <button onclick="openHomeTimetable()" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
                             <i id="btn-icon-1" class="fa-regular fa-clock text-[#0054A6] text-[15px]"></i>
-                            <span class="text-[12px] font-bold text-gray-300">전체 시간표 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-600"></i></span>
+                            <span class="text-[12px] font-bold text-[#111827]">전체 시간표 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-400"></i></span>
                         </button>
-                        <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                        <button onclick="openHomeTimetable()" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
                             <i id="btn-icon-2" class="fa-solid fa-train-tram text-[#0054A6] text-[15px]"></i>
-                            <span class="text-[12px] font-bold text-gray-300">첫차·막차 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-600"></i></span>
+                            <span class="text-[12px] font-bold text-[#111827]">첫차·막차 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-400"></i></span>
                         </button>
                     </div>
                 </div>
@@ -216,26 +209,26 @@
         </main>
 
         <!-- 2. 상단 헤더 & 트래커 UI -->
-        <header id="main-header" class="hidden absolute top-0 left-0 w-full z-20 bg-black/80 backdrop-blur-md border-b border-white/5 flex flex-col pt-safe pb-1.5 shadow-sm text-white transition-all">
+        <header id="main-header" class="hidden absolute top-0 left-0 w-full z-20 bg-white/90 backdrop-blur-md flex flex-col pt-safe pb-1.5 shadow-sm text-[#111827] transition-all">
             <div class="px-4 pt-2 flex justify-between items-center mb-2">
                 <div class="flex items-center gap-2">
-                    <h1 id="line-header-title" class="text-[17px] font-extrabold tracking-tight text-white drop-shadow-sm">대구권 대경선 지하철 현황</h1>
-                    <select id="direction-toggle" class="bg-[#1C1C1E] text-gray-300 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-white/10 shadow-sm transition-all focus:ring-2 focus:ring-[#0054A6]/50 appearance-none pr-5 relative" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23A1A1A6%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 4px center;">
+                    <h1 id="line-header-title" class="text-[17px] font-extrabold tracking-tight text-[#111827] drop-shadow-sm">대구권 대경선 지하철 현황</h1>
+                    <select id="direction-toggle" class="bg-gray-100 text-gray-700 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-black/5 shadow-sm transition-all focus:ring-2 focus:ring-[#0054A6]/50 appearance-none pr-5 relative" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 4px center;">
                         <option value="up" class="text-gray-900">상행 (구미 방면)</option>
                         <option value="down" class="text-gray-900">하행 (경산 방면)</option>
                     </select>
                 </div>
                 <div class="flex flex-col items-end gap-1 shrink-0">
-                    <div class="flex items-center gap-1.5 bg-white/5 px-2.5 py-1.5 rounded-full border border-white/10">
-                        <i class="fa-regular fa-clock text-[10px] text-gray-400"></i>
-                        <span id="day-type-display" class="text-[10px] text-gray-300 font-bold">평일</span>
-                        <span class="text-gray-500 text-[10px] leading-none">·</span>
+                    <div class="flex items-center gap-1.5 bg-black/5 px-2.5 py-1.5 rounded-full border border-black/5">
+                        <i class="fa-regular fa-clock text-[10px] text-gray-500"></i>
+                        <span id="day-type-display" class="text-[10px] text-gray-600 font-bold">평일</span>
+                        <span class="text-gray-400 text-[10px] leading-none">·</span>
                         <span id="data-status-display" class="text-[10px] text-[#0054A6] font-bold">실시간</span>
-                        <span id="clock-display" class="text-[10px] text-gray-300 font-mono tracking-tighter ml-0.5">00:00:00</span>
+                        <span id="clock-display" class="text-[10px] text-gray-600 font-mono tracking-tighter ml-0.5">00:00:00</span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-[10px] font-medium text-gray-400 mr-1">
+                    <div class="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 mr-1">
                         <span>상행 <b id="count-up" class="font-extrabold text-[#0054A6]">0</b></span>
-                        <span class="text-gray-600 text-[8px] leading-none">|</span>
+                        <span class="text-gray-400 text-[8px] leading-none">|</span>
                         <span>하행 <b id="count-down" class="font-extrabold text-[#5998D6]">0</b></span>
                     </div>
                 </div>
@@ -244,12 +237,12 @@
             <div id="train-list" class="flex gap-2 overflow-x-auto px-4 pb-1 hide-scrollbar"></div>
         </header>
 
-        <!-- 3. 트래커 맵 스크롤 뷰 (bg-[#333333] 적용) -->
-        <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-[#333333] scroll-smooth relative pt-[80px] pb-32">
+        <!-- 3. 트래커 맵 스크롤 뷰 -->
+        <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-white scroll-smooth relative pt-[80px] pb-32">
             <div id="svg-wrapper" class="relative w-full h-[1500px]">
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
                     <svg id="line-svg" viewBox="0 0 400 1300" class="w-full h-[1300px]">
-                        <!-- 노선 상단 표시 (흰색 배경 알약 모양 적용) -->
+                        <!-- 노선 상단 표시 -->
                         <g id="svg-down-top">
                             <rect x="94" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" class="transition-colors duration-300" />
                             <text x="120" y="40.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">하행</text>
@@ -259,12 +252,12 @@
                             <text x="280" y="40.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">상행</text>
                         </g>
 
-                        <path id="line-path-down-bg" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" /> <!-- 하행 (시에라 블루/핑크) -->
-                        <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" /> <!-- 상행 -->
+                        <path id="line-path-down-bg" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" />
+                        <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" />
                         <path id="line-path-down" d="M 120 60 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <path id="line-path-up" d="M 280 60 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
                         
-                        <!-- 노선 하단 표시 (흰색 배경 알약 모양 적용) -->
+                        <!-- 노선 하단 표시 -->
                         <g id="svg-down-bottom" transform="translate(0,0)" class="transition-transform duration-300">
                             <rect x="94" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" class="transition-colors duration-300" />
                             <text x="120" y="1235.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">하행</text>
@@ -282,13 +275,13 @@
             </div>
         </main>
 
-        <button id="auto-scroll-btn" class="hidden absolute bottom-[200px] left-1/2 -translate-x-1/2 bg-[#1C1C1E]/80 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full shadow-xl text-[11px] font-bold text-gray-200 flex items-center gap-1.5 z-40 transition-transform active:scale-95">
+        <button id="auto-scroll-btn" class="hidden absolute bottom-[200px] left-1/2 -translate-x-1/2 bg-white border border-black/10 px-3.5 py-1.5 rounded-full shadow-xl text-[11px] font-bold text-gray-700 flex items-center gap-1.5 z-40 transition-transform active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-[#0054A6] text-[13px]" id="scroll-cross-icon"></i> 선택한 열차 따라가기
         </button>
 
         <div id="floating-panel" class="hidden absolute bottom-[100px] left-0 right-0 px-4 z-[90] min-h-[72px] transition-all duration-300"></div>
 
-        <!-- 4. 하단 네비게이션 (흰색 배경에 맞게 화이트/라이트 테마로 변경) -->
+        <!-- 4. 하단 네비게이션 -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[75%] max-w-[240px] px-1.5 touch-pan-x select-none">
             <div class="flex items-center justify-between bg-white/90 backdrop-blur-[12px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-black/10 rounded-full p-1 gap-0.5 relative transition-all duration-300">
                 <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white shadow-sm rounded-full border border-black/5 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
@@ -309,34 +302,26 @@
         </nav>
 
         <!-- 모달들 -->
-        <div id="timetable-modal" class="hidden absolute inset-0 z-[150] flex flex-col justify-end bg-black/60 backdrop-blur-sm transition-opacity">
-            <div class="bg-[#000000] w-full h-[75%] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.8)] flex flex-col animate-in border-t border-white/10">
-                <div class="flex flex-col items-center pt-4 pb-2 border-b border-white/5 shrink-0 relative">
-                    <div class="w-10 h-1 bg-white/20 rounded-full mb-3"></div>
-                    <h2 id="modal-title" class="text-[18px] font-extrabold text-white tracking-tight">역 시간표</h2>
+        <div id="timetable-modal" class="hidden absolute inset-0 z-[150] flex flex-col justify-end bg-black/40 backdrop-blur-sm transition-opacity">
+            <div class="bg-white w-full h-[75%] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.1)] flex flex-col animate-in border-t border-black/5">
+                <div class="flex flex-col items-center pt-4 pb-2 border-b border-black/5 shrink-0 relative">
+                    <div class="w-10 h-1 bg-gray-200 rounded-full mb-3"></div>
+                    <h2 id="modal-title" class="text-[18px] font-extrabold text-[#111827] tracking-tight">역 시간표</h2>
                     <div id="modal-subtitle" class="mt-1 flex w-full justify-center"></div>
-                    <button id="close-modal-btn" class="absolute right-5 top-4 w-7 h-7 flex items-center justify-center bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
+                    <button id="close-modal-btn" class="absolute right-5 top-4 w-7 h-7 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 hover:text-black transition-colors">
                         <i class="fa-solid fa-xmark text-[12px]"></i>
                     </button>
                 </div>
                 <div id="modal-content" class="flex-1 overflow-y-auto px-4 py-2 pb-10 hide-scrollbar"></div>
             </div>
         </div>
-        <!-- 열차 버튼 리스트 영역 -->
-        <div id="train-list" class="flex gap-2 overflow-x-auto px-4 pb-1 hide-scrollbar"></div>
-    </header>
 
-    <!-- 3. 트래커 맵 스크롤 뷰 (bg-gray-100 적용) -->
-    <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-gray-100 scroll-smooth relative pt-[80px] pb-32">
-        <div id="svg-wrapper" class="relative w-full h-[1500px]">
-            <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
-
-        <div id="station-selector-modal" class="hidden absolute inset-0 z-[150] flex flex-col justify-end bg-black/60 backdrop-blur-sm transition-opacity">
-            <div class="bg-[#000000] w-full h-[60%] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.8)] flex flex-col animate-in border-t border-white/10">
-                <div class="flex flex-col items-center pt-4 pb-3 border-b border-white/5 shrink-0 relative">
-                    <div class="w-10 h-1 bg-white/20 rounded-full mb-3"></div>
-                    <h2 class="text-[18px] font-extrabold text-white tracking-tight">역 선택</h2>
-                    <button onclick="closeStationSelector()" class="absolute right-5 top-4 w-7 h-7 flex items-center justify-center bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
+        <div id="station-selector-modal" class="hidden absolute inset-0 z-[150] flex flex-col justify-end bg-black/40 backdrop-blur-sm transition-opacity">
+            <div class="bg-white w-full h-[60%] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.1)] flex flex-col animate-in border-t border-black/5">
+                <div class="flex flex-col items-center pt-4 pb-3 border-b border-black/5 shrink-0 relative">
+                    <div class="w-10 h-1 bg-gray-200 rounded-full mb-3"></div>
+                    <h2 class="text-[18px] font-extrabold text-[#111827] tracking-tight">역 선택</h2>
+                    <button onclick="closeStationSelector()" class="absolute right-5 top-4 w-7 h-7 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 hover:text-black transition-colors">
                         <i class="fa-solid fa-xmark text-[12px]"></i>
                     </button>
                 </div>
@@ -642,13 +627,13 @@
 
             if (region === 'daegu') {
                 btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all';
-                btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 tabsDaegu.classList.remove('hidden'); tabsDaegu.classList.add('flex');
                 tabsDaejeon.classList.add('hidden'); tabsDaejeon.classList.remove('flex');
                 if (!isInit) await window.switchLine('daegyeong');
             } else if (region === 'daejeon') {
                 btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all';
-                btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 tabsDaegu.classList.add('hidden'); tabsDaegu.classList.remove('flex');
                 tabsDaejeon.classList.remove('hidden'); tabsDaejeon.classList.add('flex');
                 if (!isInit) await window.switchLine('daejeon_line1');
@@ -662,14 +647,13 @@
             DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : '#5998D6');
             STATIONS = STATIONS_ALL[lineId];
 
-            // 탭 버튼 UI 업데이트
             const btnD = document.getElementById('btn-line-daegyeong');
             const btn1 = document.getElementById('btn-line-1');
             const btnDaejeon1 = document.getElementById('btn-line-daejeon1');
 
             if (lineId === 'daegyeong') {
                 btnD.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
-                btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '구미';
                 document.querySelector('#home-screen h2').textContent = '대구권 대경선 지하철역';
                 dom.lineHeaderTitle.textContent = '대구권 대경선 지하철 현황';
@@ -679,7 +663,7 @@
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             } else if (lineId === 'line1') {
                 btn1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(217,63,92,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
-                btnD.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
+                btnD.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '설화명곡';
                 document.querySelector('#home-screen h2').textContent = '대구권 1호선 지하철역';
                 dom.lineHeaderTitle.textContent = '대구권 1호선 지하철 현황';
@@ -698,8 +682,7 @@
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             }
 
-            // 홈 화면 요소 동적 테마 업데이트
-            document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : '1';
+            document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : (lineId === 'daejeon_line1' ? '대' : '1');
             document.querySelector('.metro-logo-circle').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-base').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-pill').style.borderColor = THEME_COLOR;
@@ -707,7 +690,6 @@
             document.getElementById('btn-icon-2').style.color = THEME_COLOR;
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
-            // 역 개수에 따라 노선도 SVG 길이 동적 변경
             const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : 1600);
             const svg = document.getElementById('line-svg');
             if (svg) {
@@ -788,11 +770,11 @@
             const upTrains = getUpc(parsedTrainsUp);
             const downTrains = getUpc(parsedTrainsDown);
             const renderL = (trains) => {
-                if (!trains || trains.length === 0) return `<span class="text-gray-500 text-[12px] font-bold my-auto">운행 종료</span>`;
+                if (!trains || trains.length === 0) return `<span class="text-gray-400 text-[12px] font-bold my-auto">운행 종료</span>`;
                 return trains.map(t => {
                     const diff = t.sec - currentSec;
                     const timeText = diff <= 0 ? '곧 도착' : (diff < 60 ? diff + '초' : Math.ceil(diff/60) + '분');
-                    return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2 rounded-xl border border-white/5"><span class="text-[12px] font-bold text-gray-200">${t.dest}</span><span class="text-[13px] font-extrabold" style="color:${THEME_COLOR}">${timeText}</span></div>`;
+                    return `<div class="flex justify-between items-center w-full bg-white px-3 py-2 rounded-xl border border-black/5 shadow-sm"><span class="text-[12px] font-bold text-[#111827]">${t.dest}</span><span class="text-[13px] font-extrabold" style="color:${THEME_COLOR}">${timeText}</span></div>`;
                 }).join('');
             };
             
@@ -800,15 +782,15 @@
             const isFirst = homeSelectedStation === stationNames[0];
             const isLast = homeSelectedStation === stationNames[stationNames.length - 1];
 
-            dom.homeUpInfo.innerHTML = isFirst ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
-            dom.homeDownInfo.innerHTML = isLast ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(downTrains);
+            dom.homeUpInfo.innerHTML = isFirst ? `<span class="text-gray-400 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
+            dom.homeDownInfo.innerHTML = isLast ? `<span class="text-gray-400 text-[12px] font-bold my-auto">종점</span>` : renderL(downTrains);
         };
 
         window.openStationSelector = () => {
             dom.stationSelectorModal.classList.remove('hidden');
             dom.selectorListContainer.innerHTML = Object.keys(STATIONS).map(name => `
-                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-4 py-3 rounded-[14px] ${name === homeSelectedStation ? 'selected-station-card' : 'bg-white/5 border border-white/5 hover:bg-white/10'} cursor-pointer active:scale-[0.98] transition-all" style="${name === homeSelectedStation ? `background-color: ${THEME_COLOR}33; border-color: ${THEME_COLOR}80;` : ''}">
-                    <span class="text-[14px] font-bold ${name === homeSelectedStation ? '' : 'text-gray-200'}" style="${name === homeSelectedStation ? `color: ${THEME_COLOR};` : ''}">${name}역</span>
+                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-4 py-3 rounded-[14px] ${name === homeSelectedStation ? '' : 'bg-gray-50 border border-black/5 hover:bg-gray-100'} cursor-pointer active:scale-[0.98] transition-all" style="${name === homeSelectedStation ? `background-color: ${THEME_COLOR}22; border-color: ${THEME_COLOR}55;` : ''}">
+                    <span class="text-[14px] font-bold ${name === homeSelectedStation ? '' : 'text-gray-700'}" style="${name === homeSelectedStation ? `color: ${THEME_COLOR};` : ''}">${name}역</span>
                     ${name === homeSelectedStation ? `<i class="fa-solid fa-check text-[14px] drop-shadow-sm" style="color: ${THEME_COLOR};"></i>` : ''}
                 </div>`).join('');
         };
@@ -846,7 +828,6 @@
                 dom.navIndicator.style.width = `${targetBtn.offsetWidth}px`;
                 dom.navIndicator.style.transform = `translateX(${targetBtn.offsetLeft - 4}px)`;
             }
-            // 하단 메뉴가 밝은 배경에 어울리도록 JS 클래스 변경 (검은색 텍스트 활용)
             tabs.forEach(id => {
                 const el = document.getElementById(id); if (!el) return;
                 const icon = el.querySelector('i'); const span = el.querySelector('span');
@@ -883,15 +864,15 @@
                 const isDown = id === 'tt-down';
                 const curColor = isDown ? DOWN_COLOR : THEME_COLOR;
                 let listHtml = `<div id="${id}" class="space-y-1.5 mt-2 ${isHidden ? 'hidden' : ''}">`;
-                if(times.length === 0) listHtml += `<div class="text-center text-gray-500 py-10 font-medium text-[12px]">운행 정보가 없습니다.</div>`;
+                if(times.length === 0) listHtml += `<div class="text-center text-gray-400 py-10 font-medium text-[12px]">운행 정보가 없습니다.</div>`;
                 times.forEach(t => {
                     const isPast = t.sec < currentSec;
-                    listHtml += `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40 past-time' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-500' : 'text-white tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-600' : 'text-gray-400'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-600 bg-white/5 border-white/5' : 'text-white shadow-sm'}" style="${!isPast ? `background-color: ${curColor}; border-color: ${curColor};` : ''} padding: 2px 8px; border-radius: 4px; border-width: 1px;">${t.id}</span></div>`;
+                    listHtml += `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-400' : 'text-[#111827] tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-400' : 'text-gray-600'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-400 bg-gray-100 border-black/5' : 'text-white shadow-sm'}" style="${!isPast ? `background-color: ${curColor}; border-color: ${curColor};` : ''} padding: 2px 8px; border-radius: 4px; border-width: 1px;">${t.id}</span></div>`;
                 });
                 listHtml += `</div>`; return listHtml;
             };
 
-            dom.modalSubtitle.innerHTML = `<div class="flex bg-white/5 rounded-full p-0.5 border border-white/5 w-fit mx-auto mt-1 mb-1"><button onclick="document.getElementById('tt-up').classList.remove('hidden'); document.getElementById('tt-down').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${THEME_COLOR}'; this.nextElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.nextElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-gray-400 hover:text-white' : 'text-white shadow-sm'}" style="${!isDownDefault ? `background-color: ${THEME_COLOR};` : ''}">${upLabel}</button><button onclick="document.getElementById('tt-down').classList.remove('hidden'); document.getElementById('tt-up').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${DOWN_COLOR}'; this.previousElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.previousElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-white shadow-sm' : 'text-gray-400 hover:text-white'}" style="${isDownDefault ? `background-color: ${DOWN_COLOR};` : ''}">${downLabel}</button></div>`;
+            dom.modalSubtitle.innerHTML = `<div class="flex bg-gray-100 rounded-full p-0.5 border border-black/5 w-fit mx-auto mt-1 mb-1"><button onclick="document.getElementById('tt-up').classList.remove('hidden'); document.getElementById('tt-down').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${THEME_COLOR}'; this.nextElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-500 hover:text-black transition-all'; this.nextElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-gray-500 hover:text-black' : 'text-white shadow-sm'}" style="${!isDownDefault ? `background-color: ${THEME_COLOR};` : ''}">${upLabel}</button><button onclick="document.getElementById('tt-down').classList.remove('hidden'); document.getElementById('tt-up').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${DOWN_COLOR}'; this.previousElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-500 hover:text-black transition-all'; this.previousElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-white shadow-sm' : 'text-gray-500 hover:text-black'}" style="${isDownDefault ? `background-color: ${DOWN_COLOR};` : ''}">${downLabel}</button></div>`;
             
             let html = renderList(upTimes, 'tt-up', isDownDefault); html += renderList(downTimes, 'tt-down', !isDownDefault);
             dom.modalContent.innerHTML = html; dom.timetableModal.classList.remove('hidden');
@@ -940,7 +921,7 @@
             let btnHtml = activeT.length === 0 ? `<span class="text-xs text-gray-400 font-medium py-1">운행 종료</span>` : '';
             activeT.forEach(t => {
                 const isSel = t.id === selectedTrainId; const tColor = t.direction === 'down' ? DOWN_COLOR : THEME_COLOR;
-                let selClass = isSel ? 'text-white shadow-md border' : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10';
+                let selClass = isSel ? 'text-white shadow-md border' : 'bg-gray-100 text-gray-600 border border-black/5 hover:bg-gray-200';
                 btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}" style="${isSel ? `background-color: ${tColor}; border-color: ${tColor};` : ''}"><span style="color: ${isSel ? '#FFFFFF' : tColor};" class="mr-1">●</span>${t.id}${t.isWaiting ? ' (대기)' : ''}</button>`;
             });
             dom.trainList.innerHTML = btnHtml;
@@ -952,17 +933,16 @@
                         let g = layer.querySelector(`g[data-id="${t.id}"]`); const isSelected = t.id === selectedTrainId;
                         if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.dataset.id = t.id; g.setAttribute("class", "cursor-pointer"); g.setAttribute("onclick", `handleTrainClick('${t.id}')`); layer.appendChild(g); }
                         g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
-                        const tColor = t.direction === 'down' ? DOWN_COLOR : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#3f3f46');
+                        const tColor = t.direction === 'down' ? DOWN_COLOR : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#9ca3af');
                         const isUp = t.direction === 'up'; const textWidth = t.id.length * 6 + 14; const rectX = -(textWidth / 2);
-                        g.innerHTML = `${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}<rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#FFFFFF' : '#1C1C1E'}" stroke-width="${isSelected ? '2' : '1'}" /><rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" /><circle cx="15" cy="-3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" /><circle cx="15" cy="3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?10:-25}" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" /><text x="0" y="${isUp?21:-14}" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
+                        g.innerHTML = `${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}<rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#000000' : '#ffffff'}" stroke-width="${isSelected ? '2' : '1'}" /><rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" /><circle cx="15" cy="-3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" /><circle cx="15" cy="3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?10:-25}" width="${textWidth}" height="16" rx="8" fill="#ffffff" stroke="${tColor}" stroke-width="1.5" shadow="0 2px 4px rgba(0,0,0,0.1)" /><text x="0" y="${isUp?21:-14}" text-anchor="middle" fill="#111827" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
                     });
                 };
                 updateLayer(dom.lineTrainsUp, renderedT.filter(t => t.direction === 'up'), true); updateLayer(dom.lineTrainsDown, renderedT.filter(t => t.direction === 'down'), true);
             }
             let lineHTML = ''; for (const stationName in STATIONS) {
                 const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
-                // 흰 배경에서 선이 예쁘게 보이도록 stroke="#D1D5DB" 로 변경, 텍스트도 #111827 적용
-                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
+                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
@@ -972,10 +952,10 @@
             let panelHtml = ''; if (selectedStation) {
                 dom.floatingPanel.classList.remove('hidden'); let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
                 let upcoming = target.map(t => { const s = t.schedule.find(st => st.name === selectedStation); return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null; }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
-                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-white'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'text-white shadow-sm':'text-gray-400 hover:text-white'}" style="${stationDetailDirection==='down' ? `background-color: ${DOWN_COLOR};` : ''}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : `color: ${DOWN_COLOR};`}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
+                panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-2xl transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-[#111827] tracking-tight">${selectedStation}역</h3><div class="flex bg-gray-100 rounded-full p-0.5 border border-black/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='down' ? `background-color: ${DOWN_COLOR};` : ''}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center hover:text-black hover:bg-gray-200 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center shadow-sm border border-black/5"><span class="text-[#111827] font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-500 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : `color: ${DOWN_COLOR};`}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-400 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 border border-black/5 transition-colors rounded-[14px] font-bold text-gray-700 text-[12px] flex items-center justify-center gap-1.5 shadow-sm"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
             } else if (selectedData) {
                 dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? DOWN_COLOR : THEME_COLOR;
-                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-white tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-400">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
+                panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-2xl min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-black/10 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-500">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-500">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
             } else dom.floatingPanel.classList.add('hidden');
             if(dom.floatingPanel.innerHTML !== panelHtml && activeTab !== 'home') dom.floatingPanel.innerHTML = panelHtml;
         };
