@@ -219,7 +219,7 @@
         <header id="main-header" class="hidden absolute top-0 left-0 w-full z-20 bg-black/80 backdrop-blur-md border-b border-white/5 flex flex-col pt-safe pb-1.5 shadow-sm text-white transition-all">
             <div class="px-4 pt-2 flex justify-between items-center mb-2">
                 <div class="flex items-center gap-2">
-                    <h1 class="text-[17px] font-extrabold tracking-tight text-white drop-shadow-sm">지하철 현황</h1>
+                    <h1 id="line-header-title" class="text-[17px] font-extrabold tracking-tight text-white drop-shadow-sm">대구권 대경선 지하철 현황</h1>
                     <select id="direction-toggle" class="bg-[#1C1C1E] text-gray-300 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-white/10 shadow-sm transition-all focus:ring-2 focus:ring-[#0054A6]/50 appearance-none pr-5 relative" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23A1A1A6%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 4px center;">
                         <option value="up" class="text-gray-900">상행 (구미 방면)</option>
                         <option value="down" class="text-gray-900">하행 (경산 방면)</option>
@@ -508,7 +508,8 @@
             favoriteIcon: document.getElementById('favorite-icon'),
             svgWrapper: document.getElementById('svg-wrapper'),
             countUp: document.getElementById('count-up'),
-            countDown: document.getElementById('count-down')
+            countDown: document.getElementById('count-down'),
+            lineHeaderTitle: document.getElementById('line-header-title')
         };
 
         const getDayType = (dateObj) => {
@@ -663,6 +664,7 @@
                 btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '구미';
                 document.querySelector('#home-screen h2').textContent = '대구권 대경선 지하철역';
+                dom.lineHeaderTitle.textContent = '대구권 대경선 지하철 현황';
                 dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (구미 방면)</option><option value="down" class="text-gray-900">하행 (경산 방면)</option>';
                 document.getElementById('home-up-dir-label').textContent = '구미 방면';
                 document.getElementById('home-down-dir-label').textContent = '경산 방면';
@@ -672,6 +674,7 @@
                 btnD.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-pointer hover:bg-white/10 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '설화명곡';
                 document.querySelector('#home-screen h2').textContent = '대구권 1호선 지하철역';
+                dom.lineHeaderTitle.textContent = '대구권 1호선 지하철 현황';
                 dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (설화명곡 방면)</option><option value="down" class="text-gray-900">하행 (안심/하양 방면)</option>';
                 document.getElementById('home-up-dir-label').textContent = '설화명곡 방면';
                 document.getElementById('home-down-dir-label').textContent = '하양 방면';
@@ -680,6 +683,7 @@
                 btnDaejeon1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '반석';
                 document.querySelector('#home-screen h2').textContent = '대전 1호선 지하철역';
+                dom.lineHeaderTitle.textContent = '대전 1호선 지하철 현황';
                 dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (반석 방면)</option><option value="down" class="text-gray-900">하행 (판암 방면)</option>';
                 document.getElementById('home-up-dir-label').textContent = '반석 방면';
                 document.getElementById('home-down-dir-label').textContent = '판암 방면';
@@ -948,7 +952,7 @@
             }
             let lineHTML = ''; for (const stationName in STATIONS) {
                 const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
-                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#333" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<text x="0" y="14" text-anchor="middle" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}</g>`;
+                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#333" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" opacity="1" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" />` : ''}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
