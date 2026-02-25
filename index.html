@@ -239,27 +239,27 @@
                     <svg id="line-svg" viewBox="0 0 400 1300" class="w-full h-[1300px]">
                         <!-- 노선 상단 표시 (흰색 배경 알약 모양 적용) -->
                         <g id="svg-down-top">
-                            <rect x="94" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
-                            <text x="120" y="40.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
+                            <rect x="94" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" class="transition-colors duration-300" />
+                            <text x="120" y="40.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">하행</text>
                         </g>
                         <g id="svg-up-top">
-                            <rect x="254" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" transition="stroke 0.3s" />
-                            <text x="280" y="40.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest" transition="fill 0.3s">상행</text>
+                            <rect x="254" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" class="transition-colors duration-300" />
+                            <text x="280" y="40.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">상행</text>
                         </g>
 
-                        <path id="line-path-down-bg" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 하행 (시에라 블루) -->
-                        <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" transition="stroke 0.3s" /> <!-- 상행 -->
+                        <path id="line-path-down-bg" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" /> <!-- 하행 (시에라 블루/핑크) -->
+                        <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" /> <!-- 상행 -->
                         <path id="line-path-down" d="M 120 60 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <path id="line-path-up" d="M 280 60 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
                         
                         <!-- 노선 하단 표시 (흰색 배경 알약 모양 적용) -->
-                        <g id="svg-down-bottom" transform="translate(0,0)" transition="transform 0.3s">
-                            <rect x="94" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
-                            <text x="120" y="1235.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
+                        <g id="svg-down-bottom" transform="translate(0,0)" class="transition-transform duration-300">
+                            <rect x="94" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" class="transition-colors duration-300" />
+                            <text x="120" y="1235.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">하행</text>
                         </g>
-                        <g id="svg-up-bottom" transform="translate(0,0)" transition="transform 0.3s">
-                            <rect x="254" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" transition="stroke 0.3s" />
-                            <text x="280" y="1235.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest" transition="fill 0.3s">상행</text>
+                        <g id="svg-up-bottom" transform="translate(0,0)" class="transition-transform duration-300">
+                            <rect x="254" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" class="transition-colors duration-300" />
+                            <text x="280" y="1235.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">상행</text>
                         </g>
 
                         <g id="line-stations"></g>
@@ -330,6 +330,7 @@
 
         let currentLineId = 'daegyeong';
         let THEME_COLOR = "#0054A6";
+        let DOWN_COLOR = "#5998D6";
         const STOP_DURATION = 25; 
 
         const STATIONS_ALL = {
@@ -578,6 +579,7 @@
             if (currentLineId === lineId && !isInit) return;
             currentLineId = lineId;
             THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : '#0054A6';
+            DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : '#5998D6';
             STATIONS = STATIONS_ALL[lineId];
 
             // 탭 버튼 UI 업데이트
@@ -613,7 +615,7 @@
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
             // 역 개수에 따라 노선도 SVG 길이 동적 변경
-            const lineLen = currentLineId === 'line1' ? 1800 : 1140;
+            const lineLen = currentLineId === 'line1' ? 3200 : 1600;
             const svg = document.getElementById('line-svg');
             if (svg) {
                 svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
@@ -632,6 +634,10 @@
                 document.querySelectorAll('#svg-up-top rect, #svg-up-bottom rect').forEach(r => r.setAttribute('stroke', THEME_COLOR));
                 document.querySelectorAll('#svg-up-top text, #svg-up-bottom text').forEach(t => t.setAttribute('fill', THEME_COLOR));
                 document.getElementById('line-path-up-bg').setAttribute('stroke', THEME_COLOR);
+
+                document.querySelectorAll('#svg-down-top rect, #svg-down-bottom rect').forEach(r => r.setAttribute('stroke', DOWN_COLOR));
+                document.querySelectorAll('#svg-down-top text, #svg-down-bottom text').forEach(t => t.setAttribute('fill', DOWN_COLOR));
+                document.getElementById('line-path-down-bg').setAttribute('stroke', DOWN_COLOR);
             }
 
             selectedStation = null;
@@ -780,16 +786,18 @@
             const downLabel = `하행 (${stationNames[stationNames.length - 1]} 방면)`;
 
             const renderList = (times, id, isHidden) => {
+                const isDown = id === 'tt-down';
+                const curColor = isDown ? DOWN_COLOR : THEME_COLOR;
                 let listHtml = `<div id="${id}" class="space-y-1.5 mt-2 ${isHidden ? 'hidden' : ''}">`;
                 if(times.length === 0) listHtml += `<div class="text-center text-gray-500 py-10 font-medium text-[12px]">운행 정보가 없습니다.</div>`;
                 times.forEach(t => {
                     const isPast = t.sec < currentSec;
-                    listHtml += `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40 past-time' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-500' : 'text-white tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-600' : 'text-gray-400'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-600 bg-white/5 border-white/5' : 'text-white shadow-sm'}" style="${!isPast ? `background-color: ${THEME_COLOR}; border-color: ${THEME_COLOR};` : ''} padding: 2px 8px; border-radius: 4px; border-width: 1px;">${t.id}</span></div>`;
+                    listHtml += `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40 past-time' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-500' : 'text-white tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-600' : 'text-gray-400'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-600 bg-white/5 border-white/5' : 'text-white shadow-sm'}" style="${!isPast ? `background-color: ${curColor}; border-color: ${curColor};` : ''} padding: 2px 8px; border-radius: 4px; border-width: 1px;">${t.id}</span></div>`;
                 });
                 listHtml += `</div>`; return listHtml;
             };
 
-            dom.modalSubtitle.innerHTML = `<div class="flex bg-white/5 rounded-full p-0.5 border border-white/5 w-fit mx-auto mt-1 mb-1"><button onclick="document.getElementById('tt-up').classList.remove('hidden'); document.getElementById('tt-down').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${THEME_COLOR}'; this.nextElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.nextElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-gray-400 hover:text-white' : 'text-white shadow-sm'}" style="${!isDownDefault ? `background-color: ${THEME_COLOR};` : ''}">${upLabel}</button><button onclick="document.getElementById('tt-down').classList.remove('hidden'); document.getElementById('tt-up').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='#5998D6'; this.previousElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.previousElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-white shadow-sm' : 'text-gray-400 hover:text-white'}" style="${isDownDefault ? `background-color: #5998D6;` : ''}">${downLabel}</button></div>`;
+            dom.modalSubtitle.innerHTML = `<div class="flex bg-white/5 rounded-full p-0.5 border border-white/5 w-fit mx-auto mt-1 mb-1"><button onclick="document.getElementById('tt-up').classList.remove('hidden'); document.getElementById('tt-down').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${THEME_COLOR}'; this.nextElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.nextElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-gray-400 hover:text-white' : 'text-white shadow-sm'}" style="${!isDownDefault ? `background-color: ${THEME_COLOR};` : ''}">${upLabel}</button><button onclick="document.getElementById('tt-down').classList.remove('hidden'); document.getElementById('tt-up').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-all'; this.style.backgroundColor='${DOWN_COLOR}'; this.previousElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all'; this.previousElementSibling.style.backgroundColor='transparent';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-white shadow-sm' : 'text-gray-400 hover:text-white'}" style="${isDownDefault ? `background-color: ${DOWN_COLOR};` : ''}">${downLabel}</button></div>`;
             
             let html = renderList(upTimes, 'tt-up', isDownDefault); html += renderList(downTimes, 'tt-down', !isDownDefault);
             dom.modalContent.innerHTML = html; dom.timetableModal.classList.remove('hidden');
@@ -819,7 +827,7 @@
             let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
-            const lineLen = currentLineId === 'line1' ? 1800 : 1140;
+            const lineLen = currentLineId === 'line1' ? 3200 : 1600;
             const renderedT = activeT.map(t => {
                 const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
@@ -833,9 +841,9 @@
             const selectedData = renderedT.find(t => t.id === selectedTrainId);
             let btnHtml = activeT.length === 0 ? `<span class="text-xs text-gray-400 font-medium py-1">운행 종료</span>` : '';
             activeT.forEach(t => {
-                const isSel = t.id === selectedTrainId; const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR;
-                let selClass = isSel ? (t.direction === 'down' ? 'bg-[#5998D6] text-white shadow-md border border-[#5998D6]' : `text-white shadow-md border`) : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10';
-                btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}" style="${isSel && t.direction === 'up' ? `background-color: ${THEME_COLOR}; border-color: ${THEME_COLOR};` : ''}"><span style="color: ${isSel ? '#FFFFFF' : tColor};" class="mr-1">●</span>${t.id}${t.isWaiting ? ' (대기)' : ''}</button>`;
+                const isSel = t.id === selectedTrainId; const tColor = t.direction === 'down' ? DOWN_COLOR : THEME_COLOR;
+                let selClass = isSel ? 'text-white shadow-md border' : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10';
+                btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}" style="${isSel ? `background-color: ${tColor}; border-color: ${tColor};` : ''}"><span style="color: ${isSel ? '#FFFFFF' : tColor};" class="mr-1">●</span>${t.id}${t.isWaiting ? ' (대기)' : ''}</button>`;
             });
             dom.trainList.innerHTML = btnHtml;
             
@@ -846,7 +854,7 @@
                         let g = layer.querySelector(`g[data-id="${t.id}"]`); const isSelected = t.id === selectedTrainId;
                         if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.dataset.id = t.id; g.setAttribute("class", "cursor-pointer"); g.setAttribute("onclick", `handleTrainClick('${t.id}')`); layer.appendChild(g); }
                         g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
-                        const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#3f3f46');
+                        const tColor = t.direction === 'down' ? DOWN_COLOR : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#3f3f46');
                         const isUp = t.direction === 'up'; const textWidth = t.id.length * 6 + 14; const rectX = -(textWidth / 2);
                         g.innerHTML = `${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}<rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#FFFFFF' : '#1C1C1E'}" stroke-width="${isSelected ? '2' : '1'}" /><rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" /><circle cx="15" cy="-3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" /><circle cx="15" cy="3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?10:-25}" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" /><text x="0" y="${isUp?21:-14}" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
                     });
@@ -865,9 +873,9 @@
             let panelHtml = ''; if (selectedStation) {
                 dom.floatingPanel.classList.remove('hidden'); let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
                 let upcoming = target.map(t => { const s = t.schedule.find(st => st.name === selectedStation); return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null; }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
-                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-white'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'bg-[#5998D6] text-white shadow-sm':'text-gray-400 hover:text-white'}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : 'color: #5998D6;'}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
+                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-white'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'text-white shadow-sm':'text-gray-400 hover:text-white'}" style="${stationDetailDirection==='down' ? `background-color: ${DOWN_COLOR};` : ''}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : `color: ${DOWN_COLOR};`}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
             } else if (selectedData) {
-                dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? '#5998D6' : THEME_COLOR;
+                dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? DOWN_COLOR : THEME_COLOR;
                 panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-white tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-400">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
             } else dom.floatingPanel.classList.add('hidden');
             if(dom.floatingPanel.innerHTML !== panelHtml && activeTab !== 'home') dom.floatingPanel.innerHTML = panelHtml;
