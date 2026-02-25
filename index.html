@@ -563,15 +563,6 @@
         const loadTimetable = async () => {
             const statusDisplay = document.getElementById('data-status-display');
             const statusHome = document.getElementById('data-status-home');
-            
-            if (currentLineId === 'line1' || currentLineId === 'daejeon_line1') {
-                parsedTrainsUp = createMockData('up');
-                parsedTrainsDown = createMockData('down');
-                parsedTrains = currentDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
-                if (statusDisplay) { statusDisplay.innerHTML = `<span class="text-red-400 font-extrabold animate-pulse">임의 데이터 사용중</span>`; statusDisplay.className = `text-[10px] font-bold`; statusDisplay.style.color = THEME_COLOR; }
-                if (statusHome) statusHome.classList.remove('hidden');
-                return;
-            }
 
             let targetUpUrl = FILE_URLS[currentLineId][currentDayType + '_up'];
             let targetDownUrl = FILE_URLS[currentLineId][currentDayType + '_down'];
