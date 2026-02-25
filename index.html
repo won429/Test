@@ -8,6 +8,10 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Leaflet Map (실제 지도 라이브러리) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <!-- 폰트 및 아이콘 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,7 +25,7 @@
             background-color: #0a0a0a;
         }
         
-        /* 유리 재질 공통 클래스 (Enjoy Travel Record 디자인 핵심) */
+        /* 유리 재질 공통 클래스 */
         .toss-card {
             background: rgba(28, 28, 30, 0.85);
             backdrop-filter: blur(16px) saturate(180%);
@@ -71,8 +75,8 @@
 
         /* 이미지 기반 실사 역명판 커스텀 CSS */
         .station-plate-base {
-            height: 52px;
-            background-color: #3182F6; /* 이미지 속 선명한 블루 */
+            height: 34px; 
+            background-color: #0054A6;
             border-radius: 9999px;
             position: relative;
             display: flex;
@@ -82,10 +86,10 @@
         }
         .station-plate-pill {
             background-color: white;
-            height: 40px;
-            padding: 0 16px;
+            height: 52px; 
+            padding: 0 24px;
             border-radius: 9999px;
-            border: 2px solid #3182F6;
+            border: 3px solid #0054A6;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -95,48 +99,79 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .metro-logo-circle {
-            width: 24px;
-            height: 24px;
-            background-color: #3182F6;
+            width: 26px; /* 크기 약간 확대 */
+            height: 26px;
+            background-color: #0054A6; /* 코레일 블루 적용 */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 900;
+            box-shadow: 0 2px 4px rgba(0, 84, 166, 0.4);
+            border: 2px solid white; /* 예쁜 흰색 테두리 추가 */
         }
+
+        /* 리플렛 맵 z-index 오버라이드 (UI 가림 방지) */
+        .leaflet-pane { z-index: 1 !important; }
+        .leaflet-top, .leaflet-bottom { z-index: 2 !important; }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex justify-center items-center overflow-hidden">
 
-    <!-- 스마트폰 형태의 메인 래퍼 (Enjoy Travel Record 디자인 가이드 준수) -->
+    <!-- 스마트폰 형태의 메인 래퍼 -->
     <div id="app" class="w-full h-full max-w-[430px] bg-black relative flex flex-col overflow-hidden sm:border-x border-white/10 sm:shadow-2xl">
         
-        <!-- 1. 홈 화면 (이미지 디자인 완벽 반영) -->
+        <!-- 1. 홈 화면 -->
         <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-black flex-col overflow-y-auto hide-scrollbar pb-24">
             <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-40 sticky top-0 border-b border-white/5">
-                <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                    <h2 class="text-xl font-extrabold text-main tracking-tight">대구권 지하철역</h2>
+                <div class="px-5 pb-1 flex justify-between items-center">
+                    <h2 class="text-[18px] font-extrabold text-main tracking-tight">대경선 지하철역</h2>
+                    <!-- 즐겨찾기 버튼 추가 -->
+                    <button id="favorite-toggle-btn" onclick="toggleFavorite()" class="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full text-gray-500 hover:text-yellow-400 transition-colors">
+                        <i id="favorite-icon" class="fa-regular fa-star text-[14px]"></i>
+                    </button>
                 </div>
             </header>
 
-            <div class="px-5 pt-8 space-y-8">
-                <!-- 이미지 속 디자인을 그대로 가져온 역명판 -->
-                <div onclick="openStationSelector()" class="relative w-full flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
-                    <!-- 파란색 베이스 라인 -->
-                    <div class="station-plate-base w-full">
-                        <div class="flex-1"></div>
-                        <div class="flex-1 text-right pr-2">
-                            <div id="home-next-station-container" class="opacity-100 transition-opacity">
-                                <span id="home-next-station" class="text-white text-[15px] font-bold tracking-tight">사곡 &gt;</span>
+            <div class="px-5 pt-3 space-y-6">
+                <div>
+                    <!-- 지역 선택 탭 -->
+                    <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-2 pb-1">
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">수도권</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">부산권</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대구권</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">대전</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">광주</button>
+                    </div>
+
+                    <!-- 노선 선택 탭 -->
+                    <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대경선</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">1호선</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">2호선</button>
+                        <button class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-gray-500 shrink-0 border border-white/5 cursor-not-allowed">3호선</button>
+                    </div>
+
+                    <!-- 코레일 스타일 역명판 -->
+                    <div onclick="openStationSelector()" class="relative w-full flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+                        <div class="station-plate-base w-full">
+                            <div class="flex-1 text-left pl-2">
+                                <div id="home-prev-station-container" class="opacity-0 transition-opacity">
+                                    <span id="home-prev-station" class="text-white text-[15px] font-bold tracking-tight"></span>
+                                </div>
+                            </div>
+                            <div class="flex-1 text-right pr-2">
+                                <div id="home-next-station-container" class="opacity-100 transition-opacity">
+                                    <span id="home-next-station" class="text-white text-[15px] font-bold tracking-tight">사곡 &gt;</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- 중앙 흰색 역명 캡슐 -->
-                    <div class="station-plate-pill">
-                        <div class="metro-logo-circle">대</div>
-                        <span id="home-station-name" class="text-lg font-black text-black">구미</span>
+                        <div class="station-plate-pill">
+                            <div class="metro-logo-circle">대</div>
+                            <span id="home-station-name" class="text-lg font-black text-black">구미</span>
+                        </div>
                     </div>
                 </div>
 
@@ -145,30 +180,32 @@
                     <div class="flex justify-between items-end mb-1 px-1">
                         <h3 class="text-lg font-bold text-main tracking-tight">도착 정보</h3>
                         <div class="flex items-center gap-2">
+                            <!-- 테스트용 데이터 사용 시 나타나는 배지 -->
+                            <span id="data-status-home" class="hidden text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded-md border border-red-500/20 animate-pulse">임의 데이터 사용중</span>
                             <span id="home-current-time" class="text-xs font-bold text-sub bg-white/5 px-2 py-1 rounded-md">오후 5:35</span>
                             <button onclick="renderHomeArrivalInfo()" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-white transition-colors"><i class="fa-solid fa-rotate-right"></i></button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="list-card p-5 flex flex-col h-full min-h-[140px] relative overflow-hidden text-center">
-                            <span class="text-[14px] font-bold text-gray-400 mb-4">구미 방면</span>
-                            <div id="home-up-info" class="flex-1 flex flex-col justify-center items-center gap-2"></div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
+                            <span class="text-[12px] font-bold text-gray-400 mb-2.5">구미 방면</span>
+                            <div id="home-up-info" class="flex-1 flex flex-col justify-center items-center gap-1.5"></div>
                         </div>
-                        <div class="list-card p-5 flex flex-col h-full min-h-[140px] relative overflow-hidden text-center">
-                            <span class="text-[14px] font-bold text-gray-400 mb-4">경산 방면</span>
-                            <div id="home-down-info" class="flex-1 flex flex-col justify-center gap-2"></div>
+                        <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
+                            <span class="text-[12px] font-bold text-gray-400 mb-2.5">경산 방면</span>
+                            <div id="home-down-info" class="flex-1 flex flex-col justify-center gap-1.5"></div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 mt-2">
-                        <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
-                            <i class="fa-regular fa-clock text-[#3182F6] text-lg"></i>
-                            <span class="text-[13px] font-bold text-gray-300">전체 시간표 <i class="fa-solid fa-chevron-down text-[9px] ml-0.5 text-gray-600"></i></span>
+                    <div class="grid grid-cols-2 gap-2.5 mt-2">
+                        <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                            <i class="fa-regular fa-clock text-[#0054A6] text-[15px]"></i>
+                            <span class="text-[12px] font-bold text-gray-300">전체 시간표 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-600"></i></span>
                         </button>
-                        <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
-                            <i class="fa-solid fa-train-tram text-[#3182F6] text-lg"></i>
-                            <span class="text-[13px] font-bold text-gray-300">첫차·막차 <i class="fa-solid fa-chevron-down text-[9px] ml-0.5 text-gray-600"></i></span>
+                        <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                            <i class="fa-solid fa-train-tram text-[#0054A6] text-[15px]"></i>
+                            <span class="text-[12px] font-bold text-gray-300">첫차·막차 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-600"></i></span>
                         </button>
                     </div>
                 </div>
@@ -176,98 +213,96 @@
         </main>
 
         <!-- 2. 상단 헤더 & 트래커 UI -->
-        <header id="main-header" class="hidden absolute top-0 left-0 w-full z-20 bg-black/80 backdrop-blur-md border-b border-white/5 flex flex-col pt-safe pb-2 shadow-sm text-white transition-all">
-            <div class="px-5 pt-2 flex justify-between items-center mb-3">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-bold tracking-tight text-main drop-shadow-sm">지하철 현황</h1>
-                        <select id="direction-toggle" class="bg-white/10 text-gray-300 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-white/10 shadow-sm transition-all focus:ring-2 focus:ring-[#0052FF]/50">
-                            <option value="up" class="text-gray-900">상행 (구미 방면)</option>
-                            <option value="down" class="text-gray-900">하행 (경산 방면)</option>
-                        </select>
-                    </div>
-                    <p class="text-xs text-[#3182F6] font-bold mt-1.5 flex items-center gap-1.5 bg-[#3182F6]/20 w-max px-2.5 py-1 rounded-full border border-[#3182F6]/30">
-                        <i class="fa-regular fa-clock"></i>
-                        <span id="day-type-display">평일</span> · 실시간 (<span id="clock-display">00:00:00</span>)
-                    </p>
+        <header id="main-header" class="hidden absolute top-0 left-0 w-full z-20 bg-black/80 backdrop-blur-md border-b border-white/5 flex flex-col pt-safe pb-1.5 shadow-sm text-white transition-all">
+            <div class="px-4 pt-2 flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                    <h1 class="text-[17px] font-extrabold tracking-tight text-white drop-shadow-sm">지하철 현황</h1>
+                    <select id="direction-toggle" class="bg-[#1C1C1E] text-gray-300 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-white/10 shadow-sm transition-all focus:ring-2 focus:ring-[#0054A6]/50 appearance-none pr-5 relative" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23A1A1A6%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 4px center;">
+                        <option value="up" class="text-gray-900">상행 (구미 방면)</option>
+                        <option value="down" class="text-gray-900">하행 (경산 방면)</option>
+                    </select>
                 </div>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#3182F6]/20 border border-[#3182F6]/30 text-[#3182F6] shrink-0 shadow-lg">
-                    <i class="fa-solid fa-train-subway text-lg"></i>
+                <div class="flex items-center gap-1.5 bg-white/5 px-2.5 py-1.5 rounded-full border border-white/10 shrink-0">
+                    <i class="fa-regular fa-clock text-[10px] text-gray-400"></i>
+                    <span id="day-type-display" class="text-[10px] text-gray-300 font-bold">평일</span>
+                    <span class="text-gray-500 text-[10px] leading-none">·</span>
+                    <span id="data-status-display" class="text-[10px] text-[#0054A6] font-bold">실시간</span>
+                    <span id="clock-display" class="text-[10px] text-gray-300 font-mono tracking-tighter ml-0.5">00:00:00</span>
                 </div>
             </div>
-            <div id="train-list" class="flex gap-2 overflow-x-auto px-5 pb-1 hide-scrollbar"></div>
+            <!-- 열차 버튼 리스트 영역 -->
+            <div id="train-list" class="flex gap-2 overflow-x-auto px-4 pb-1 hide-scrollbar"></div>
         </header>
 
         <!-- 3. 트래커 맵 스크롤 뷰 -->
-        <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-black scroll-smooth relative pt-[130px] pb-32">
+        <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-black scroll-smooth relative pt-[80px] pb-32">
             <div class="relative w-full h-[1500px]">
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
-                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
-                        <path d="M 120 100 L 120 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
-                        <path d="M 280 100 L 280 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
-                        <path id="line-path-down" d="M 120 100 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
-                        <path id="line-path-up" d="M 280 100 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
+                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px]">
+                        <!-- 노선 상단 표시 (흰색 배경 알약 모양 적용) -->
+                        <g>
+                            <rect x="94" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
+                            <text x="120" y="40.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
+                        </g>
+                        <g>
+                            <rect x="254" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" />
+                            <text x="280" y="40.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest">상행</text>
+                        </g>
+
+                        <path d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 하행 (시에라 블루) -->
+                        <path d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 상행 (코레일 블루) -->
+                        <path id="line-path-down" d="M 120 60 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
+                        <path id="line-path-up" d="M 280 60 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
+                        
+                        <!-- 노선 하단 표시 (흰색 배경 알약 모양 적용) -->
+                        <g>
+                            <rect x="94" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" />
+                            <text x="120" y="1235.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest">하행</text>
+                        </g>
+                        <g>
+                            <rect x="254" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0054A6" stroke-width="2" />
+                            <text x="280" y="1235.5" text-anchor="middle" fill="#0054A6" class="text-[13px] font-extrabold tracking-widest">상행</text>
+                        </g>
+
                         <g id="line-stations"></g>
                         <g id="line-trains-down"></g>
                         <g id="line-trains-up"></g>
                     </svg>
                 </div>
-                <div id="route-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-100 z-10">
-                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
-                        <path d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
-                        <path id="route-path" d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="transparent" stroke-width="8" />
-                        <g id="route-stations"></g>
-                        <g id="route-trains"></g>
-                    </svg>
-                </div>
-                <div id="map-view" class="absolute top-0 left-0 w-full bg-[#0a0a0a] transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
-                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
-                        <path d="M 0 100 C 150 300, 100 500, 50 1300" fill="none" stroke="#1A1A1D" stroke-width="40" stroke-linecap="round" />
-                        <path d="M 400 450 C 300 500, 200 600, 90 550" fill="none" stroke="#1A1A1D" stroke-width="20" stroke-linecap="round" />
-                        <path d="M 100 0 L 180 1300" stroke="#1C1C1E" stroke-width="6" fill="none" /> 
-                        <path d="M 0 600 L 400 500" stroke="#1C1C1E" stroke-width="8" fill="none" /> 
-                        <path d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
-                        <path id="map-path" d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="transparent" stroke-width="8" />
-                        <g id="map-stations"></g>
-                        <g id="map-trains"></g>
-                    </svg>
+
+                <div id="map-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
+                    <div id="real-map" class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[100dvh] bg-[#0a0a0a]"></div>
                 </div>
             </div>
         </main>
 
-        <button id="auto-scroll-btn" class="hidden absolute bottom-[130px] left-1/2 -translate-x-1/2 bg-[#3182F6] text-white px-5 py-3 rounded-full shadow-lg text-[13px] font-bold flex items-center gap-2 z-40 transition-transform active:scale-95 animate-bounce">
-            <i class="fa-solid fa-location-crosshairs text-base"></i> 선택한 열차 따라가기
+        <button id="auto-scroll-btn" class="hidden absolute bottom-[200px] left-1/2 -translate-x-1/2 bg-[#1C1C1E]/80 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full shadow-xl text-[11px] font-bold text-gray-200 flex items-center gap-1.5 z-40 transition-transform active:scale-95">
+            <i class="fa-solid fa-location-crosshairs text-[#0054A6] text-[13px]"></i> 선택한 열차 따라가기
         </button>
 
-        <div id="floating-panel" class="hidden absolute bottom-[80px] left-4 right-4 z-30 min-h-[72px]"></div>
+        <div id="floating-panel" class="hidden absolute bottom-[100px] left-0 right-0 px-4 z-[90] min-h-[72px] transition-all duration-300"></div>
 
-        <!-- 4. 하단 네비게이션 (Enjoy Travel Record 스타일 완전 복구) -->
-        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[88%] max-w-[300px] px-2 touch-pan-x select-none">
+        <!-- 4. 하단 네비게이션 -->
+        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[65%] max-w-[200px] px-1.5 touch-pan-x select-none">
             <div class="flex items-center justify-between bg-white/10 backdrop-blur-[8px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border border-white/20 rounded-full p-1 gap-0.5 relative transition-all duration-300">
                 <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white/20 shadow-sm rounded-full backdrop-blur-[2px] border border-white/10 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
-                <button id="tab-home" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-house text-base text-gray-400 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 group-hover:text-white whitespace-nowrap transition-colors">홈</span>
+                <button id="tab-home" class="relative py-1 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                    <div class="flex flex-col items-center gap-[1px] pointer-events-none">
+                        <i class="fa-solid fa-house text-[14px] text-gray-400 group-hover:text-white transition-colors"></i>
+                        <span class="text-[9px] font-medium text-gray-400 group-hover:text-white whitespace-nowrap transition-colors">홈</span>
                     </div>
                 </button>
-                <button id="tab-line" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-grip-lines text-base text-gray-400 transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선</span>
+                <button id="tab-line" class="relative py-1 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                    <div class="flex flex-col items-center gap-[1px] pointer-events-none">
+                        <i class="fa-solid fa-route text-[14px] text-gray-400 transition-colors"></i>
+                        <span class="text-[9px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선</span>
                     </div>
                 </button>
-                <button id="tab-route" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-route text-base text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선도</span>
-                    </div>
-                </button>
-                <button id="tab-map" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-map-location-dot text-base text-gray-400 transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">지도</span>
+                <button id="tab-map" class="relative py-1 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                    <div class="flex flex-col items-center gap-[1px] pointer-events-none">
+                        <i class="fa-solid fa-map-location-dot text-[14px] text-gray-400 transition-colors"></i>
+                        <span class="text-[9px] font-medium text-gray-400 whitespace-nowrap transition-colors">지도</span>
                     </div>
                 </button>
             </div>
@@ -275,52 +310,89 @@
 
         <!-- 모달들 -->
         <div id="timetable-modal" class="hidden absolute inset-0 z-[150] flex flex-col justify-end bg-black/60 backdrop-blur-sm transition-opacity">
-            <div class="bg-[#1C1C1E] w-full h-[85%] rounded-t-3xl shadow-2xl flex flex-col animate-in border-t border-white/10">
-                <div class="flex flex-col items-center pt-4 pb-5 border-b border-white/5 shrink-0 relative">
-                    <div class="w-12 h-1.5 bg-white/20 rounded-full mb-4"></div>
-                    <h2 id="modal-title" class="text-xl font-extrabold text-main">역 시간표</h2>
-                    <div id="modal-subtitle" class="mt-2 flex"></div>
-                    <button id="close-modal-btn" class="absolute right-5 top-5 w-8 h-8 flex items-center justify-center bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
-                        <i class="fa-solid fa-xmark text-lg"></i>
+            <div class="bg-[#000000] w-full h-[75%] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.8)] flex flex-col animate-in border-t border-white/10">
+                <div class="flex flex-col items-center pt-4 pb-2 border-b border-white/5 shrink-0 relative">
+                    <div class="w-10 h-1 bg-white/20 rounded-full mb-3"></div>
+                    <h2 id="modal-title" class="text-[18px] font-extrabold text-white tracking-tight">역 시간표</h2>
+                    <div id="modal-subtitle" class="mt-1 flex w-full justify-center"></div>
+                    <button id="close-modal-btn" class="absolute right-5 top-4 w-7 h-7 flex items-center justify-center bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark text-[12px]"></i>
                     </button>
                 </div>
-                <div id="modal-content" class="flex-1 overflow-y-auto px-5 py-2 pb-10 hide-scrollbar"></div>
+                <div id="modal-content" class="flex-1 overflow-y-auto px-4 py-2 pb-10 hide-scrollbar"></div>
             </div>
         </div>
 
         <div id="station-selector-modal" class="hidden absolute inset-0 z-[150] flex flex-col justify-end bg-black/60 backdrop-blur-sm transition-opacity">
-            <div class="bg-[#1C1C1E] w-full h-[65%] rounded-t-3xl shadow-2xl flex flex-col animate-in border-t border-white/10">
+            <div class="bg-[#000000] w-full h-[60%] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.8)] flex flex-col animate-in border-t border-white/10">
                 <div class="flex flex-col items-center pt-4 pb-3 border-b border-white/5 shrink-0 relative">
-                    <div class="w-12 h-1.5 bg-white/20 rounded-full mb-4"></div>
-                    <h2 class="text-xl font-extrabold text-main">역 선택</h2>
-                    <button onclick="closeStationSelector()" class="absolute right-5 top-5 w-8 h-8 flex items-center justify-center bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
-                        <i class="fa-solid fa-xmark text-lg"></i>
+                    <div class="w-10 h-1 bg-white/20 rounded-full mb-3"></div>
+                    <h2 class="text-[18px] font-extrabold text-white tracking-tight">역 선택</h2>
+                    <button onclick="closeStationSelector()" class="absolute right-5 top-4 w-7 h-7 flex items-center justify-center bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark text-[12px]"></i>
                     </button>
                 </div>
-                <div class="flex-1 overflow-y-auto px-5 py-4 pb-10 space-y-2 hide-scrollbar" id="selector-list-container"></div>
+                <div class="flex-1 overflow-y-auto px-4 py-3 pb-10 space-y-1.5 hide-scrollbar" id="selector-list-container"></div>
             </div>
         </div>
     </div>
 
-    <!-- 스크립트 -->
-    <script>
-        const THEME_COLOR = "#3182F6";
+    <!-- Firebase SDK (Private Data Persistence) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase state
+        let db, auth, user;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'subway-tracker-v1';
+        let favoriteStation = null;
+
+        const THEME_COLOR = "#0054A6";
         const STOP_DURATION = 30; 
 
         const STATIONS = {
-            "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4 },
-            "사곡": { progress: 0.08, align: "start", xOff: 15, yOff: 4 },
-            "북삼": { progress: 0.23, align: "middle", xOff: 0, yOff: -20 },
-            "왜관": { progress: 0.39, align: "end", xOff: -15, yOff: 4 },
-            "서대구": { progress: 0.54, align: "middle", xOff: 0, yOff: 24, ktx: true },
-            "대구": { progress: 0.67, align: "start", xOff: 15, yOff: 4 },
-            "동대구": { progress: 0.80, align: "start", xOff: 15, yOff: 4, ktx: true },
-            "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true }
+            "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4, lat: 36.1284, lng: 128.3305 },
+            "사곡": { progress: 0.08, align: "start", xOff: 15, yOff: 4, lat: 36.0965, lng: 128.3496 },
+            "북삼": { progress: 0.23, align: "middle", xOff: 0, yOff: -20, lat: 36.0357, lng: 128.3698 },
+            "왜관": { progress: 0.39, align: "end", xOff: -15, yOff: 4, lat: 35.9934, lng: 128.4022 },
+            "서대구": { progress: 0.54, align: "middle", xOff: 0, yOff: 24, ktx: true, lat: 35.8776, lng: 128.5398 },
+            "대구": { progress: 0.67, align: "start", xOff: 15, yOff: 4, lat: 35.8763, lng: 128.5961 },
+            "동대구": { progress: 0.80, align: "start", xOff: 15, yOff: 4, ktx: true, lat: 35.8797, lng: 128.6285 },
+            "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true, lat: 35.8164, lng: 128.7351 }
         };
 
-        const KOR_HOLIDAYS = ["2025-01-01", "2025-05-05", "2025-08-15"];
+        const RAIL_SEGMENTS = [
+            { start: "구미", end: "사곡", path: [[36.1284, 128.3305], [36.1230, 128.3325], [36.1170, 128.3355], [36.1100, 128.3400], [36.1030, 128.3450], [36.0965, 128.3496]] },
+            { start: "사곡", end: "북삼", path: [[36.0965, 128.3496], [36.0900, 128.3515], [36.0820, 128.3540], [36.0740, 128.3565], [36.0650, 128.3590], [36.0550, 128.3620], [36.0450, 128.3660], [36.0357, 128.3698]] },
+            { start: "북삼", end: "왜관", path: [[36.0357, 128.3698], [36.0300, 128.3725], [36.0230, 128.3765], [36.0160, 128.3815], [36.0090, 128.3870], [36.0030, 128.3930], [35.9980, 128.3980], [35.9934, 128.4022]] },
+            { start: "왜관", end: "서대구", path: [[35.9934, 128.4022], [35.9890, 128.4045], [35.9830, 128.4070], [35.9760, 128.4110], [35.9690, 128.4165], [35.9610, 128.4230], [35.9530, 128.4310], [35.9450, 128.4410], [35.9380, 128.4520], [35.9310, 128.4630], [35.9230, 128.4730], [35.9150, 128.4830], [35.9080, 128.4920], [35.9010, 128.5020], [35.8940, 128.5120], [35.8880, 128.5210], [35.8820, 128.5300], [35.8790, 128.5350], [35.8776, 128.5398]] },
+            { start: "서대구", end: "대구", path: [[35.8776, 128.5398], [35.8790, 128.5470], [35.8810, 128.5550], [35.8820, 128.5640], [35.8810, 128.5740], [35.8790, 128.5840], [35.8763, 128.5961]] },
+            { start: "대구", end: "동대구", path: [[35.8763, 128.5961], [35.8750, 128.6040], [35.8750, 128.6130], [35.8765, 128.6210], [35.8797, 128.6285]] },
+            { start: "동대구", end: "경산", path: [[35.8797, 128.6285], [35.8740, 128.6380], [35.8670, 128.6500], [35.8590, 128.6620], [35.8510, 128.6760], [35.8430, 128.6920], [35.8340, 128.7080], [35.8250, 128.7230], [35.8164, 128.7351]] }
+        ];
 
-        // Blob 환경에서의 fetch 오류를 방지하기 위해 파일명만 사용합니다.
+        RAIL_SEGMENTS.forEach(seg => {
+            let totalDist = 0;
+            seg.distances = [0];
+            for (let i = 0; i < seg.path.length - 1; i++) {
+                const dx = seg.path[i][0] - seg.path[i+1][0];
+                const dy = seg.path[i][1] - seg.path[i+1][1];
+                totalDist += Math.sqrt(dx*dx + dy*dy);
+                seg.distances.push(totalDist);
+            }
+            seg.totalDist = totalDist;
+        });
+
+        const KOR_HOLIDAYS = [
+            "2025-01-01", "2025-01-28", "2025-01-29", "2025-01-30", "2025-03-03",
+            "2025-05-05", "2025-05-06", "2025-06-06", "2025-08-15", "2025-10-03",
+            "2025-10-06", "2025-10-07", "2025-10-09", "2025-12-25",
+            "2026-01-01", "2026-02-16", "2026-02-17", "2026-02-18", "2026-03-01", 
+            "2026-05-05", "2026-05-24", "2026-06-06", "2026-08-15", "2026-09-24", 
+            "2026-09-25", "2026-09-26", "2026-10-03", "2026-10-09", "2026-12-25"
+        ];
+
         const FILE_URLS = {
             weekday_up: 'dae_up.csv',
             weekday_down: 'dae_down.csv',
@@ -334,14 +406,54 @@
         let selectedTrainId = null;
         let selectedStation = null;
         let currentSec = 0;
-        let routeLength = 0;
-        let mapLength = 0;
         let currentDirection = 'up'; 
         let currentDayType = 'weekday'; 
         let stationDetailDirection = 'up'; 
         let parsedTrainsUp = [];
         let parsedTrainsDown = [];
         let parsedTrains = [];
+
+        let leafletMap;
+        let trainMarkers = {};
+
+        const dom = {
+            mainHeader: document.getElementById('main-header'),
+            homeScreen: document.getElementById('home-screen'),
+            clock: document.getElementById('clock-display'),
+            dayTypeDisplay: document.getElementById('day-type-display'),
+            directionToggle: document.getElementById('direction-toggle'),
+            trainList: document.getElementById('train-list'),
+            scrollContainer: document.getElementById('scroll-container'),
+            lineView: document.getElementById('line-view'),
+            mapView: document.getElementById('map-view'),
+            linePathDown: document.getElementById('line-path-down'),
+            linePathUp: document.getElementById('line-path-up'),
+            lineStations: document.getElementById('line-stations'),
+            lineTrainsDown: document.getElementById('line-trains-down'),
+            lineTrainsUp: document.getElementById('line-trains-up'),
+            autoScrollBtn: document.getElementById('auto-scroll-btn'),
+            floatingPanel: document.getElementById('floating-panel'),
+            tabHome: document.getElementById('tab-home'),
+            tabLine: document.getElementById('tab-line'),
+            tabMap: document.getElementById('tab-map'),
+            navIndicator: document.getElementById('nav-indicator'),
+            timetableModal: document.getElementById('timetable-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalSubtitle: document.getElementById('modal-subtitle'),
+            modalContent: document.getElementById('modal-content'),
+            closeModalBtn: document.getElementById('close-modal-btn'),
+            homeStationName: document.getElementById('home-station-name'),
+            homePrevStation: document.getElementById('home-prev-station'),
+            homePrevStationContainer: document.getElementById('home-prev-station-container'),
+            homeNextStation: document.getElementById('home-next-station'),
+            homeNextStationContainer: document.getElementById('home-next-station-container'),
+            homeCurrentTime: document.getElementById('home-current-time'),
+            homeUpInfo: document.getElementById('home-up-info'),
+            homeDownInfo: document.getElementById('home-down-info'),
+            stationSelectorModal: document.getElementById('station-selector-modal'),
+            selectorListContainer: document.getElementById('selector-list-container'),
+            favoriteIcon: document.getElementById('favorite-icon')
+        };
 
         const getDayType = (dateObj) => {
             const day = dateObj.getDay();
@@ -377,10 +489,32 @@
             return `${ampm} ${h}:${m.toString().padStart(2, '0')}`;
         };
 
+        function createMockData(direction) {
+            const now = new Date();
+            let h = now.getHours(); if (h < 4) h += 24;
+            const baseSec = h * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const trainList = [];
+            const stationNames = Object.keys(STATIONS);
+            const orderedStations = direction === 'up' ? [...stationNames].reverse() : stationNames;
+            for (let i = -5; i <= 5; i++) {
+                const train = { id: `MOCK${direction === 'up' ? 'U' : 'D'}${i + 5}`, schedule: [] };
+                const startSec = baseSec + (i * 1800) - 2000; 
+                orderedStations.forEach((st) => {
+                    const firstProg = STATIONS[orderedStations[0]].progress;
+                    const myProg = STATIONS[st].progress;
+                    const progDiff = Math.abs(myProg - firstProg);
+                    const stSec = startSec + Math.floor(progDiff * 3600); 
+                    train.schedule.push({ name: st, time: secondsToTime(stSec), sec: stSec, progress: myProg });
+                });
+                train.schedule.sort((a,b) => a.sec - b.sec);
+                trainList.push(train);
+            }
+            return trainList;
+        }
+
         const loadTimetable = async () => {
             let targetUpUrl = currentDayType === 'weekday' ? FILE_URLS.weekday_up : FILE_URLS.weekend_up;
             let targetDownUrl = currentDayType === 'weekday' ? FILE_URLS.weekday_down : FILE_URLS.weekend_down;
-
             const parseCsv = (csvStr) => {
                 if (!csvStr) return [];
                 const lines = csvStr.trim().split(/\r?\n/);
@@ -402,98 +536,130 @@
                 trains.forEach(t => t.schedule.sort((a, b) => a.sec - b.sec));
                 return trains.filter(t => t.id && t.schedule.length >= 2);
             };
-
+            const safeFetch = async (url) => {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) return await response.text();
+                } catch (err) { }
+                return "";
+            };
             try {
-                const [upText, downText] = await Promise.all([
-                    fetch(targetUpUrl).then(r => r.ok ? r.text() : "").catch(() => ""),
-                    fetch(targetDownUrl).then(r => r.ok ? r.text() : "").catch(() => "")
-                ]);
+                const [upText, downText] = await Promise.all([safeFetch(targetUpUrl), safeFetch(targetDownUrl)]);
                 parsedTrainsUp = parseCsv(upText);
                 parsedTrainsDown = parseCsv(downText);
+                let isMockUsed = false;
+                if (parsedTrainsUp.length === 0) { parsedTrainsUp = createMockData('up'); isMockUsed = true; }
+                if (parsedTrainsDown.length === 0) { parsedTrainsDown = createMockData('down'); isMockUsed = true; }
                 parsedTrains = currentDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
-            } catch (e) { 
-                console.error("Data Load Error", e); 
-            }
-        };
-
-        const dom = {
-            mainHeader: document.getElementById('main-header'),
-            homeScreen: document.getElementById('home-screen'),
-            clock: document.getElementById('clock-display'),
-            dayTypeDisplay: document.getElementById('day-type-display'),
-            directionToggle: document.getElementById('direction-toggle'),
-            trainList: document.getElementById('train-list'),
-            scrollContainer: document.getElementById('scroll-container'),
-            lineView: document.getElementById('line-view'),
-            routeView: document.getElementById('route-view'),
-            mapView: document.getElementById('map-view'),
-            linePathDown: document.getElementById('line-path-down'),
-            linePathUp: document.getElementById('line-path-up'),
-            routePath: document.getElementById('route-path'),
-            mapPath: document.getElementById('map-path'),
-            lineStations: document.getElementById('line-stations'),
-            routeStations: document.getElementById('route-stations'),
-            mapStations: document.getElementById('map-stations'),
-            lineTrainsDown: document.getElementById('line-trains-down'),
-            lineTrainsUp: document.getElementById('line-trains-up'),
-            routeTrains: document.getElementById('route-trains'),
-            mapTrains: document.getElementById('map-trains'),
-            autoScrollBtn: document.getElementById('auto-scroll-btn'),
-            floatingPanel: document.getElementById('floating-panel'),
-            tabHome: document.getElementById('tab-home'),
-            tabLine: document.getElementById('tab-line'),
-            tabRoute: document.getElementById('tab-route'),
-            tabMap: document.getElementById('tab-map'),
-            navIndicator: document.getElementById('nav-indicator'),
-            timetableModal: document.getElementById('timetable-modal'),
-            modalTitle: document.getElementById('modal-title'),
-            modalSubtitle: document.getElementById('modal-subtitle'),
-            modalContent: document.getElementById('modal-content'),
-            homeStationName: document.getElementById('home-station-name'),
-            homeNextStation: document.getElementById('home-next-station'),
-            homeNextStationContainer: document.getElementById('home-next-station-container'),
-            homeCurrentTime: document.getElementById('home-current-time'),
-            homeUpInfo: document.getElementById('home-up-info'),
-            homeDownInfo: document.getElementById('home-down-info'),
-            stationSelectorModal: document.getElementById('station-selector-modal'),
-            selectorListContainer: document.getElementById('selector-list-container')
-        };
-
-        function updateTabUI(activeTabId) {
-            const tabs = ['tab-home', 'tab-line', 'tab-route', 'tab-map'];
-            const activeIndex = tabs.indexOf(activeTabId);
-            const navButtons = document.querySelectorAll('#bottom-nav button');
-            if (navButtons[activeIndex]) {
-                const targetBtn = navButtons[activeIndex];
-                dom.navIndicator.style.width = `${targetBtn.offsetWidth}px`;
-                dom.navIndicator.style.transform = `translateX(${targetBtn.offsetLeft - 4}px)`;
-            }
-            tabs.forEach(id => {
-                const el = document.getElementById(id);
-                const icon = el.querySelector('i');
-                const span = el.querySelector('span');
-                icon.className = icon.className.replace(/text-(white|gray-400)/g, '').trim();
-                span.className = span.className.replace(/text-(white|gray-400)/g, '').replace(/font-(medium|bold)/g, '').trim();
-                if (id === activeTabId) {
-                    icon.className += ' text-white';
-                    span.className += ' text-white font-bold';
+                const statusDisplay = document.getElementById('data-status-display');
+                const statusHome = document.getElementById('data-status-home');
+                if (isMockUsed) {
+                    if (statusDisplay) statusDisplay.innerHTML = `<span class="text-red-400 font-extrabold animate-pulse">임의 데이터 사용중</span>`;
+                    if (statusHome) statusHome.classList.remove('hidden');
                 } else {
-                    icon.className += ' text-gray-400';
-                    span.className += ' text-gray-400 font-medium';
+                    if (statusDisplay) statusDisplay.textContent = '실시간';
+                    if (statusHome) statusHome.classList.add('hidden');
+                }
+            } catch (e) { }
+        };
+
+        function initMap() {
+            leafletMap = L.map('real-map', { zoomControl: false, attributionControl: false }).setView([35.97, 128.53], 10);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(leafletMap);
+            const allLatLngs = [];
+            RAIL_SEGMENTS.forEach((seg, idx) => {
+                if (idx === 0) allLatLngs.push(seg.path[0]);
+                for (let i = 1; i < seg.path.length; i++) allLatLngs.push(seg.path[i]);
+            });
+            L.polyline(allLatLngs, {color: '#333333', weight: 6, opacity: 0.8, lineJoin: 'round', smoothFactor: 1.5}).addTo(leafletMap);
+            L.polyline(allLatLngs, {color: THEME_COLOR, weight: 3, opacity: 0.5, lineJoin: 'round', smoothFactor: 1.5}).addTo(leafletMap);
+            Object.keys(STATIONS).forEach(name => {
+                const s = STATIONS[name];
+                L.circleMarker([s.lat, s.lng], { radius: 6, color: THEME_COLOR, weight: 3, fillColor: '#1C1C1E', fillOpacity: 1 }).addTo(leafletMap).on('click', () => {
+                    window.handleStationClick(name);
+                    leafletMap.setView([s.lat, s.lng], 13, {animate: true});
+                });
+                const html = `<div style="color:white; font-size:12px; font-weight:bold; text-shadow: 0 0 5px black; white-space:nowrap; transform: translate(-50%, 10px); text-align:center;">${name}${s.ktx ? `<br><span style="color:${THEME_COLOR}; font-size:9px; font-style:italic; font-weight:900;">KTX</span>` : ''}</div>`;
+                L.marker([s.lat, s.lng], { icon: L.divIcon({ className: 'custom-station-label', html, iconSize: [0, 0] }) }).addTo(leafletMap);
+            });
+        }
+
+        function getLatLngAtProgress(prog) {
+            const stKeys = Object.keys(STATIONS);
+            for (let i = 0; i < stKeys.length - 1; i++) {
+                const s1Name = stKeys[i]; const s2Name = stKeys[i+1];
+                const s1 = STATIONS[s1Name]; const s2 = STATIONS[s2Name];
+                if (prog >= s1.progress && prog <= s2.progress) {
+                    const localProg = (prog - s1.progress) / (s2.progress - s1.progress);
+                    const seg = RAIL_SEGMENTS.find(s => s.start === s1Name && s.end === s2Name);
+                    if (!seg || seg.totalDist === 0) return [s1.lat + (s2.lat - s1.lat) * localProg, s1.lng + (s2.lng - s1.lng) * localProg];
+                    const targetDist = localProg * seg.totalDist;
+                    for (let j = 0; j < seg.distances.length - 1; j++) {
+                        if (targetDist >= seg.distances[j] && targetDist <= seg.distances[j+1]) {
+                            const subProg = (targetDist - seg.distances[j]) / (seg.distances[j+1] - seg.distances[j]);
+                            return [seg.path[j][0] + (seg.path[j+1][0] - seg.path[j][0]) * subProg, seg.path[j][1] + (seg.path[j+1][1] - seg.path[j][1]) * subProg];
+                        }
+                    }
+                }
+            }
+            if (prog <= 0) return [STATIONS[stKeys[0]].lat, STATIONS[stKeys[0]].lng];
+            return [STATIONS[stKeys[stKeys.length-1]].lat, STATIONS[stKeys[stKeys.length-1]].lng];
+        }
+
+        function updateMapTrains(trains) {
+            if (!leafletMap) return;
+            const currentIds = trains.map(t => t.id);
+            Object.keys(trainMarkers).forEach(id => {
+                if (!currentIds.includes(id)) { leafletMap.removeLayer(trainMarkers[id]); delete trainMarkers[id]; }
+            });
+            trains.forEach(t => {
+                const isSelected = t.id === selectedTrainId;
+                const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR;
+                const fillColor = isSelected ? THEME_COLOR : '#3f3f46';
+                const latlng = getLatLngAtProgress(t.overallProgress);
+                const nextProg = Math.max(0, Math.min(1, t.overallProgress + (t.direction === 'up' ? -0.001 : 0.001)));
+                const nextLatlng = getLatLngAtProgress(nextProg);
+                let angle = (Math.abs(nextLatlng[0] - latlng[0]) > 0.00001 || Math.abs(nextLatlng[1] - latlng[1]) > 0.00001) ? 
+                    Math.atan2(Math.cos(latlng[0] * Math.PI / 180) * (nextLatlng[1] - latlng[1]), nextLatlng[0] - latlng[0]) * 180 / Math.PI : (t.direction === 'up' ? 180 : 0);
+                const html = `<div style="position:relative; width:14px; height:32px; background:${fillColor}; border-radius:3px; border:1px solid ${isSelected?'white':'#1C1C1E'}; box-shadow:0 2px 5px rgba(0,0,0,0.5); transform: rotate(${angle}deg); transform-origin: center center; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;"><div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div><div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div><div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div>${isSelected ? `<div style="position:absolute; bottom:-28px; left:50%; transform:translateX(-50%) rotate(${-angle}deg); background:#1C1C1E; border:1px solid ${tColor}; color:white; font-size:10px; font-weight:900; padding:2px 8px; border-radius:10px; white-space:nowrap; z-index:1100;">${t.id}</div>` : ''}</div>`;
+                if (!trainMarkers[t.id]) {
+                    trainMarkers[t.id] = L.marker(latlng, {icon: L.divIcon({ className: '', html, iconSize: [14, 32], iconAnchor: [7, 16] }), zIndexOffset: isSelected ? 1000 : 0}).addTo(leafletMap);
+                    trainMarkers[t.id].on('click', () => window.handleTrainClick(t.id));
+                } else {
+                    trainMarkers[t.id].setLatLng(latlng);
+                    trainMarkers[t.id].setIcon(L.divIcon({ className: '', html, iconSize: [14, 32], iconAnchor: [7, 16] }));
+                    trainMarkers[t.id].setZIndexOffset(isSelected ? 1000 : 0);
                 }
             });
         }
 
-        function updateHomeUI() {
+        window.toggleFavorite = async () => {
+            if (!user) return;
+            const newFav = (favoriteStation === homeSelectedStation) ? null : homeSelectedStation;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorite'), { station: newFav });
+                favoriteStation = newFav;
+                updateHomeUI();
+            } catch (e) { console.error("Save Fav Error", e); }
+        };
+
+        window.updateHomeUI = () => {
             const stationNames = Object.keys(STATIONS);
             const idx = stationNames.indexOf(homeSelectedStation);
+            const prevStation = idx > 0 ? stationNames[idx - 1] : null;
             const nextStation = idx < stationNames.length - 1 ? stationNames[idx + 1] : null;
             dom.homeStationName.textContent = homeSelectedStation;
-            if (nextStation) {
-                dom.homeNextStation.textContent = `${nextStation} >`;
-                dom.homeNextStationContainer.classList.remove('opacity-0');
-            } else { dom.homeNextStationContainer.classList.add('opacity-0'); }
-        }
+            if (prevStation) { dom.homePrevStation.textContent = `< ${prevStation}`; dom.homePrevStationContainer.classList.replace('opacity-0', 'opacity-100'); } 
+            else { dom.homePrevStationContainer.classList.replace('opacity-100', 'opacity-0'); }
+            if (nextStation) { dom.homeNextStation.textContent = `${nextStation} >`; dom.homeNextStationContainer.classList.replace('opacity-0', 'opacity-100'); } 
+            else { dom.homeNextStationContainer.classList.replace('opacity-100', 'opacity-0'); }
+            
+            if (favoriteStation === homeSelectedStation) {
+                dom.favoriteIcon.className = "fa-solid fa-star text-yellow-400";
+            } else {
+                dom.favoriteIcon.className = "fa-regular fa-star";
+            }
+        };
 
         window.renderHomeArrivalInfo = () => {
             if (activeTab !== 'home') return;
@@ -509,168 +675,235 @@
             };
             const upTrains = getUpc(parsedTrainsUp);
             const downTrains = getUpc(parsedTrainsDown);
-
             const renderL = (trains) => {
-                if (!trains || trains.length === 0) return `<span class="text-gray-500 text-[13px] font-bold mt-2">운행 종료</span>`;
+                if (!trains || trains.length === 0) return `<span class="text-gray-500 text-[12px] font-bold my-auto">운행 종료</span>`;
                 return trains.map(t => {
                     const min = Math.ceil((t.sec - currentSec)/60);
-                    return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2.5 rounded-xl border border-white/5">
-                        <span class="text-[13px] font-bold text-gray-200">${t.dest}</span>
-                        <span class="text-[14px] font-extrabold text-[#3182F6]">${min <= 0 ? '곧 도착' : min + '분'}</span>
-                    </div>`;
+                    return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2 rounded-xl border border-white/5"><span class="text-[12px] font-bold text-gray-200">${t.dest}</span><span class="text-[13px] font-extrabold text-[#0054A6] drop-shadow-sm">${min <= 0 ? '곧 도착' : min + '분'}</span></div>`;
                 }).join('');
             };
-            dom.homeUpInfo.innerHTML = homeSelectedStation === '구미' ? `<span class="text-gray-500 font-bold">종점</span>` : renderL(upTrains);
-            dom.homeDownInfo.innerHTML = homeSelectedStation === '경산' ? `<span class="text-gray-500 font-bold">종점</span>` : renderL(downTrains);
+            dom.homeUpInfo.innerHTML = homeSelectedStation === '구미' ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
+            dom.homeDownInfo.innerHTML = homeSelectedStation === '경산' ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(downTrains);
         };
 
         window.openStationSelector = () => {
             dom.stationSelectorModal.classList.remove('hidden');
             dom.selectorListContainer.innerHTML = Object.keys(STATIONS).map(name => `
-                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-5 py-4 rounded-2xl ${name === homeSelectedStation ? 'bg-[#3182F6]/20 border border-[#3182F6]/50' : 'bg-[#1C1C1E] border border-white/5'} cursor-pointer">
-                    <span class="text-[15px] font-bold ${name === homeSelectedStation ? 'text-[#3182F6]' : 'text-gray-200'}">${name}역</span>
-                    ${name === homeSelectedStation ? '<i class="fa-solid fa-check text-[#3182F6]"></i>' : ''}
+                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-4 py-3 rounded-[14px] ${name === homeSelectedStation ? 'bg-[#0054A6]/20 border border-[#0054A6]/50 shadow-[0_0_15px_rgba(0,84,166,0.2)]' : 'bg-white/5 border border-white/5 hover:bg-white/10'} cursor-pointer active:scale-[0.98] transition-all">
+                    <span class="text-[14px] font-bold ${name === homeSelectedStation ? 'text-[#3B82F6]' : 'text-gray-200'}">${name}역</span>
+                    ${name === homeSelectedStation ? '<i class="fa-solid fa-check text-[#3B82F6] text-[14px] drop-shadow-sm"></i>' : ''}
                 </div>`).join('');
         };
 
         window.closeStationSelector = () => dom.stationSelectorModal.classList.add('hidden');
-        window.selectHomeStation = (name) => { homeSelectedStation = name; updateHomeUI(); renderHomeArrivalInfo(); closeStationSelector(); };
-        window.openHomeTimetable = () => { handleStationClick(homeSelectedStation); window.openModal(); };
+        window.selectHomeStation = (name) => { homeSelectedStation = name; window.updateHomeUI(); window.renderHomeArrivalInfo(); window.closeStationSelector(); };
+        window.openHomeTimetable = () => { window.handleStationClick(homeSelectedStation); window.openModal(); };
 
-        function switchTab(tabId) {
+        window.switchTab = (tabId) => {
             activeTab = tabId;
+            selectedStation = null; selectedTrainId = null;
+            dom.timetableModal.classList.add('hidden'); dom.stationSelectorModal.classList.add('hidden'); dom.floatingPanel.classList.add('hidden');
             if (tabId === 'home') {
                 dom.homeScreen.classList.remove('hidden'); dom.homeScreen.classList.add('flex');
                 dom.scrollContainer.classList.add('hidden'); dom.mainHeader.classList.add('hidden');
-                dom.floatingPanel.classList.add('hidden'); dom.autoScrollBtn.classList.add('hidden');
-                updateHomeUI(); renderHomeArrivalInfo();
+                dom.autoScrollBtn.classList.add('hidden'); window.updateHomeUI(); window.renderHomeArrivalInfo();
             } else {
                 dom.homeScreen.classList.add('hidden'); dom.scrollContainer.classList.remove('hidden');
                 dom.mainHeader.classList.remove('hidden'); dom.mainHeader.classList.add('flex');
-                dom.floatingPanel.classList.remove('hidden');
                 dom.directionToggle.classList.toggle('hidden', tabId === 'line');
+                dom.trainList.classList.toggle('hidden', tabId === 'line'); 
                 dom.lineView.style.opacity = tabId === 'line' ? '1' : '0';
-                dom.routeView.style.opacity = tabId === 'route' ? '1' : '0';
+                dom.lineView.classList.toggle('pointer-events-none', tabId !== 'line');
                 dom.mapView.style.opacity = tabId === 'map' ? '1' : '0';
-                isAutoScroll = tabId !== 'line';
+                dom.mapView.classList.toggle('pointer-events-none', tabId !== 'map');
+                dom.scrollContainer.classList.toggle('overflow-y-auto', tabId !== 'map');
+                dom.scrollContainer.classList.toggle('overflow-hidden', tabId === 'map');
+                isAutoScroll = false; 
+                if (tabId === 'map' && leafletMap) { setTimeout(() => leafletMap.invalidateSize(), 500); }
             }
-            updateTabUI('tab-' + tabId);
-        }
+            window.render(); updateTabUI('tab-' + tabId);
+        };
 
-        dom.tabHome.onclick = () => switchTab('home');
-        dom.tabLine.onclick = () => switchTab('line');
-        dom.tabRoute.onclick = () => switchTab('route');
-        dom.tabMap.onclick = () => switchTab('map');
-
-        window.handleStationClick = (n) => { selectedStation = n; if(n) stationDetailDirection = currentDirection; render(); };
-        window.handleTrainClick = (id) => { selectedTrainId = id; isAutoScroll = true; selectedStation = null; render(); };
-        window.setStationDetailDirection = (d) => { stationDetailDirection = d; render(); };
-        window.openModal = () => document.getElementById('timetable-modal').classList.remove('hidden');
-        document.getElementById('close-modal-btn').onclick = () => document.getElementById('timetable-modal').classList.add('hidden');
-
-        function drawStaticStations() {
-            let lH = '', rH = '', mH = '';
-            for (const name in STATIONS) {
-                const s = STATIONS[name]; const isSel = selectedStation === name;
-                const lineY = 100 + 1100 * s.progress;
-                lH += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${name}')" class="cursor-pointer">
-                    <circle r="${isSel?'8':'6'}" fill="#1C1C1E" stroke="${isSel?THEME_COLOR:'#4B5563'}" stroke-width="${isSel?'4':'3'}" />
-                    <text y="-12" text-anchor="middle" fill="${isSel?THEME_COLOR:'#F2F4F6'}" class="text-[12px] font-bold">${name}</text></g>`;
-                if(routeLength > 0) {
-                    const rPt = dom.routePath.getPointAtLength(routeLength * s.progress);
-                    rH += `<g transform="translate(${rPt.x}, ${rPt.y})" onclick="handleStationClick('${name}')" class="cursor-pointer">
-                        <circle r="${isSel?'8':'6'}" fill="#1C1C1E" stroke="${isSel?THEME_COLOR:'#4B5563'}" stroke-width="${isSel?'4':'3'}" />
-                        <text x="${s.xOff}" y="${s.yOff}" text-anchor="${s.align}" fill="${isSel?THEME_COLOR:'#F2F4F6'}" class="text-[13px] font-extrabold">${name}</text></g>`;
-                }
+        function updateTabUI(activeTabId) {
+            const tabs = ['tab-home', 'tab-line', 'tab-map'];
+            const activeIndex = tabs.indexOf(activeTabId);
+            const navButtons = document.querySelectorAll('#bottom-nav button');
+            if (navButtons[activeIndex]) {
+                const targetBtn = navButtons[activeIndex];
+                dom.navIndicator.style.width = `${targetBtn.offsetWidth}px`;
+                dom.navIndicator.style.transform = `translateX(${targetBtn.offsetLeft - 4}px)`;
             }
-            dom.lineStations.innerHTML = lH; dom.routeStations.innerHTML = rH;
+            tabs.forEach(id => {
+                const el = document.getElementById(id); if (!el) return;
+                const icon = el.querySelector('i'); const span = el.querySelector('span');
+                icon.className = icon.className.replace(/text-(white|gray-400)/g, '').trim();
+                span.className = span.className.replace(/text-(white|gray-400)/g, '').replace(/font-(medium|bold)/g, '').trim();
+                if (id === activeTabId) { icon.className += ' text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]'; span.className += ' text-white font-bold'; } 
+                else { icon.className += ' text-gray-400 transition-colors'; span.className += ' text-gray-400 font-medium transition-colors'; }
+            });
         }
 
-        function updateTrainsSVG(layer, trains) {
-            if (!trains) return;
-            layer.innerHTML = trains.map(t => {
-                const isS = t.id === selectedTrainId;
-                return `<g transform="translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})" data-id="${t.id}">
-                    ${isS ? `<circle r="26" fill="${THEME_COLOR}" opacity="0.2" class="animate-ping" />` : ''}
-                    <rect x="-16" y="-7" width="32" height="14" rx="3" fill="${isS?THEME_COLOR:'#3f3f46'}" stroke="#1C1C1E" stroke-width="2" />
-                    <circle cx="15" cy="-3" r="1.5" fill="${isS?'#FFE600':'#FFF'}" /><circle cx="15" cy="3" r="1.5" fill="${isS?'#FFE600':'#FFF'}" />
-                </g>`;
-            }).join('');
-        }
+        window.handleStationClick = (n) => { selectedStation = n; if(n) stationDetailDirection = currentDirection; window.render(); };
+        window.handleTrainClick = (id) => { selectedTrainId = id; isAutoScroll = true; selectedStation = null; window.render(); };
+        window.setStationDetailDirection = (d) => { stationDetailDirection = d; window.render(); };
+        
+        window.openModal = () => {
+            if (!selectedStation) return;
+            dom.modalTitle.textContent = `${selectedStation}역 시간표`;
+            const getStationTimes = (trains) => {
+                return trains.map(t => {
+                    const stop = t.schedule.find(s => s.name === selectedStation);
+                    if (stop) return { id: t.id, time: stop.time, sec: stop.sec, dest: t.schedule[t.schedule.length-1].name };
+                    return null;
+                }).filter(t => t).sort((a,b) => a.sec - b.sec);
+            };
+            const upTimes = getStationTimes(parsedTrainsUp);
+            const downTimes = getStationTimes(parsedTrainsDown);
+            const isDownDefault = stationDetailDirection === 'down';
+            const renderList = (times, id, isHidden) => {
+                let listHtml = `<div id="${id}" class="space-y-1.5 mt-2 ${isHidden ? 'hidden' : ''}">`;
+                if(times.length === 0) listHtml += `<div class="text-center text-gray-500 py-10 font-medium text-[12px]">운행 정보가 없습니다.</div>`;
+                times.forEach(t => {
+                    const isPast = t.sec < currentSec;
+                    listHtml += `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40 past-time' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-500' : 'text-white tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-600' : 'text-gray-400'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-600 bg-white/5' : 'text-[#0054A6] bg-[#0054A6]/10'} px-2 py-0.5 rounded border ${isPast ? 'border-white/5' : 'border-[#0054A6]/20'} shadow-sm">${t.id}</span></div>`;
+                });
+                listHtml += `</div>`; return listHtml;
+            };
+            dom.modalSubtitle.innerHTML = `<div class="flex bg-white/5 rounded-full p-0.5 border border-white/5 w-fit mx-auto mt-1 mb-1"><button onclick="document.getElementById('tt-up').classList.remove('hidden'); document.getElementById('tt-down').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-sm transition-all'; this.nextElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'text-gray-400 hover:text-white' : 'bg-[#0054A6] text-white shadow-sm'}">상행 (구미 방면)</button><button onclick="document.getElementById('tt-down').classList.remove('hidden'); document.getElementById('tt-up').classList.add('hidden'); this.className='px-4 py-1.5 rounded-full text-[11px] font-bold bg-[#5998D6] text-white shadow-sm transition-all'; this.previousElementSibling.className='px-4 py-1.5 rounded-full text-[11px] font-bold text-gray-400 hover:text-white transition-all';" class="px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${isDownDefault ? 'bg-[#5998D6] text-white shadow-sm' : 'text-gray-400 hover:text-white'}">하행 (경산 방면)</button></div>`;
+            let html = renderList(upTimes, 'tt-up', isDownDefault); html += renderList(downTimes, 'tt-down', !isDownDefault);
+            dom.modalContent.innerHTML = html; dom.timetableModal.classList.remove('hidden');
+            setTimeout(() => {
+                const activeTabId = isDownDefault ? 'tt-down' : 'tt-up';
+                const activeTab = document.getElementById(activeTabId);
+                if (activeTab) { const firstFuture = activeTab.querySelector('.future-time'); if (firstFuture) firstFuture.scrollIntoView({ behavior: 'auto', block: 'center' }); }
+            }, 320);
+        };
 
-        const getActiveTrains = (list, dir) => {
-            if (!list) return [];
-            return list.map(t => {
+        window.render = () => {
+            dom.clock.textContent = secondsToTime(currentSec);
+            if (activeTab === 'home') window.renderHomeArrivalInfo();
+            const getActiveTrains = (list, dir) => list ? list.map(t => {
                 const start = t.schedule[0].sec, end = t.schedule[t.schedule.length-1].sec;
                 if (currentSec < start || currentSec > end + 30) return null;
                 let idx = 0; while(idx < t.schedule.length && currentSec >= t.schedule[idx].sec) idx++; idx--;
                 const curr = t.schedule[idx], next = t.schedule[idx+1] || curr;
                 let prog = curr.progress, isStop = (currentSec - curr.sec <= 30), rem = next.sec - currentSec;
                 if (!isStop && idx < t.schedule.length-1) {
-                    const segDur = next.sec - (curr.sec + 30);
-                    const timeMov = currentSec - (curr.sec + 30);
-                    const segProg = Math.min(1, Math.max(0, timeMov / segDur));
-                    prog = curr.progress + (next.progress - curr.progress) * segProg;
+                    const segDur = Math.max(1, next.sec - (curr.sec + 30));
+                    prog = curr.progress + (next.progress - curr.progress) * Math.min(1, Math.max(0, (currentSec - (curr.sec + 30)) / segDur));
                 }
-                return { ...t, curr, next, overallProgress: prog, timeRemaining: rem, isStopped: isStop };
-            }).filter(t => t);
+                return { ...t, curr, next, overallProgress: prog, timeRemaining: rem, isStopped: isStop, direction: dir };
+            }).filter(t => t) : [];
+            let activeTrainsUp = getActiveTrains(parsedTrainsUp, 'up');
+            let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
+            let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
+            const renderedT = activeT.map(t => {
+                const ref = activeTab === 'map' ? null : (t.direction === 'up' ? dom.linePathUp : dom.linePathDown);
+                let p = {x: 0, y: 0}, angle = 0;
+                if (ref) {
+                    const currentLen = 1140 * (t.overallProgress || 0); p = ref.getPointAtLength(currentLen);
+                    const np = ref.getPointAtLength(Math.max(0, Math.min(1140, currentLen + (t.direction === 'up' ? -1 : 1))));
+                    angle = (Math.abs(np.x - p.x) > 0.001 || Math.abs(np.y - p.y) > 0.001) ? Math.atan2(np.y - p.y, np.x - p.x) * 180 / Math.PI : (t.direction === 'up' ? -90 : 90);
+                }
+                return { ...t, point: p, angle };
+            });
+            const selectedData = renderedT.find(t => t.id === selectedTrainId);
+            let btnHtml = activeT.length === 0 ? `<span class="text-xs text-gray-400 font-medium py-1">운행 종료</span>` : '';
+            activeT.forEach(t => {
+                const isSel = t.id === selectedTrainId; const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR;
+                let selClass = isSel ? (t.direction === 'down' ? 'bg-[#5998D6] text-white shadow-md border border-[#5998D6]' : `bg-[${THEME_COLOR}] text-white shadow-md border border-[${THEME_COLOR}]`) : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10';
+                btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}"><span style="color: ${isSel ? '#FFFFFF' : tColor};" class="mr-1">●</span>${t.id}${t.isWaiting ? ' (대기)' : ''}</button>`;
+            });
+            dom.trainList.innerHTML = btnHtml;
+            if (activeTab === 'map') updateMapTrains(renderedT);
+            else if (activeTab === 'line') {
+                const updateLayer = (layer, trains, isLine) => {
+                    const currentIds = trains.map(t => t.id); Array.from(layer.children).forEach(c => { if (!currentIds.includes(c.dataset.id)) c.remove(); });
+                    trains.forEach(t => {
+                        let g = layer.querySelector(`g[data-id="${t.id}"]`); const isSelected = t.id === selectedTrainId;
+                        if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.dataset.id = t.id; g.setAttribute("class", "cursor-pointer"); g.setAttribute("onclick", `handleTrainClick('${t.id}')`); layer.appendChild(g); }
+                        g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
+                        const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#3f3f46');
+                        const isUp = t.direction === 'up'; const textWidth = t.id.length * 6 + 14; const rectX = -(textWidth / 2);
+                        g.innerHTML = `${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}<rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#FFFFFF' : '#1C1C1E'}" stroke-width="${isSelected ? '2' : '1'}" /><rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" />${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?10:-25}" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" /><text x="0" y="${isUp?21:-14}" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
+                    });
+                };
+                updateLayer(dom.lineTrainsUp, renderedT.filter(t => t.direction === 'up'), true); updateLayer(dom.lineTrainsDown, renderedT.filter(t => t.direction === 'down'), true);
+            }
+            let lineHTML = ''; for (const stationName in STATIONS) {
+                const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + 1140 * s.progress;
+                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#333" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<text x="0" y="14" text-anchor="middle" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}</g>`;
+            }
+            dom.lineStations.innerHTML = lineHTML;
+            if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
+                if (activeTab === 'map' && leafletMap) { leafletMap.panTo(getLatLngAtProgress(selectedData.overallProgress), {animate: true}); } 
+                else { dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - (dom.scrollContainer.clientHeight - 150) / 2, behavior: 'auto' }); }
+                dom.autoScrollBtn.classList.add('hidden');
+            } else if (selectedData && !selectedStation && activeTab !== 'home') dom.autoScrollBtn.classList.remove('hidden'); else dom.autoScrollBtn.classList.add('hidden');
+            let panelHtml = ''; if (selectedStation) {
+                dom.floatingPanel.classList.remove('hidden'); let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
+                let upcoming = target.map(t => { const s = t.schedule.find(st => st.name === selectedStation); return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null; }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
+                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'bg-[#0054A6] text-white shadow-sm':'text-gray-400 hover:text-white'}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'bg-[#5998D6] text-white shadow-sm':'text-gray-400 hover:text-white'}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="${stationDetailDirection==='up'?'text-[#0054A6]':'text-[#5998D6]'} font-black text-[13px]">${Math.ceil((u.sec-currentSec)/60)}분 후</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
+            } else if (selectedData) {
+                dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? '#5998D6' : THEME_COLOR;
+                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-white tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-400">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">분 전</span></div>` : ''}</div></div>`;
+            } else dom.floatingPanel.classList.add('hidden');
+            if(dom.floatingPanel.innerHTML !== panelHtml && activeTab !== 'home') dom.floatingPanel.innerHTML = panelHtml;
         };
 
-        function render() {
-            dom.clock.textContent = secondsToTime(currentSec);
-            if (activeTab === 'home') renderHomeArrivalInfo();
-            
-            const activeT = getActiveTrains(parsedTrains, currentDirection);
-            if (activeT.length > 0 && !selectedTrainId) selectedTrainId = activeT[0].id;
-            
-            const renderedT = activeT.map(t => {
-                const ref = activeTab === 'route' ? dom.routePath : (currentDirection==='up'?dom.linePathUp:dom.linePathDown);
-                const len = activeTab === 'route' ? routeLength : 1100;
-                const p = ref.getPointAtLength(len * (t.overallProgress || 0));
-                const np = ref.getPointAtLength(Math.min(len, len * (t.overallProgress || 0) + 1));
-                return { ...t, point: p, angle: Math.atan2(np.y-p.y, np.x-p.x) * 180 / Math.PI };
+        window.onload = async () => {
+            // Firebase Initialize
+            const firebaseConfig = JSON.parse(__firebase_config);
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Auth Login (Mandatory Rule 3)
+            const initAuth = async () => {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            };
+            await initAuth();
+
+            onAuthStateChanged(auth, async (u) => {
+                if (!u) return;
+                user = u;
+                // Load favorite from Firestore (Rule 1 & 2)
+                try {
+                    const snap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorite'));
+                    if (snap.exists() && snap.data().station) {
+                        favoriteStation = snap.data().station;
+                        homeSelectedStation = favoriteStation;
+                        window.updateHomeUI();
+                        window.renderHomeArrivalInfo();
+                    }
+                } catch (e) { console.error("Load Fav Error", e); }
             });
 
-            if (activeTab === 'route') updateTrainsSVG(dom.routeTrains, renderedT);
-            else updateTrainsSVG(currentDirection==='up'?dom.lineTrainsUp:dom.lineTrainsDown, renderedT);
-            
-            drawStaticStations();
-            
-            if (selectedStation) {
-                let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
-                let upcoming = target.map(t => {
-                    const s = t.schedule.find(st => st.name === selectedStation);
-                    return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null;
-                }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
-
-                dom.floatingPanel.innerHTML = `<div class="toss-card p-5">
-                    <div class="flex justify-between items-start mb-4">
-                        <div><h3 class="text-xl font-extrabold text-white">${selectedStation}역</h3>
-                        <div class="flex gap-1 mt-2"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='up'?'bg-[#3182F6] text-white':'text-gray-400 bg-white/5'}">상행</button>
-                        <button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='down'?'bg-[#3182F6] text-white':'text-gray-400 bg-white/5'}">하행</button></div></div>
-                        <button onclick="handleStationClick(null)" class="text-gray-500"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    <div class="space-y-2 mb-4">${upcoming.length ? upcoming.map(u => `<div class="list-card p-3 flex justify-between">
-                        <span class="text-white font-bold">${u.time.slice(0,5)} <span class="text-xs text-gray-500">${u.dest}행</span></span>
-                        <span class="text-[#3182F6] font-black">${Math.ceil((u.sec-currentSec)/60)}분 후</span></div>`).join('') : '<div class="text-center text-gray-500 py-2">운행 종료</div>'}</div>
-                    <button onclick="window.openModal()" class="w-full py-3 bg-[#3182F6] rounded-xl font-bold">시간표 보기</button></div>`;
-            }
-        }
-
-        window.onload = async () => {
             currentDayType = getDayType(new Date());
             await loadTimetable();
+            initMap();
             setTimeout(() => {
-                routeLength = dom.routePath.getTotalLength();
-                switchTab('home');
+                window.switchTab('home');
                 setInterval(() => {
-                    const now = new Date();
-                    let h = now.getHours(); if(h<4) h+=24;
+                    const now = new Date(); let h = now.getHours(); if(h<4) h+=24;
                     currentSec = h*3600 + now.getMinutes()*60 + now.getSeconds();
-                    render();
+                    window.render();
                 }, 1000);
             }, 100);
         };
+        
+        dom.tabHome.onclick = () => window.switchTab('home');
+        dom.tabLine.onclick = () => window.switchTab('line');
+        dom.tabMap.onclick = () => window.switchTab('map');
+        dom.directionToggle.addEventListener('change', async (e) => { currentDirection = e.target.value; await loadTimetable(); isAutoScroll = true; window.render(); });
+        dom.scrollContainer.addEventListener('touchstart', () => isAutoScroll = false, {passive: true});
+        dom.scrollContainer.addEventListener('wheel', () => isAutoScroll = false, {passive: true});
+        dom.autoScrollBtn.addEventListener('click', () => { isAutoScroll = true; window.render(); });
+        dom.closeModalBtn.addEventListener('click', () => { dom.timetableModal.classList.add('hidden'); });
     </script>
 </body>
 </html>
