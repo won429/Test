@@ -135,7 +135,11 @@
                 <!-- 코레일 스타일 역명판 -->
                 <div onclick="openStationSelector()" class="relative w-full flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
                     <div class="station-plate-base w-full">
-                        <div class="flex-1"></div>
+                        <div class="flex-1 text-left pl-2">
+                            <div id="home-prev-station-container" class="opacity-0 transition-opacity">
+                                <span id="home-prev-station" class="text-white text-[15px] font-bold tracking-tight"></span>
+                            </div>
+                        </div>
                         <div class="flex-1 text-right pr-2">
                             <div id="home-next-station-container" class="opacity-100 transition-opacity">
                                 <span id="home-next-station" class="text-white text-[15px] font-bold tracking-tight">사곡 &gt;</span>
@@ -242,15 +246,6 @@
                         <g id="line-trains-up"></g>
                     </svg>
                 </div>
-                
-                <div id="route-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-100 z-10">
-                    <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
-                        <path d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
-                        <path id="route-path" d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="transparent" stroke-width="8" />
-                        <g id="route-stations"></g>
-                        <g id="route-trains"></g>
-                    </svg>
-                </div>
 
                 <div id="map-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
                     <div id="real-map" class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[100dvh] bg-[#0a0a0a]"></div>
@@ -279,12 +274,6 @@
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-grip-lines text-base text-gray-400 transition-colors"></i>
                         <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선</span>
-                    </div>
-                </button>
-                <button id="tab-route" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-route text-base text-white transition-colors"></i>
-                        <span class="text-[10px] font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] whitespace-nowrap transition-colors">노선도</span>
                     </div>
                 </button>
                 <button id="tab-map" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
@@ -387,7 +376,6 @@
         let selectedTrainId = null;
         let selectedStation = null;
         let currentSec = 0;
-        let routeLength = 0;
         let currentDirection = 'up'; 
         let currentDayType = 'weekday'; 
         let stationDetailDirection = 'up'; 
@@ -668,21 +656,16 @@
             trainList: document.getElementById('train-list'),
             scrollContainer: document.getElementById('scroll-container'),
             lineView: document.getElementById('line-view'),
-            routeView: document.getElementById('route-view'),
             mapView: document.getElementById('map-view'),
             linePathDown: document.getElementById('line-path-down'),
             linePathUp: document.getElementById('line-path-up'),
-            routePath: document.getElementById('route-path'),
             lineStations: document.getElementById('line-stations'),
-            routeStations: document.getElementById('route-stations'),
             lineTrainsDown: document.getElementById('line-trains-down'),
             lineTrainsUp: document.getElementById('line-trains-up'),
-            routeTrains: document.getElementById('route-trains'),
             autoScrollBtn: document.getElementById('auto-scroll-btn'),
             floatingPanel: document.getElementById('floating-panel'),
             tabHome: document.getElementById('tab-home'),
             tabLine: document.getElementById('tab-line'),
-            tabRoute: document.getElementById('tab-route'),
             tabMap: document.getElementById('tab-map'),
             navIndicator: document.getElementById('nav-indicator'),
             timetableModal: document.getElementById('timetable-modal'),
@@ -691,6 +674,8 @@
             modalContent: document.getElementById('modal-content'),
             closeModalBtn: document.getElementById('close-modal-btn'),
             homeStationName: document.getElementById('home-station-name'),
+            homePrevStation: document.getElementById('home-prev-station'),
+            homePrevStationContainer: document.getElementById('home-prev-station-container'),
             homeNextStation: document.getElementById('home-next-station'),
             homeNextStationContainer: document.getElementById('home-next-station-container'),
             homeCurrentTime: document.getElementById('home-current-time'),
@@ -701,7 +686,7 @@
         };
 
         function updateTabUI(activeTabId) {
-            const tabs = ['tab-home', 'tab-line', 'tab-route', 'tab-map'];
+            const tabs = ['tab-home', 'tab-line', 'tab-map'];
             const activeIndex = tabs.indexOf(activeTabId);
             const navButtons = document.querySelectorAll('#bottom-nav button');
             if (navButtons[activeIndex]) {
@@ -729,12 +714,28 @@
         function updateHomeUI() {
             const stationNames = Object.keys(STATIONS);
             const idx = stationNames.indexOf(homeSelectedStation);
+            const prevStation = idx > 0 ? stationNames[idx - 1] : null;
             const nextStation = idx < stationNames.length - 1 ? stationNames[idx + 1] : null;
+            
             dom.homeStationName.textContent = homeSelectedStation;
+            
+            if (prevStation) {
+                dom.homePrevStation.textContent = `< ${prevStation}`;
+                dom.homePrevStationContainer.classList.remove('opacity-0');
+                dom.homePrevStationContainer.classList.add('opacity-100');
+            } else { 
+                dom.homePrevStationContainer.classList.add('opacity-0');
+                dom.homePrevStationContainer.classList.remove('opacity-100');
+            }
+
             if (nextStation) {
                 dom.homeNextStation.textContent = `${nextStation} >`;
                 dom.homeNextStationContainer.classList.remove('opacity-0');
-            } else { dom.homeNextStationContainer.classList.add('opacity-0'); }
+                dom.homeNextStationContainer.classList.add('opacity-100');
+            } else { 
+                dom.homeNextStationContainer.classList.add('opacity-0');
+                dom.homeNextStationContainer.classList.remove('opacity-100');
+            }
         }
 
         window.renderHomeArrivalInfo = () => {
@@ -801,8 +802,6 @@
                 
                 dom.lineView.style.opacity = tabId === 'line' ? '1' : '0';
                 dom.lineView.classList.toggle('pointer-events-none', tabId !== 'line');
-                dom.routeView.style.opacity = tabId === 'route' ? '1' : '0';
-                dom.routeView.classList.toggle('pointer-events-none', tabId !== 'route');
                 dom.mapView.style.opacity = tabId === 'map' ? '1' : '0';
                 dom.mapView.classList.toggle('pointer-events-none', tabId !== 'map');
                 
@@ -825,7 +824,6 @@
 
         dom.tabHome.onclick = () => switchTab('home');
         dom.tabLine.onclick = () => switchTab('line');
-        dom.tabRoute.onclick = () => switchTab('route');
         dom.tabMap.onclick = () => switchTab('map');
 
         dom.directionToggle.addEventListener('change', async (e) => {
@@ -905,7 +903,7 @@
         };
 
         function drawStaticStations() {
-            let lineHTML = '', routeHTML = '';
+            let lineHTML = '';
             for (const stationName in STATIONS) {
                 const s = STATIONS[stationName];
                 const isSel = selectedStation === stationName;
@@ -920,21 +918,8 @@
                         ${s.ktx ? `<text x="0" y="14" text-anchor="middle" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}
                     </g>
                 `;
-
-                let rPt = {x:0, y:0};
-                if(routeLength > 0) rPt = dom.routePath.getPointAtLength(routeLength * s.progress);
-                
-                routeHTML += `
-                    <g transform="translate(${rPt.x}, ${rPt.y})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
-                        <circle r="20" fill="transparent" />
-                        <circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" class="transition-all" />
-                        <text x="${s.xOff}" y="${s.yOff}" text-anchor="${s.align}" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[13px] font-extrabold tracking-tight">${stationName}</text>
-                        ${s.ktx ? `<text x="${s.xOff}" y="${s.yOff + 13}" text-anchor="${s.align}" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}
-                    </g>
-                `;
             }
             dom.lineStations.innerHTML = lineHTML;
-            dom.routeStations.innerHTML = routeHTML;
         }
 
         function updateTrainsSVG(layer, trains, isLineView) {
@@ -1029,10 +1014,7 @@
             
             const renderedT = activeT.map(t => {
                 let ref, len;
-                if (activeTab === 'route') {
-                    ref = dom.routePath;
-                    len = routeLength;
-                } else if (activeTab === 'map') {
+                if (activeTab === 'map') {
                     ref = null;
                     len = 0;
                 } else {
@@ -1078,9 +1060,7 @@
             });
             if(dom.trainList.innerHTML !== btnHtml) dom.trainList.innerHTML = btnHtml;
 
-            if (activeTab === 'route') {
-                updateTrainsSVG(dom.routeTrains, renderedT, false);
-            } else if (activeTab === 'map') {
+            if (activeTab === 'map') {
                 updateMapTrains(renderedT);
             } else if (activeTab === 'line') {
                 const rUp = renderedT.filter(t => t.direction === 'up');
@@ -1178,7 +1158,6 @@
             await loadTimetable();
             initMap(); // Leaflet 지도 초기화
             setTimeout(() => {
-                routeLength = dom.routePath.getTotalLength();
                 switchTab('home');
                 setInterval(() => {
                     const now = new Date();
