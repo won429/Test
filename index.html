@@ -337,16 +337,8 @@
         </div>
     </div>
 
-    <!-- Firebase SDK (Private Data Persistence) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global Firebase state
-        let db, auth, user;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'subway-tracker-v1';
-        let favoriteStation = null;
+    <script>
+        let favoriteStation = localStorage.getItem('subway_fav_station') || null;
 
         const THEME_COLOR = "#0054A6";
         const STOP_DURATION = 30; 
@@ -633,14 +625,15 @@
             });
         }
 
-        window.toggleFavorite = async () => {
-            if (!user) return;
+        window.toggleFavorite = () => {
             const newFav = (favoriteStation === homeSelectedStation) ? null : homeSelectedStation;
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorite'), { station: newFav });
-                favoriteStation = newFav;
-                updateHomeUI();
-            } catch (e) { console.error("Save Fav Error", e); }
+            favoriteStation = newFav;
+            if (newFav) {
+                localStorage.setItem('subway_fav_station', newFav);
+            } else {
+                localStorage.removeItem('subway_fav_station');
+            }
+            window.updateHomeUI();
         };
 
         window.updateHomeUI = () => {
@@ -852,36 +845,10 @@
         };
 
         window.onload = async () => {
-            // Firebase Initialize
-            const firebaseConfig = JSON.parse(__firebase_config);
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-
-            // Auth Login (Mandatory Rule 3)
-            const initAuth = async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            };
-            await initAuth();
-
-            onAuthStateChanged(auth, async (u) => {
-                if (!u) return;
-                user = u;
-                // Load favorite from Firestore (Rule 1 & 2)
-                try {
-                    const snap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorite'));
-                    if (snap.exists() && snap.data().station) {
-                        favoriteStation = snap.data().station;
-                        homeSelectedStation = favoriteStation;
-                        window.updateHomeUI();
-                        window.renderHomeArrivalInfo();
-                    }
-                } catch (e) { console.error("Load Fav Error", e); }
-            });
+            if (favoriteStation && STATIONS[favoriteStation]) {
+                homeSelectedStation = favoriteStation;
+                window.updateHomeUI();
+            }
 
             currentDayType = getDayType(new Date());
             await loadTimetable();
