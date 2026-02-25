@@ -8,10 +8,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Leaflet Map (실제 지도 라이브러리) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <!-- 폰트 및 아이콘 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -111,10 +107,6 @@
             font-weight: 900;
             box-shadow: 0 2px 4px rgba(0, 84, 166, 0.4);
         }
-
-        /* 리플렛 맵 z-index 오버라이드 (UI 가림 방지) */
-        .leaflet-pane { z-index: 1 !important; }
-        .leaflet-top, .leaflet-bottom { z-index: 2 !important; }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex justify-center items-center overflow-hidden">
@@ -268,10 +260,6 @@
                         <g id="line-trains-up"></g>
                     </svg>
                 </div>
-
-                <div id="map-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
-                    <div id="real-map" class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[100dvh] bg-[#0a0a0a]"></div>
-                </div>
             </div>
         </main>
 
@@ -296,12 +284,6 @@
                     <div class="flex flex-col items-center gap-[2px] pointer-events-none">
                         <i class="fa-solid fa-route text-[15px] text-gray-400 transition-colors"></i>
                         <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선</span>
-                    </div>
-                </button>
-                <button id="tab-map" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
-                        <i class="fa-solid fa-map-location-dot text-[15px] text-gray-400 transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">지도</span>
                     </div>
                 </button>
             </div>
@@ -340,7 +322,7 @@
         let favoriteStation = localStorage.getItem('subway_fav_station') || null;
 
         const THEME_COLOR = "#0054A6";
-        const STOP_DURATION = 30; 
+        const STOP_DURATION = 25; 
 
         const STATIONS = {
             "구미": { progress: 0.00, align: "start", xOff: 15, yOff: 4, lat: 36.1284, lng: 128.3305 },
@@ -404,9 +386,6 @@
         let parsedTrainsDown = [];
         let parsedTrains = [];
 
-        let leafletMap;
-        let trainMarkers = {};
-
         const dom = {
             mainHeader: document.getElementById('main-header'),
             homeScreen: document.getElementById('home-screen'),
@@ -416,7 +395,6 @@
             trainList: document.getElementById('train-list'),
             scrollContainer: document.getElementById('scroll-container'),
             lineView: document.getElementById('line-view'),
-            mapView: document.getElementById('map-view'),
             linePathDown: document.getElementById('line-path-down'),
             linePathUp: document.getElementById('line-path-up'),
             lineStations: document.getElementById('line-stations'),
@@ -426,7 +404,6 @@
             floatingPanel: document.getElementById('floating-panel'),
             tabHome: document.getElementById('tab-home'),
             tabLine: document.getElementById('tab-line'),
-            tabMap: document.getElementById('tab-map'),
             navIndicator: document.getElementById('nav-indicator'),
             timetableModal: document.getElementById('timetable-modal'),
             modalTitle: document.getElementById('modal-title'),
@@ -554,76 +531,6 @@
             } catch (e) { }
         };
 
-        function initMap() {
-            leafletMap = L.map('real-map', { zoomControl: false, attributionControl: false }).setView([35.97, 128.53], 10);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(leafletMap);
-            const allLatLngs = [];
-            RAIL_SEGMENTS.forEach((seg, idx) => {
-                if (idx === 0) allLatLngs.push(seg.path[0]);
-                for (let i = 1; i < seg.path.length; i++) allLatLngs.push(seg.path[i]);
-            });
-            L.polyline(allLatLngs, {color: '#333333', weight: 6, opacity: 0.8, lineJoin: 'round', smoothFactor: 1.5}).addTo(leafletMap);
-            L.polyline(allLatLngs, {color: THEME_COLOR, weight: 3, opacity: 0.5, lineJoin: 'round', smoothFactor: 1.5}).addTo(leafletMap);
-            Object.keys(STATIONS).forEach(name => {
-                const s = STATIONS[name];
-                L.circleMarker([s.lat, s.lng], { radius: 6, color: THEME_COLOR, weight: 3, fillColor: '#1C1C1E', fillOpacity: 1 }).addTo(leafletMap).on('click', () => {
-                    window.handleStationClick(name);
-                    leafletMap.setView([s.lat, s.lng], 13, {animate: true});
-                });
-                const html = `<div style="color:white; font-size:12px; font-weight:bold; text-shadow: 0 0 5px black; white-space:nowrap; transform: translate(-50%, 10px); text-align:center;">${name}${s.ktx ? `<br><span style="color:${THEME_COLOR}; font-size:9px; font-style:italic; font-weight:900;">KTX</span>` : ''}</div>`;
-                L.marker([s.lat, s.lng], { icon: L.divIcon({ className: 'custom-station-label', html, iconSize: [0, 0] }) }).addTo(leafletMap);
-            });
-        }
-
-        function getLatLngAtProgress(prog) {
-            const stKeys = Object.keys(STATIONS);
-            for (let i = 0; i < stKeys.length - 1; i++) {
-                const s1Name = stKeys[i]; const s2Name = stKeys[i+1];
-                const s1 = STATIONS[s1Name]; const s2 = STATIONS[s2Name];
-                if (prog >= s1.progress && prog <= s2.progress) {
-                    const localProg = (prog - s1.progress) / (s2.progress - s1.progress);
-                    const seg = RAIL_SEGMENTS.find(s => s.start === s1Name && s.end === s2Name);
-                    if (!seg || seg.totalDist === 0) return [s1.lat + (s2.lat - s1.lat) * localProg, s1.lng + (s2.lng - s1.lng) * localProg];
-                    const targetDist = localProg * seg.totalDist;
-                    for (let j = 0; j < seg.distances.length - 1; j++) {
-                        if (targetDist >= seg.distances[j] && targetDist <= seg.distances[j+1]) {
-                            const subProg = (targetDist - seg.distances[j]) / (seg.distances[j+1] - seg.distances[j]);
-                            return [seg.path[j][0] + (seg.path[j+1][0] - seg.path[j][0]) * subProg, seg.path[j][1] + (seg.path[j+1][1] - seg.path[j][1]) * subProg];
-                        }
-                    }
-                }
-            }
-            if (prog <= 0) return [STATIONS[stKeys[0]].lat, STATIONS[stKeys[0]].lng];
-            return [STATIONS[stKeys[stKeys.length-1]].lat, STATIONS[stKeys[stKeys.length-1]].lng];
-        }
-
-        function updateMapTrains(trains) {
-            if (!leafletMap) return;
-            const currentIds = trains.map(t => t.id);
-            Object.keys(trainMarkers).forEach(id => {
-                if (!currentIds.includes(id)) { leafletMap.removeLayer(trainMarkers[id]); delete trainMarkers[id]; }
-            });
-            trains.forEach(t => {
-                const isSelected = t.id === selectedTrainId;
-                const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR;
-                const fillColor = isSelected ? THEME_COLOR : '#3f3f46';
-                const latlng = getLatLngAtProgress(t.overallProgress);
-                const nextProg = Math.max(0, Math.min(1, t.overallProgress + (t.direction === 'up' ? -0.001 : 0.001)));
-                const nextLatlng = getLatLngAtProgress(nextProg);
-                let angle = (Math.abs(nextLatlng[0] - latlng[0]) > 0.00001 || Math.abs(nextLatlng[1] - latlng[1]) > 0.00001) ? 
-                    Math.atan2(Math.cos(latlng[0] * Math.PI / 180) * (nextLatlng[1] - latlng[1]), nextLatlng[0] - latlng[0]) * 180 / Math.PI : (t.direction === 'up' ? 180 : 0);
-                const html = `<div style="position:relative; width:14px; height:32px; background:${fillColor}; border-radius:3px; border:1px solid ${isSelected?'white':'#1C1C1E'}; box-shadow:0 2px 5px rgba(0,0,0,0.5); transform: rotate(${angle}deg); transform-origin: center center; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;"><div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div><div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div><div style="width:10px; height:6px; background:white; border-radius:1px; opacity:0.9;"></div>${isSelected ? `<div style="position:absolute; bottom:-28px; left:50%; transform:translateX(-50%) rotate(${-angle}deg); background:#1C1C1E; border:1px solid ${tColor}; color:white; font-size:10px; font-weight:900; padding:2px 8px; border-radius:10px; white-space:nowrap; z-index:1100;">${t.id}</div>` : ''}</div>`;
-                if (!trainMarkers[t.id]) {
-                    trainMarkers[t.id] = L.marker(latlng, {icon: L.divIcon({ className: '', html, iconSize: [14, 32], iconAnchor: [7, 16] }), zIndexOffset: isSelected ? 1000 : 0}).addTo(leafletMap);
-                    trainMarkers[t.id].on('click', () => window.handleTrainClick(t.id));
-                } else {
-                    trainMarkers[t.id].setLatLng(latlng);
-                    trainMarkers[t.id].setIcon(L.divIcon({ className: '', html, iconSize: [14, 32], iconAnchor: [7, 16] }));
-                    trainMarkers[t.id].setZIndexOffset(isSelected ? 1000 : 0);
-                }
-            });
-        }
-
         window.toggleFavorite = () => {
             const newFav = (favoriteStation === homeSelectedStation) ? null : homeSelectedStation;
             favoriteStation = newFav;
@@ -670,8 +577,9 @@
             const renderL = (trains) => {
                 if (!trains || trains.length === 0) return `<span class="text-gray-500 text-[12px] font-bold my-auto">운행 종료</span>`;
                 return trains.map(t => {
-                    const min = Math.ceil((t.sec - currentSec)/60);
-                    return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2 rounded-xl border border-white/5"><span class="text-[12px] font-bold text-gray-200">${t.dest}</span><span class="text-[13px] font-extrabold text-[#0054A6] drop-shadow-sm">${min <= 0 ? '곧 도착' : min + '분'}</span></div>`;
+                    const diff = t.sec - currentSec;
+                    const timeText = diff <= 0 ? '곧 도착' : (diff < 60 ? diff + '초' : Math.ceil(diff/60) + '분');
+                    return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2 rounded-xl border border-white/5"><span class="text-[12px] font-bold text-gray-200">${t.dest}</span><span class="text-[13px] font-extrabold text-[#0054A6] drop-shadow-sm">${timeText}</span></div>`;
                 }).join('');
             };
             dom.homeUpInfo.innerHTML = homeSelectedStation === '구미' ? `<span class="text-gray-500 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
@@ -706,18 +614,13 @@
                 dom.trainList.classList.toggle('hidden', tabId === 'line'); 
                 dom.lineView.style.opacity = tabId === 'line' ? '1' : '0';
                 dom.lineView.classList.toggle('pointer-events-none', tabId !== 'line');
-                dom.mapView.style.opacity = tabId === 'map' ? '1' : '0';
-                dom.mapView.classList.toggle('pointer-events-none', tabId !== 'map');
-                dom.scrollContainer.classList.toggle('overflow-y-auto', tabId !== 'map');
-                dom.scrollContainer.classList.toggle('overflow-hidden', tabId === 'map');
                 isAutoScroll = false; 
-                if (tabId === 'map' && leafletMap) { setTimeout(() => leafletMap.invalidateSize(), 500); }
             }
             window.render(); updateTabUI('tab-' + tabId);
         };
 
         function updateTabUI(activeTabId) {
-            const tabs = ['tab-home', 'tab-line', 'tab-map'];
+            const tabs = ['tab-home', 'tab-line'];
             const activeIndex = tabs.indexOf(activeTabId);
             const navButtons = document.querySelectorAll('#bottom-nav button');
             if (navButtons[activeIndex]) {
@@ -776,21 +679,21 @@
             if (activeTab === 'home') window.renderHomeArrivalInfo();
             const getActiveTrains = (list, dir) => list ? list.map(t => {
                 const start = t.schedule[0].sec, end = t.schedule[t.schedule.length-1].sec;
-                if (currentSec < start || currentSec > end + 30) return null;
+                if (currentSec < start || currentSec > end + STOP_DURATION) return null;
                 let idx = 0; while(idx < t.schedule.length && currentSec >= t.schedule[idx].sec) idx++; idx--;
                 const curr = t.schedule[idx], next = t.schedule[idx+1] || curr;
-                let prog = curr.progress, isStop = (currentSec - curr.sec <= 30), rem = next.sec - currentSec;
+                let prog = curr.progress, isStop = (currentSec - curr.sec <= STOP_DURATION), rem = next.sec - currentSec;
                 if (!isStop && idx < t.schedule.length-1) {
-                    const segDur = Math.max(1, next.sec - (curr.sec + 30));
-                    prog = curr.progress + (next.progress - curr.progress) * Math.min(1, Math.max(0, (currentSec - (curr.sec + 30)) / segDur));
+                    const segDur = Math.max(1, next.sec - (curr.sec + STOP_DURATION));
+                    prog = curr.progress + (next.progress - curr.progress) * Math.min(1, Math.max(0, (currentSec - (curr.sec + STOP_DURATION)) / segDur));
                 }
-                return { ...t, curr, next, overallProgress: prog, timeRemaining: rem, isStopped: isStop, direction: dir };
+                return { ...t, curr, next, overallProgress: prog, timeRemaining: rem, isStopped: isStop, direction: dir, stopRemaining: isStop ? STOP_DURATION - (currentSec - curr.sec) : 0 };
             }).filter(t => t) : [];
             let activeTrainsUp = getActiveTrains(parsedTrainsUp, 'up');
             let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             const renderedT = activeT.map(t => {
-                const ref = activeTab === 'map' ? null : (t.direction === 'up' ? dom.linePathUp : dom.linePathDown);
+                const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
                 if (ref) {
                     const currentLen = 1140 * (t.overallProgress || 0); p = ref.getPointAtLength(currentLen);
@@ -807,8 +710,8 @@
                 btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}"><span style="color: ${isSel ? '#FFFFFF' : tColor};" class="mr-1">●</span>${t.id}${t.isWaiting ? ' (대기)' : ''}</button>`;
             });
             dom.trainList.innerHTML = btnHtml;
-            if (activeTab === 'map') updateMapTrains(renderedT);
-            else if (activeTab === 'line') {
+            
+            if (activeTab === 'line') {
                 const updateLayer = (layer, trains, isLine) => {
                     const currentIds = trains.map(t => t.id); Array.from(layer.children).forEach(c => { if (!currentIds.includes(c.dataset.id)) c.remove(); });
                     trains.forEach(t => {
@@ -817,7 +720,7 @@
                         g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
                         const tColor = t.direction === 'down' ? '#5998D6' : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#3f3f46');
                         const isUp = t.direction === 'up'; const textWidth = t.id.length * 6 + 14; const rectX = -(textWidth / 2);
-                        g.innerHTML = `${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}<rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#FFFFFF' : '#1C1C1E'}" stroke-width="${isSelected ? '2' : '1'}" /><rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" />${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?10:-25}" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" /><text x="0" y="${isUp?21:-14}" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
+                        g.innerHTML = `${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}<rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#FFFFFF' : '#1C1C1E'}" stroke-width="${isSelected ? '2' : '1'}" /><rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" /><circle cx="15" cy="-3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" /><circle cx="15" cy="3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?10:-25}" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" /><text x="0" y="${isUp?21:-14}" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
                     });
                 };
                 updateLayer(dom.lineTrainsUp, renderedT.filter(t => t.direction === 'up'), true); updateLayer(dom.lineTrainsDown, renderedT.filter(t => t.direction === 'down'), true);
@@ -828,17 +731,16 @@
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
-                if (activeTab === 'map' && leafletMap) { leafletMap.panTo(getLatLngAtProgress(selectedData.overallProgress), {animate: true}); } 
-                else { dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - (dom.scrollContainer.clientHeight - 150) / 2, behavior: 'auto' }); }
+                dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - (dom.scrollContainer.clientHeight - 150) / 2, behavior: 'auto' });
                 dom.autoScrollBtn.classList.add('hidden');
             } else if (selectedData && !selectedStation && activeTab !== 'home') dom.autoScrollBtn.classList.remove('hidden'); else dom.autoScrollBtn.classList.add('hidden');
             let panelHtml = ''; if (selectedStation) {
                 dom.floatingPanel.classList.remove('hidden'); let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
                 let upcoming = target.map(t => { const s = t.schedule.find(st => st.name === selectedStation); return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null; }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
-                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'bg-[#0054A6] text-white shadow-sm':'text-gray-400 hover:text-white'}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'bg-[#5998D6] text-white shadow-sm':'text-gray-400 hover:text-white'}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="${stationDetailDirection==='up'?'text-[#0054A6]':'text-[#5998D6]'} font-black text-[13px]">${Math.ceil((u.sec-currentSec)/60)}분 후</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
+                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-white tracking-tight">${selectedStation}역</h3><div class="flex bg-white/5 rounded-full p-0.5 border border-white/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'bg-[#0054A6] text-white shadow-sm':'text-gray-400 hover:text-white'}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'bg-[#5998D6] text-white shadow-sm':'text-gray-400 hover:text-white'}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-white/5 w-7 h-7 rounded-full flex items-center justify-center hover:text-white hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-white/5 hover:bg-white/10 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center"><span class="text-white font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-400 ml-1.5 font-medium">${u.dest}행</span></span><span class="${stationDetailDirection==='up'?'text-[#0054A6]':'text-[#5998D6]'} font-black text-[13px]">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-500 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors rounded-[14px] font-bold text-gray-300 text-[12px] flex items-center justify-center gap-1.5"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
             } else if (selectedData) {
                 dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? '#5998D6' : THEME_COLOR;
-                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-white tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-400">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">분 전</span></div>` : ''}</div></div>`;
+                panelHtml = `<div class="bg-[#000000] border border-white/10 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-[0_20px_40px_rgba(0,0,0,0.8)] min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-white tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-400">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-400 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
             } else dom.floatingPanel.classList.add('hidden');
             if(dom.floatingPanel.innerHTML !== panelHtml && activeTab !== 'home') dom.floatingPanel.innerHTML = panelHtml;
         };
@@ -851,7 +753,6 @@
 
             currentDayType = getDayType(new Date());
             await loadTimetable();
-            initMap();
             setTimeout(() => {
                 window.switchTab('home');
                 setInterval(() => {
@@ -864,7 +765,6 @@
         
         dom.tabHome.onclick = () => window.switchTab('home');
         dom.tabLine.onclick = () => window.switchTab('line');
-        dom.tabMap.onclick = () => window.switchTab('map');
         dom.directionToggle.addEventListener('change', async (e) => { currentDirection = e.target.value; await loadTimetable(); isAutoScroll = true; window.render(); });
         dom.scrollContainer.addEventListener('touchstart', () => isAutoScroll = false, {passive: true});
         dom.scrollContainer.addEventListener('wheel', () => isAutoScroll = false, {passive: true});
