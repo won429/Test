@@ -24,7 +24,7 @@
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             touch-action: pan-y;
-            background-color: #0a0a0a;
+            background-color: #333333; /* 사이트 바탕색 다크그레이로 변경 */
         }
         
         /* 유리 재질 공통 클래스 */
@@ -120,11 +120,11 @@
 </head>
 <body class="w-full h-[100dvh] flex justify-center items-center overflow-hidden">
 
-    <!-- 스마트폰 형태의 메인 래퍼 -->
-    <div id="app" class="w-full h-full max-w-[430px] bg-black relative flex flex-col overflow-hidden sm:border-x border-white/10 sm:shadow-2xl">
+    <!-- 스마트폰 형태의 메인 래퍼 (bg-[#333333] 적용) -->
+    <div id="app" class="w-full h-full max-w-[430px] bg-[#333333] relative flex flex-col overflow-hidden sm:border-x border-black/10 sm:shadow-2xl">
         
-        <!-- 1. 홈 화면 -->
-        <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-black flex-col overflow-y-auto hide-scrollbar pb-24">
+        <!-- 1. 홈 화면 (bg-[#333333] 적용) -->
+        <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-[#333333] flex-col overflow-y-auto hide-scrollbar pb-24">
             <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-40 sticky top-0 border-b border-white/5">
                 <div class="px-5 pb-1 flex justify-between items-center">
                     <h2 class="text-[18px] font-extrabold text-main tracking-tight">대구권 대경선 지하철역</h2>
@@ -181,12 +181,12 @@
                 <!-- 도착 정보 섹션 -->
                 <div class="flex flex-col gap-3.5">
                     <div class="flex justify-between items-end mb-1 px-1">
-                        <h3 class="text-lg font-bold text-main tracking-tight">도착 정보</h3>
+                        <!-- 흰색 배경에서 보이도록 텍스트 색상을 검은색으로 변경 -->
+                        <h3 class="text-lg font-bold text-[#111827] tracking-tight">도착 정보</h3>
                         <div class="flex items-center gap-2">
-                            <!-- 테스트용 데이터 사용 시 나타나는 배지 -->
                             <span id="data-status-home" class="hidden text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded-md border border-red-500/20 animate-pulse">임의 데이터 사용중</span>
-                            <span id="home-current-time" class="text-xs font-bold text-sub bg-white/5 px-2 py-1 rounded-md">오후 5:35</span>
-                            <button onclick="renderHomeArrivalInfo()" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-white transition-colors"><i class="fa-solid fa-rotate-right"></i></button>
+                            <span id="home-current-time" class="text-xs font-bold text-gray-500 bg-black/5 px-2 py-1 rounded-md">오후 5:35</span>
+                            <button onclick="renderHomeArrivalInfo()" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-black transition-colors"><i class="fa-solid fa-rotate-right"></i></button>
                         </div>
                     </div>
 
@@ -244,8 +244,8 @@
             <div id="train-list" class="flex gap-2 overflow-x-auto px-4 pb-1 hide-scrollbar"></div>
         </header>
 
-        <!-- 3. 트래커 맵 스크롤 뷰 -->
-        <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-black scroll-smooth relative pt-[80px] pb-32">
+        <!-- 3. 트래커 맵 스크롤 뷰 (bg-[#333333] 적용) -->
+        <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-[#333333] scroll-smooth relative pt-[80px] pb-32">
             <div id="svg-wrapper" class="relative w-full h-[1500px]">
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
                     <svg id="line-svg" viewBox="0 0 400 1300" class="w-full h-[1300px]">
@@ -288,15 +288,15 @@
 
         <div id="floating-panel" class="hidden absolute bottom-[100px] left-0 right-0 px-4 z-[90] min-h-[72px] transition-all duration-300"></div>
 
-        <!-- 4. 하단 네비게이션 -->
+        <!-- 4. 하단 네비게이션 (흰색 배경에 맞게 화이트/라이트 테마로 변경) -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[75%] max-w-[240px] px-1.5 touch-pan-x select-none">
-            <div class="flex items-center justify-between bg-white/10 backdrop-blur-[8px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border border-white/20 rounded-full p-1 gap-0.5 relative transition-all duration-300">
-                <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white/20 shadow-sm rounded-full backdrop-blur-[2px] border border-white/10 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
+            <div class="flex items-center justify-between bg-white/90 backdrop-blur-[12px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-black/10 rounded-full p-1 gap-0.5 relative transition-all duration-300">
+                <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white shadow-sm rounded-full border border-black/5 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
                 <button id="tab-home" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
                     <div class="flex flex-col items-center gap-[2px] pointer-events-none">
-                        <i class="fa-solid fa-house text-[15px] text-gray-400 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 group-hover:text-white whitespace-nowrap transition-colors">홈</span>
+                        <i class="fa-solid fa-house text-[15px] text-black drop-shadow-sm group-hover:text-black transition-colors"></i>
+                        <span class="text-[10px] text-black font-bold group-hover:text-black whitespace-nowrap transition-colors">홈</span>
                     </div>
                 </button>
                 <button id="tab-line" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
@@ -322,6 +322,14 @@
                 <div id="modal-content" class="flex-1 overflow-y-auto px-4 py-2 pb-10 hide-scrollbar"></div>
             </div>
         </div>
+        <!-- 열차 버튼 리스트 영역 -->
+        <div id="train-list" class="flex gap-2 overflow-x-auto px-4 pb-1 hide-scrollbar"></div>
+    </header>
+
+    <!-- 3. 트래커 맵 스크롤 뷰 (bg-gray-100 적용) -->
+    <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-gray-100 scroll-smooth relative pt-[80px] pb-32">
+        <div id="svg-wrapper" class="relative w-full h-[1500px]">
+            <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
 
         <div id="station-selector-modal" class="hidden absolute inset-0 z-[150] flex flex-col justify-end bg-black/60 backdrop-blur-sm transition-opacity">
             <div class="bg-[#000000] w-full h-[60%] rounded-t-[32px] shadow-[0_-20px_40px_rgba(0,0,0,0.8)] flex flex-col animate-in border-t border-white/10">
@@ -838,12 +846,13 @@
                 dom.navIndicator.style.width = `${targetBtn.offsetWidth}px`;
                 dom.navIndicator.style.transform = `translateX(${targetBtn.offsetLeft - 4}px)`;
             }
+            // 하단 메뉴가 밝은 배경에 어울리도록 JS 클래스 변경 (검은색 텍스트 활용)
             tabs.forEach(id => {
                 const el = document.getElementById(id); if (!el) return;
                 const icon = el.querySelector('i'); const span = el.querySelector('span');
-                icon.className = icon.className.replace(/text-(white|gray-400)/g, '').trim();
-                span.className = span.className.replace(/text-(white|gray-400)/g, '').replace(/font-(medium|bold)/g, '').trim();
-                if (id === activeTabId) { icon.className += ' text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]'; span.className += ' text-white font-bold'; } 
+                icon.className = icon.className.replace(/text-(white|black|gray-400)/g, '').trim();
+                span.className = span.className.replace(/text-(white|black|gray-400)/g, '').replace(/font-(medium|bold)/g, '').trim();
+                if (id === activeTabId) { icon.className += ' text-black drop-shadow-sm'; span.className += ' text-black font-bold'; } 
                 else { icon.className += ' text-gray-400 transition-colors'; span.className += ' text-gray-400 font-medium transition-colors'; }
             });
         }
@@ -952,7 +961,8 @@
             }
             let lineHTML = ''; for (const stationName in STATIONS) {
                 const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
-                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#333" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" opacity="1" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" />` : ''}</g>`;
+                // 흰 배경에서 선이 예쁘게 보이도록 stroke="#D1D5DB" 로 변경, 텍스트도 #111827 적용
+                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
