@@ -21,7 +21,7 @@
             background-color: #0a0a0a;
         }
         
-        /* 유리 재질 공통 클래스 (Enjoy Travel Record 디자인 핵심) */
+        /* 유리 재질 공통 클래스 */
         .toss-card {
             background: rgba(28, 28, 30, 0.85);
             backdrop-filter: blur(16px) saturate(180%);
@@ -71,8 +71,8 @@
 
         /* 이미지 기반 실사 역명판 커스텀 CSS */
         .station-plate-base {
-            height: 52px;
-            background-color: #3182F6; /* 이미지 속 선명한 블루 */
+            height: 34px; 
+            background-color: #0052FF;
             border-radius: 9999px;
             position: relative;
             display: flex;
@@ -82,10 +82,10 @@
         }
         .station-plate-pill {
             background-color: white;
-            height: 40px;
-            padding: 0 16px;
+            height: 52px; 
+            padding: 0 24px;
             border-radius: 9999px;
-            border: 2px solid #3182F6;
+            border: 3px solid #0052FF;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -95,25 +95,27 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .metro-logo-circle {
-            width: 24px;
-            height: 24px;
-            background-color: #3182F6;
+            width: 26px; /* 크기 약간 확대 */
+            height: 26px;
+            background-color: #0052FF; /* 코레일 블루 적용 */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 900;
+            box-shadow: 0 2px 4px rgba(0, 82, 255, 0.4);
+            border: 2px solid white; /* 예쁜 흰색 테두리 추가 */
         }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex justify-center items-center overflow-hidden">
 
-    <!-- 스마트폰 형태의 메인 래퍼 (Enjoy Travel Record 디자인 가이드 준수) -->
+    <!-- 스마트폰 형태의 메인 래퍼 -->
     <div id="app" class="w-full h-full max-w-[430px] bg-black relative flex flex-col overflow-hidden sm:border-x border-white/10 sm:shadow-2xl">
         
-        <!-- 1. 홈 화면 (이미지 디자인 완벽 반영) -->
+        <!-- 1. 홈 화면 -->
         <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-black flex-col overflow-y-auto hide-scrollbar pb-24">
             <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-40 sticky top-0 border-b border-white/5">
                 <div class="px-5 pt-3 pb-4 flex justify-between items-center">
@@ -122,9 +124,8 @@
             </header>
 
             <div class="px-5 pt-8 space-y-8">
-                <!-- 이미지 속 디자인을 그대로 가져온 역명판 -->
+                <!-- 코레일 스타일 역명판 -->
                 <div onclick="openStationSelector()" class="relative w-full flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
-                    <!-- 파란색 베이스 라인 -->
                     <div class="station-plate-base w-full">
                         <div class="flex-1"></div>
                         <div class="flex-1 text-right pr-2">
@@ -133,7 +134,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 중앙 흰색 역명 캡슐 -->
                     <div class="station-plate-pill">
                         <div class="metro-logo-circle">대</div>
                         <span id="home-station-name" class="text-lg font-black text-black">구미</span>
@@ -145,6 +145,8 @@
                     <div class="flex justify-between items-end mb-1 px-1">
                         <h3 class="text-lg font-bold text-main tracking-tight">도착 정보</h3>
                         <div class="flex items-center gap-2">
+                            <!-- 테스트용 데이터 사용 시 나타나는 배지 -->
+                            <span id="data-status-home" class="hidden text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded-md border border-red-500/20 animate-pulse">임의 데이터 사용중</span>
                             <span id="home-current-time" class="text-xs font-bold text-sub bg-white/5 px-2 py-1 rounded-md">오후 5:35</span>
                             <button onclick="renderHomeArrivalInfo()" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-white transition-colors"><i class="fa-solid fa-rotate-right"></i></button>
                         </div>
@@ -163,11 +165,11 @@
 
                     <div class="grid grid-cols-2 gap-3 mt-2">
                         <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
-                            <i class="fa-regular fa-clock text-[#3182F6] text-lg"></i>
+                            <i class="fa-regular fa-clock text-[#0052FF] text-lg"></i>
                             <span class="text-[13px] font-bold text-gray-300">전체 시간표 <i class="fa-solid fa-chevron-down text-[9px] ml-0.5 text-gray-600"></i></span>
                         </button>
                         <button onclick="openHomeTimetable()" class="bg-[#1C1C1E] border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
-                            <i class="fa-solid fa-train-tram text-[#3182F6] text-lg"></i>
+                            <i class="fa-solid fa-train-tram text-[#0052FF] text-lg"></i>
                             <span class="text-[13px] font-bold text-gray-300">첫차·막차 <i class="fa-solid fa-chevron-down text-[9px] ml-0.5 text-gray-600"></i></span>
                         </button>
                     </div>
@@ -186,15 +188,16 @@
                             <option value="down" class="text-gray-900">하행 (경산 방면)</option>
                         </select>
                     </div>
-                    <p class="text-xs text-[#3182F6] font-bold mt-1.5 flex items-center gap-1.5 bg-[#3182F6]/20 w-max px-2.5 py-1 rounded-full border border-[#3182F6]/30">
+                    <p class="text-xs text-[#0052FF] font-bold mt-1.5 flex items-center gap-1.5 bg-[#0052FF]/20 w-max px-2.5 py-1 rounded-full border border-[#0052FF]/30">
                         <i class="fa-regular fa-clock"></i>
-                        <span id="day-type-display">평일</span> · 실시간 (<span id="clock-display">00:00:00</span>)
+                        <span id="day-type-display">평일</span> · <span id="data-status-display">실시간</span> (<span id="clock-display">00:00:00</span>)
                     </p>
                 </div>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#3182F6]/20 border border-[#3182F6]/30 text-[#3182F6] shrink-0 shadow-lg">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#0052FF]/20 border border-[#0052FF]/30 text-[#0052FF] shrink-0 shadow-lg">
                     <i class="fa-solid fa-train-subway text-lg"></i>
                 </div>
             </div>
+            <!-- 열차 버튼 리스트 영역 -->
             <div id="train-list" class="flex gap-2 overflow-x-auto px-5 pb-1 hide-scrollbar"></div>
         </header>
 
@@ -203,8 +206,8 @@
             <div class="relative w-full h-[1500px]">
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
                     <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
-                        <path d="M 120 100 L 120 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
-                        <path d="M 280 100 L 280 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
+                        <path d="M 120 100 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 하행 (시에라 블루) -->
+                        <path d="M 280 100 L 280 1200" fill="none" stroke="#0052FF" stroke-width="6" stroke-linecap="round" opacity="0.3" /> <!-- 상행 (코레일 블루) -->
                         <path id="line-path-down" d="M 120 100 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <path id="line-path-up" d="M 280 100 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <g id="line-stations"></g>
@@ -212,21 +215,23 @@
                         <g id="line-trains-up"></g>
                     </svg>
                 </div>
+                
                 <div id="route-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-100 z-10">
                     <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
-                        <path d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
+                        <path d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="#0052FF" stroke-width="6" stroke-linecap="round" opacity="0.3" />
                         <path id="route-path" d="M 80 100 L 80 280 Q 80 330 130 330 L 270 330 Q 320 330 320 380 L 320 560 Q 320 610 270 610 L 130 610 Q 80 610 80 660 L 80 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <g id="route-stations"></g>
                         <g id="route-trains"></g>
                     </svg>
                 </div>
+
                 <div id="map-view" class="absolute top-0 left-0 w-full bg-[#0a0a0a] transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
                     <svg viewBox="0 0 400 1300" class="w-full h-[1300px] mt-4">
                         <path d="M 0 100 C 150 300, 100 500, 50 1300" fill="none" stroke="#1A1A1D" stroke-width="40" stroke-linecap="round" />
                         <path d="M 400 450 C 300 500, 200 600, 90 550" fill="none" stroke="#1A1A1D" stroke-width="20" stroke-linecap="round" />
                         <path d="M 100 0 L 180 1300" stroke="#1C1C1E" stroke-width="6" fill="none" /> 
                         <path d="M 0 600 L 400 500" stroke="#1C1C1E" stroke-width="8" fill="none" /> 
-                        <path d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="#3182F6" stroke-width="6" stroke-linecap="round" opacity="0.3" />
+                        <path d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="#0052FF" stroke-width="6" stroke-linecap="round" opacity="0.3" />
                         <path id="map-path" d="M 60 150 C 100 200, 120 400, 180 600 C 220 750, 280 800, 310 900 C 340 1000, 350 1150, 360 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <g id="map-stations"></g>
                         <g id="map-trains"></g>
@@ -235,13 +240,13 @@
             </div>
         </main>
 
-        <button id="auto-scroll-btn" class="hidden absolute bottom-[130px] left-1/2 -translate-x-1/2 bg-[#3182F6] text-white px-5 py-3 rounded-full shadow-lg text-[13px] font-bold flex items-center gap-2 z-40 transition-transform active:scale-95 animate-bounce">
+        <button id="auto-scroll-btn" class="hidden absolute bottom-[130px] left-1/2 -translate-x-1/2 bg-[#0052FF] text-white px-5 py-3 rounded-full shadow-[0_4px_20px_rgba(0,82,255,0.4)] text-[13px] font-bold flex items-center gap-2 z-40 transition-transform active:scale-95 animate-bounce">
             <i class="fa-solid fa-location-crosshairs text-base"></i> 선택한 열차 따라가기
         </button>
 
         <div id="floating-panel" class="hidden absolute bottom-[80px] left-4 right-4 z-30 min-h-[72px]"></div>
 
-        <!-- 4. 하단 네비게이션 (Enjoy Travel Record 스타일 완전 복구) -->
+        <!-- 4. 하단 네비게이션 -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[88%] max-w-[300px] px-2 touch-pan-x select-none">
             <div class="flex items-center justify-between bg-white/10 backdrop-blur-[8px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border border-white/20 rounded-full p-1 gap-0.5 relative transition-all duration-300">
                 <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white/20 shadow-sm rounded-full backdrop-blur-[2px] border border-white/10 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
@@ -261,7 +266,7 @@
                 <button id="tab-route" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-route text-base text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선도</span>
+                        <span class="text-[10px] font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] whitespace-nowrap transition-colors">노선도</span>
                     </div>
                 </button>
                 <button id="tab-map" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
@@ -302,9 +307,8 @@
         </div>
     </div>
 
-    <!-- 스크립트 -->
     <script>
-        const THEME_COLOR = "#3182F6";
+        const THEME_COLOR = "#0052FF";
         const STOP_DURATION = 30; 
 
         const STATIONS = {
@@ -318,14 +322,20 @@
             "경산": { progress: 1.00, align: "start", xOff: 15, yOff: 4, ktx: true }
         };
 
-        const KOR_HOLIDAYS = ["2025-01-01", "2025-05-05", "2025-08-15"];
+        const KOR_HOLIDAYS = [
+            "2025-01-01", "2025-01-28", "2025-01-29", "2025-01-30", "2025-03-03",
+            "2025-05-05", "2025-05-06", "2025-06-06", "2025-08-15", "2025-10-03",
+            "2025-10-06", "2025-10-07", "2025-10-09", "2025-12-25",
+            "2026-01-01", "2026-02-16", "2026-02-17", "2026-02-18", "2026-03-01", 
+            "2026-05-05", "2026-05-24", "2026-06-06", "2026-08-15", "2026-09-24", 
+            "2026-09-25", "2026-09-26", "2026-10-03", "2026-10-09", "2026-12-25"
+        ];
 
-        // Blob 환경에서의 fetch 오류를 방지하기 위해 파일명만 사용합니다.
         const FILE_URLS = {
-            weekday_up: 'dae_up.csv',
-            weekday_down: 'dae_down.csv',
-            weekend_up: 'daew_up.csv',
-            weekend_down: 'daew_down.csv'
+            weekday_up: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/dae_up.csv',
+            weekday_down: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/dae_down.csv',
+            weekend_up: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/daew_up.csv',
+            weekend_down: 'won429/test/Test-61fb753456f7f1b2e79d8f4a4d9cec43a5a23b84/daew_down.csv'
         };
 
         let homeSelectedStation = '구미';
@@ -377,6 +387,38 @@
             return `${ampm} ${h}:${m.toString().padStart(2, '0')}`;
         };
 
+        function createMockData(direction) {
+            const now = new Date();
+            let h = now.getHours(); if (h < 4) h += 24;
+            const baseSec = h * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            
+            const trainList = [];
+            const stationNames = Object.keys(STATIONS);
+            const orderedStations = direction === 'up' ? [...stationNames].reverse() : stationNames;
+            
+            for (let i = -5; i <= 5; i++) {
+                const train = { id: `MOCK${direction === 'up' ? 'U' : 'D'}${i + 5}`, schedule: [] };
+                const startSec = baseSec + (i * 1800) - 2000; 
+                
+                orderedStations.forEach((st) => {
+                    const firstProg = STATIONS[orderedStations[0]].progress;
+                    const myProg = STATIONS[st].progress;
+                    const progDiff = Math.abs(myProg - firstProg);
+                    
+                    const stSec = startSec + Math.floor(progDiff * 3600); 
+                    train.schedule.push({
+                        name: st,
+                        time: secondsToTime(stSec),
+                        sec: stSec,
+                        progress: myProg
+                    });
+                });
+                train.schedule.sort((a,b) => a.sec - b.sec);
+                trainList.push(train);
+            }
+            return trainList;
+        }
+
         const loadTimetable = async () => {
             let targetUpUrl = currentDayType === 'weekday' ? FILE_URLS.weekday_up : FILE_URLS.weekend_up;
             let targetDownUrl = currentDayType === 'weekday' ? FILE_URLS.weekday_down : FILE_URLS.weekend_down;
@@ -403,14 +445,39 @@
                 return trains.filter(t => t.id && t.schedule.length >= 2);
             };
 
+            const safeFetch = async (url) => {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) return await response.text();
+                } catch (err) {
+                    console.warn('Fetch error for ' + url + ' (Using mock data instead)');
+                }
+                return "";
+            };
+
             try {
                 const [upText, downText] = await Promise.all([
-                    fetch(targetUpUrl).then(r => r.ok ? r.text() : "").catch(() => ""),
-                    fetch(targetDownUrl).then(r => r.ok ? r.text() : "").catch(() => "")
+                    safeFetch(targetUpUrl),
+                    safeFetch(targetDownUrl)
                 ]);
                 parsedTrainsUp = parseCsv(upText);
                 parsedTrainsDown = parseCsv(downText);
+                
+                let isMockUsed = false;
+                if (parsedTrainsUp.length === 0) { parsedTrainsUp = createMockData('up'); isMockUsed = true; }
+                if (parsedTrainsDown.length === 0) { parsedTrainsDown = createMockData('down'); isMockUsed = true; }
+                
                 parsedTrains = currentDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
+                
+                const statusDisplay = document.getElementById('data-status-display');
+                const statusHome = document.getElementById('data-status-home');
+                if (isMockUsed) {
+                    if (statusDisplay) statusDisplay.innerHTML = `<span class="text-red-400 font-extrabold animate-pulse">임의 데이터 사용중</span>`;
+                    if (statusHome) statusHome.classList.remove('hidden');
+                } else {
+                    if (statusDisplay) statusDisplay.textContent = '실시간';
+                    if (statusHome) statusHome.classList.add('hidden');
+                }
             } catch (e) { 
                 console.error("Data Load Error", e); 
             }
@@ -449,6 +516,7 @@
             modalTitle: document.getElementById('modal-title'),
             modalSubtitle: document.getElementById('modal-subtitle'),
             modalContent: document.getElementById('modal-content'),
+            closeModalBtn: document.getElementById('close-modal-btn'),
             homeStationName: document.getElementById('home-station-name'),
             homeNextStation: document.getElementById('home-next-station'),
             homeNextStationContainer: document.getElementById('home-next-station-container'),
@@ -470,16 +538,17 @@
             }
             tabs.forEach(id => {
                 const el = document.getElementById(id);
+                if (!el) return;
                 const icon = el.querySelector('i');
                 const span = el.querySelector('span');
                 icon.className = icon.className.replace(/text-(white|gray-400)/g, '').trim();
                 span.className = span.className.replace(/text-(white|gray-400)/g, '').replace(/font-(medium|bold)/g, '').trim();
                 if (id === activeTabId) {
-                    icon.className += ' text-white';
+                    icon.className += ' text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]';
                     span.className += ' text-white font-bold';
                 } else {
-                    icon.className += ' text-gray-400';
-                    span.className += ' text-gray-400 font-medium';
+                    icon.className += ' text-gray-400 transition-colors';
+                    span.className += ' text-gray-400 font-medium transition-colors';
                 }
             });
         }
@@ -516,20 +585,20 @@
                     const min = Math.ceil((t.sec - currentSec)/60);
                     return `<div class="flex justify-between items-center w-full bg-white/5 px-3 py-2.5 rounded-xl border border-white/5">
                         <span class="text-[13px] font-bold text-gray-200">${t.dest}</span>
-                        <span class="text-[14px] font-extrabold text-[#3182F6]">${min <= 0 ? '곧 도착' : min + '분'}</span>
+                        <span class="text-[14px] font-extrabold text-[#0052FF] drop-shadow-sm">${min <= 0 ? '곧 도착' : min + '분'}</span>
                     </div>`;
                 }).join('');
             };
-            dom.homeUpInfo.innerHTML = homeSelectedStation === '구미' ? `<span class="text-gray-500 font-bold">종점</span>` : renderL(upTrains);
-            dom.homeDownInfo.innerHTML = homeSelectedStation === '경산' ? `<span class="text-gray-500 font-bold">종점</span>` : renderL(downTrains);
+            dom.homeUpInfo.innerHTML = homeSelectedStation === '구미' ? `<span class="text-gray-500 font-bold mt-2">종점</span>` : renderL(upTrains);
+            dom.homeDownInfo.innerHTML = homeSelectedStation === '경산' ? `<span class="text-gray-500 font-bold mt-2">종점</span>` : renderL(downTrains);
         };
 
         window.openStationSelector = () => {
             dom.stationSelectorModal.classList.remove('hidden');
             dom.selectorListContainer.innerHTML = Object.keys(STATIONS).map(name => `
-                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-5 py-4 rounded-2xl ${name === homeSelectedStation ? 'bg-[#3182F6]/20 border border-[#3182F6]/50' : 'bg-[#1C1C1E] border border-white/5'} cursor-pointer">
-                    <span class="text-[15px] font-bold ${name === homeSelectedStation ? 'text-[#3182F6]' : 'text-gray-200'}">${name}역</span>
-                    ${name === homeSelectedStation ? '<i class="fa-solid fa-check text-[#3182F6]"></i>' : ''}
+                <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-5 py-4 rounded-2xl ${name === homeSelectedStation ? 'bg-[#0052FF]/20 border border-[#0052FF]/50 shadow-[0_0_15px_rgba(0,82,255,0.2)]' : 'bg-[#1C1C1E] border border-white/5 hover:bg-[#2C2C2E]'} cursor-pointer active:scale-[0.98] transition-all">
+                    <span class="text-[15px] font-bold ${name === homeSelectedStation ? 'text-[#3B82F6]' : 'text-gray-200'}">${name}역</span>
+                    ${name === homeSelectedStation ? '<i class="fa-solid fa-check text-[#3B82F6] text-lg drop-shadow-sm"></i>' : ''}
                 </div>`).join('');
         };
 
@@ -549,10 +618,19 @@
                 dom.mainHeader.classList.remove('hidden'); dom.mainHeader.classList.add('flex');
                 dom.floatingPanel.classList.remove('hidden');
                 dom.directionToggle.classList.toggle('hidden', tabId === 'line');
+                
+                // 노선 탭에서는 "사진보낸 부분(상단 열차 버튼 리스트)"을 숨깁니다.
+                dom.trainList.classList.toggle('hidden', tabId === 'line'); 
+                
                 dom.lineView.style.opacity = tabId === 'line' ? '1' : '0';
+                dom.lineView.classList.toggle('pointer-events-none', tabId !== 'line');
                 dom.routeView.style.opacity = tabId === 'route' ? '1' : '0';
+                dom.routeView.classList.toggle('pointer-events-none', tabId !== 'route');
                 dom.mapView.style.opacity = tabId === 'map' ? '1' : '0';
-                isAutoScroll = tabId !== 'line';
+                dom.mapView.classList.toggle('pointer-events-none', tabId !== 'map');
+                
+                // 탭 변경 시 무조건 자동 스크롤과 자동 선택을 강제 해제합니다. (사용자가 선택하기 전까지 멈춤)
+                isAutoScroll = false; 
             }
             updateTabUI('tab-' + tabId);
         }
@@ -562,40 +640,129 @@
         dom.tabRoute.onclick = () => switchTab('route');
         dom.tabMap.onclick = () => switchTab('map');
 
+        dom.directionToggle.addEventListener('change', async (e) => {
+            currentDirection = e.target.value;
+            await loadTimetable();
+            isAutoScroll = true;
+            render();
+        });
+
+        const stopAutoScroll = () => { if(isAutoScroll) { isAutoScroll = false; render(); } };
+        dom.scrollContainer.addEventListener('touchstart', stopAutoScroll, {passive: true});
+        dom.scrollContainer.addEventListener('wheel', stopAutoScroll, {passive: true});
+        dom.scrollContainer.addEventListener('mousedown', stopAutoScroll);
+
+        dom.autoScrollBtn.addEventListener('click', () => { isAutoScroll = true; render(); });
+        
+        dom.closeModalBtn.addEventListener('click', () => { dom.timetableModal.classList.add('hidden'); });
+
         window.handleStationClick = (n) => { selectedStation = n; if(n) stationDetailDirection = currentDirection; render(); };
         window.handleTrainClick = (id) => { selectedTrainId = id; isAutoScroll = true; selectedStation = null; render(); };
         window.setStationDetailDirection = (d) => { stationDetailDirection = d; render(); };
-        window.openModal = () => document.getElementById('timetable-modal').classList.remove('hidden');
-        document.getElementById('close-modal-btn').onclick = () => document.getElementById('timetable-modal').classList.add('hidden');
+        window.openModal = () => dom.timetableModal.classList.remove('hidden');
 
         function drawStaticStations() {
-            let lH = '', rH = '', mH = '';
-            for (const name in STATIONS) {
-                const s = STATIONS[name]; const isSel = selectedStation === name;
+            let lineHTML = '', routeHTML = '', mapHTML = '';
+            for (const stationName in STATIONS) {
+                const s = STATIONS[stationName];
+                const isSel = selectedStation === stationName;
+                
                 const lineY = 100 + 1100 * s.progress;
-                lH += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${name}')" class="cursor-pointer">
-                    <circle r="${isSel?'8':'6'}" fill="#1C1C1E" stroke="${isSel?THEME_COLOR:'#4B5563'}" stroke-width="${isSel?'4':'3'}" />
-                    <text y="-12" text-anchor="middle" fill="${isSel?THEME_COLOR:'#F2F4F6'}" class="text-[12px] font-bold">${name}</text></g>`;
-                if(routeLength > 0) {
-                    const rPt = dom.routePath.getPointAtLength(routeLength * s.progress);
-                    rH += `<g transform="translate(${rPt.x}, ${rPt.y})" onclick="handleStationClick('${name}')" class="cursor-pointer">
-                        <circle r="${isSel?'8':'6'}" fill="#1C1C1E" stroke="${isSel?THEME_COLOR:'#4B5563'}" stroke-width="${isSel?'4':'3'}" />
-                        <text x="${s.xOff}" y="${s.yOff}" text-anchor="${s.align}" fill="${isSel?THEME_COLOR:'#F2F4F6'}" class="text-[13px] font-extrabold">${name}</text></g>`;
-                }
+                lineHTML += `
+                    <g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <path d="M -80 0 L 80 0" stroke="#333" stroke-width="2" stroke-dasharray="4" />
+                        <rect x="-100" y="-15" width="200" height="30" fill="transparent" />
+                        <circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" class="transition-all" />
+                        <text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[12px] font-bold">${stationName}</text>
+                        ${s.ktx ? `<text x="0" y="14" text-anchor="middle" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}
+                    </g>
+                `;
+
+                let rPt = {x:0, y:0};
+                if(routeLength > 0) rPt = dom.routePath.getPointAtLength(routeLength * s.progress);
+                
+                routeHTML += `
+                    <g transform="translate(${rPt.x}, ${rPt.y})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="20" fill="transparent" />
+                        <circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" class="transition-all" />
+                        <text x="${s.xOff}" y="${s.yOff}" text-anchor="${s.align}" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[13px] font-extrabold tracking-tight">${stationName}</text>
+                        ${s.ktx ? `<text x="${s.xOff}" y="${s.yOff + 13}" text-anchor="${s.align}" fill="${THEME_COLOR}" class="text-[8px] font-black italic opacity-80">KTX</text>` : ''}
+                    </g>
+                `;
+
+                let mPt = {x:0, y:0};
+                if(mapLength > 0) mPt = dom.mapPath.getPointAtLength(mapLength * s.progress);
+                mapHTML += `
+                    <g transform="translate(${mPt.x}, ${mPt.y})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="20" fill="transparent" />
+                        <circle r="${isSel ? '8' : '6'}" fill="#1C1C1E" stroke="${isSel ? THEME_COLOR : '#4B5563'}" stroke-width="${isSel ? '4' : '3'}" class="transition-all" />
+                        <rect x="-24" y="-30" width="48" height="20" rx="10" fill="#1C1C1E" stroke="#333" stroke-width="1" opacity="0.95" class="shadow-sm" />
+                        <text x="0" y="-16" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#F2F4F6'}" class="text-[11px] font-bold">${stationName}</text>
+                    </g>
+                `;
             }
-            dom.lineStations.innerHTML = lH; dom.routeStations.innerHTML = rH;
+            dom.lineStations.innerHTML = lineHTML;
+            dom.routeStations.innerHTML = routeHTML;
+            dom.mapStations.innerHTML = mapHTML;
         }
 
-        function updateTrainsSVG(layer, trains) {
+        function updateTrainsSVG(layer, trains, isLineView) {
             if (!trains) return;
-            layer.innerHTML = trains.map(t => {
-                const isS = t.id === selectedTrainId;
-                return `<g transform="translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})" data-id="${t.id}">
-                    ${isS ? `<circle r="26" fill="${THEME_COLOR}" opacity="0.2" class="animate-ping" />` : ''}
-                    <rect x="-16" y="-7" width="32" height="14" rx="3" fill="${isS?THEME_COLOR:'#3f3f46'}" stroke="#1C1C1E" stroke-width="2" />
-                    <circle cx="15" cy="-3" r="1.5" fill="${isS?'#FFE600':'#FFF'}" /><circle cx="15" cy="3" r="1.5" fill="${isS?'#FFE600':'#FFF'}" />
-                </g>`;
-            }).join('');
+            const currentIds = trains.map(t => t.id);
+            Array.from(layer.children).forEach(child => {
+                if (!currentIds.includes(child.dataset.id)) child.remove();
+            });
+
+            trains.forEach(t => {
+                let g = layer.querySelector(`g[data-id="${t.id}"]`);
+                const isSelected = t.id === selectedTrainId;
+                if (!g) {
+                    g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    g.dataset.id = t.id;
+                    g.setAttribute("class", "cursor-pointer");
+                    g.setAttribute("onclick", `handleTrainClick('${t.id}')`);
+                    layer.appendChild(g);
+                }
+                
+                g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
+                
+                const tColor = t.direction === 'down' ? '#5998D6' : '#0052FF';
+                
+                // 노선 탭일 때는 상/하행 각각의 고유 색상, 그 외에는 선택 여부에 따라 테마/회색 처리
+                const fillColor = isLineView ? tColor : (isSelected ? THEME_COLOR : '#3f3f46');
+                const stateStr = `${isSelected}-${t.isStopped}-${t.isWaiting}-${isLineView}`;
+                
+                if (g.dataset.state !== stateStr) {
+                    // 글자 수에 비례하여 알약(캡슐) 배경 사이즈를 넉넉하고 예쁘게 동적 계산
+                    const textWidth = t.id.length * 6 + 14; 
+                    const rectX = -(textWidth / 2);
+
+                    g.innerHTML = `
+                        ${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}
+                        ${isSelected && (t.isStopped || t.isWaiting) ? `<circle r="22" fill="${fillColor}" opacity="0.15" />` : ''}
+                        
+                        <!-- 원본 디테일 열차 모형 완벽 보존 -->
+                        <rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#FFFFFF' : '#1C1C1E'}" stroke-width="${isSelected ? '2' : '1'}" class="shadow-lg" />
+                        <rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
+                        <rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
+                        <rect x="8" y="-4" width="4" height="8" rx="1" fill="#FFFFFF" opacity="0.9" />
+                        <path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" />
+                        <circle cx="15" cy="-3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />
+                        <circle cx="15" cy="3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />
+                        
+                        <!-- 노선 탭에서만 열차 위에 번호(알약 모양 캡슐) 뚜렷하게 표시 -->
+                        ${isLineView ? `
+                        <g transform="rotate(${-t.angle})">
+                            <rect x="${rectX}" y="-25" width="${textWidth}" height="16" rx="8" fill="#1C1C1E" stroke="${tColor}" stroke-width="1.5" />
+                            <text x="0" y="-14" text-anchor="middle" fill="#FFFFFF" class="text-[10px] font-black tracking-wider">${t.id}</text>
+                        </g>
+                        ` : ''}
+                        
+                        ${t.isWaiting ? `<text x="0" y="${isLineView ? '-29' : '-18'}" text-anchor="middle" fill="${fillColor}" class="text-[10px] font-bold animate-pulse" transform="rotate(${-t.angle})">첫차 대기중</text>` : ''}
+                    `;
+                    g.dataset.state = stateStr;
+                }
+            });
         }
 
         const getActiveTrains = (list, dir) => {
@@ -612,7 +779,7 @@
                     const segProg = Math.min(1, Math.max(0, timeMov / segDur));
                     prog = curr.progress + (next.progress - curr.progress) * segProg;
                 }
-                return { ...t, curr, next, overallProgress: prog, timeRemaining: rem, isStopped: isStop };
+                return { ...t, curr, next, overallProgress: prog, timeRemaining: rem, isStopped: isStop, direction: dir };
             }).filter(t => t);
         };
 
@@ -620,41 +787,113 @@
             dom.clock.textContent = secondsToTime(currentSec);
             if (activeTab === 'home') renderHomeArrivalInfo();
             
-            const activeT = getActiveTrains(parsedTrains, currentDirection);
-            if (activeT.length > 0 && !selectedTrainId) selectedTrainId = activeT[0].id;
+            let activeTrainsUp = getActiveTrains(parsedTrainsUp, 'up');
+            let activeTrainsDown = getActiveTrains(parsedTrainsDown, 'down');
+            let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
+            
+            // 자동 선택을 막아 열차를 터치하기 전에는 멋대로 스크롤되지 않게 유지
             
             const renderedT = activeT.map(t => {
-                const ref = activeTab === 'route' ? dom.routePath : (currentDirection==='up'?dom.linePathUp:dom.linePathDown);
+                const ref = activeTab === 'route' ? dom.routePath : (t.direction === 'up' ? dom.linePathUp : dom.linePathDown);
                 const len = activeTab === 'route' ? routeLength : 1100;
                 const p = ref.getPointAtLength(len * (t.overallProgress || 0));
                 const np = ref.getPointAtLength(Math.min(len, len * (t.overallProgress || 0) + 1));
                 return { ...t, point: p, angle: Math.atan2(np.y-p.y, np.x-p.x) * 180 / Math.PI };
             });
 
-            if (activeTab === 'route') updateTrainsSVG(dom.routeTrains, renderedT);
-            else updateTrainsSVG(currentDirection==='up'?dom.lineTrainsUp:dom.lineTrainsDown, renderedT);
+            const selectedData = renderedT.find(t => t.id === selectedTrainId);
+
+            let btnHtml = activeT.length === 0 ? `<span class="text-xs text-gray-400 font-medium py-1">현재 운행 데이터 없음 (운행 종료)</span>` : '';
+            activeT.forEach(t => {
+                const isSel = t.id === selectedTrainId;
+                const tColor = t.direction === 'down' ? '#5998D6' : '#0052FF';
+                let selClass = 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10';
+                if (isSel) {
+                    selClass = t.direction === 'down' 
+                        ? 'bg-[#5998D6] text-white shadow-[0_0_15px_rgba(89,152,214,0.4)] scale-105 border border-[#5998D6]' 
+                        : 'bg-[#0052FF] text-white shadow-[0_0_15px_rgba(0,82,255,0.4)] scale-105 border border-[#0052FF]';
+                }
+                btnHtml += `<button onclick="handleTrainClick('${t.id}')" class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selClass}">
+                    <span style="color: ${isSel ? '#FFFFFF' : tColor}; text-shadow: ${isSel ? 'none' : '0 0 4px ' + tColor + '80'};" class="mr-1">●</span>${t.id} ${t.isWaiting ? ' (대기중)' : ''}</button>`;
+            });
+            if(dom.trainList.innerHTML !== btnHtml) dom.trainList.innerHTML = btnHtml;
+
+            if (activeTab === 'route') {
+                updateTrainsSVG(dom.routeTrains, renderedT, false);
+            } else if (activeTab === 'map') {
+                updateTrainsSVG(dom.mapTrains, renderedT, false);
+            } else if (activeTab === 'line') {
+                const rUp = renderedT.filter(t => t.direction === 'up');
+                const rDown = renderedT.filter(t => t.direction === 'down');
+                updateTrainsSVG(dom.lineTrainsUp, rUp, true);
+                updateTrainsSVG(dom.lineTrainsDown, rDown, true);
+            }
             
             drawStaticStations();
+
+            if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
+                dom.autoScrollBtn.classList.add('hidden');
+                const vOff = (dom.scrollContainer.clientHeight - 150) / 2;
+                dom.scrollContainer.scrollTo({ top: selectedData.point.y + 120 - vOff, behavior: 'auto' });
+            } else {
+                if (selectedData && !selectedStation && activeTab !== 'home') dom.autoScrollBtn.classList.remove('hidden');
+                else dom.autoScrollBtn.classList.add('hidden');
+            }
             
+            let panelHtml = '';
             if (selectedStation) {
+                dom.floatingPanel.classList.remove('hidden');
                 let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
                 let upcoming = target.map(t => {
                     const s = t.schedule.find(st => st.name === selectedStation);
                     return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null;
                 }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
 
-                dom.floatingPanel.innerHTML = `<div class="toss-card p-5">
+                panelHtml = `<div class="toss-card p-5">
                     <div class="flex justify-between items-start mb-4">
                         <div><h3 class="text-xl font-extrabold text-white">${selectedStation}역</h3>
-                        <div class="flex gap-1 mt-2"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='up'?'bg-[#3182F6] text-white':'text-gray-400 bg-white/5'}">상행</button>
-                        <button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='down'?'bg-[#3182F6] text-white':'text-gray-400 bg-white/5'}">하행</button></div></div>
+                        <div class="flex gap-1 mt-2"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='up'?'bg-[#0052FF] text-white':'text-gray-400 bg-white/5'}">상행</button>
+                        <button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded text-[10px] ${stationDetailDirection==='down'?'bg-[#5998D6] text-white':'text-gray-400 bg-white/5'}">하행</button></div></div>
                         <button onclick="handleStationClick(null)" class="text-gray-500"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div class="space-y-2 mb-4">${upcoming.length ? upcoming.map(u => `<div class="list-card p-3 flex justify-between">
                         <span class="text-white font-bold">${u.time.slice(0,5)} <span class="text-xs text-gray-500">${u.dest}행</span></span>
-                        <span class="text-[#3182F6] font-black">${Math.ceil((u.sec-currentSec)/60)}분 후</span></div>`).join('') : '<div class="text-center text-gray-500 py-2">운행 종료</div>'}</div>
-                    <button onclick="window.openModal()" class="w-full py-3 bg-[#3182F6] rounded-xl font-bold">시간표 보기</button></div>`;
+                        <span class="text-[#0052FF] font-black">${Math.ceil((u.sec-currentSec)/60)}분 후</span></div>`).join('') : '<div class="text-center text-gray-500 py-2">운행 종료</div>'}</div>
+                    <button onclick="window.openModal()" class="w-full py-3 bg-[#0052FF] rounded-xl font-bold">시간표 보기</button></div>`;
+            } else {
+                if (!selectedData) {
+                    // 열차나 역을 선택하기 전에는 방해되는 안내 문구를 아예 띄우지 않습니다.
+                    dom.floatingPanel.classList.add('hidden');
+                    panelHtml = ''; 
+                } else {
+                    dom.floatingPanel.classList.remove('hidden');
+                    const panelColor = selectedData.direction === 'down' ? '#5998D6' : '#0052FF';
+                    panelHtml = `<div class="toss-card p-5 min-h-[72px] flex flex-col justify-center">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="flex items-baseline gap-1.5 mb-1">
+                                    <span style="background-color: ${panelColor}" class="text-white text-[10px] px-2 py-0.5 rounded-sm font-bold shadow-[0_0_8px_rgba(0,0,0,0.3)]">${selectedData.id}</span>
+                                    <span class="text-[11px] font-semibold text-gray-400">${selectedData.isWaiting ? '첫차 대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span>
+                                </div>
+                                <h2 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                                    ${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역 
+                                    <span class="text-[13px] font-medium text-gray-400 font-normal">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span>
+                                </h2>
+                            </div>
+                            ${!selectedData.isStopped && !selectedData.isWaiting ? `
+                                <div class="text-right flex items-baseline gap-0.5">
+                                    <p class="text-[26px] font-black tracking-tighter" style="color: ${panelColor}">${Math.ceil(selectedData.timeRemaining / 60)}<span class="text-[11px] text-gray-400 ml-0.5 font-bold tracking-normal">분 전</span></p>
+                                </div>` : ''}
+                            ${selectedData.isWaiting ? `
+                                <div class="text-right flex items-baseline gap-0.5">
+                                    <p class="text-[22px] font-black tracking-tighter" style="color: ${panelColor}">${selectedData.curr.time.slice(0,5)}<span class="text-[10px] text-gray-400 ml-1 font-bold tracking-normal block">출발</span></p>
+                                </div>` : ''}
+                        </div>
+                    </div>`;
+                }
             }
+            
+            if(dom.floatingPanel.innerHTML !== panelHtml && activeTab !== 'home') dom.floatingPanel.innerHTML = panelHtml;
         }
 
         window.onload = async () => {
