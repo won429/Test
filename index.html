@@ -671,6 +671,7 @@
                     const trains = [];
                     const stIdx = headers.findIndex(h => h.includes('운행구간정거장'));
                     const arrIdx = headers.findIndex(h => h.includes('정거장도착시각'));
+                    const depIdx = headers.findIndex(h => h.includes('정거장출발시각'));
                     const lineNameIdx = headers.findIndex(h => h.includes('노선명'));
                     const dayTypeIdx = headers.findIndex(h => h.includes('요일구분'));
                     
@@ -680,22 +681,25 @@
                     
                     for (let i = 1; i < lines.length; i++) {
                         const row = splitCsvRow(lines[i]);
-                        // 최소 정거장 도착 시각 배열이 있어야 함
-                        if (row.length <= Math.max(stIdx, arrIdx) || arrIdx === -1) continue;
+                        // 최소 정거장 데이터가 있어야 함
+                        if (row.length <= stIdx) continue;
                         
                         // 노선 필터링 (1호선만)
                         if (lineNameIdx !== -1 && currentLineId === 'busan_line1') {
-                            if (!row[lineNameIdx].includes('1호선')) continue;
+                            const rowLine = row[lineNameIdx] || '';
+                            if (!rowLine.includes('1호선')) continue;
                         }
                         
                         // 요일 필터링
                         if (dayTypeIdx !== -1 && expectedDays.length > 0) {
-                            if (!expectedDays.some(d => row[dayTypeIdx].includes(d))) continue;
+                            const rowDay = row[dayTypeIdx] || '';
+                            if (!expectedDays.some(d => rowDay.includes(d))) continue;
                         }
                         
-                        const trainId = row[0].trim();
-                        const stationsStr = row[stIdx];
-                        const arrTimesStr = row[arrIdx];
+                        const trainId = row[0] ? row[0].trim() : '';
+                        const stationsStr = row[stIdx] || '';
+                        const arrTimesStr = (arrIdx !== -1) ? (row[arrIdx] || '') : '';
+                        const depTimesStr = (depIdx !== -1) ? (row[depIdx] || '') : '';
                         
                         if (!stationsStr) continue;
                         
@@ -716,8 +720,9 @@
                             }
                         }
                         
-                        // 2. 역번호 - 시간 매핑 (요청하신 대로 도착시간만 사용)
+                        // 2. 역번호 - 시간 매핑 (요청하신 대로 도착시간만 사용, 첫 역은 출발시간 보완)
                         const arrTokens = arrTimesStr ? arrTimesStr.split('+') : [];
+                        const depTokens = depTimesStr ? depTimesStr.split('+') : [];
                         const timeMap = {};
                         
                         for (let k = 0; k < arrTokens.length; k++) {
@@ -726,6 +731,16 @@
                                 const stNum = parts[0].trim();
                                 const timeVal = parts.slice(1).join('-').trim();
                                 if (timeVal && timeVal !== ':') timeMap[stNum] = timeVal;
+                            }
+                        }
+                        
+                        // 도착시간이 비어있는 첫 역 등을 위해 출발시간을 보완 (도착시간이 우선)
+                        for (let k = 0; k < depTokens.length; k++) {
+                            const parts = depTokens[k].split('-');
+                            if (parts.length >= 2) {
+                                const stNum = parts[0].trim();
+                                const timeVal = parts.slice(1).join('-').trim();
+                                if (!timeMap[stNum] && timeVal && timeVal !== ':') timeMap[stNum] = timeVal;
                             }
                         }
                         
@@ -791,12 +806,15 @@
                         const response = await fetch(url);
                         if (response.ok) {
                             const buffer = await response.arrayBuffer();
+                            // 우선 UTF-8로 디코딩을 시도합니다
                             let text = new TextDecoder('utf-8').decode(buffer);
-                            // 공공데이터 CSV 파일의 고질적인 EUC-KR 인코딩 깨짐 완벽 방지
-                            if (text.includes('')) {
+                            
+                            // 만약 글자가 깨졌거나(), 데이터에 필수 단어(열차번호)가 없다면 EUC-KR로 다시 디코딩합니다 (핵심 수정)
+                            if (text.includes('') || (!text.includes('열차번호') && text.length > 0 && !text.includes(','))) {
                                 text = new TextDecoder('euc-kr').decode(buffer);
                             }
-                            // 404 페이지 등 HTML이 넘어온 경우 무시
+                            
+                            // 404 에러 페이지 등 HTML 파일이 응답으로 온 경우 무시합니다
                             if (!text.trim().startsWith('<')) {
                                 return text;
                             }
