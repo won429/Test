@@ -809,8 +809,8 @@
                             // 우선 UTF-8로 디코딩을 시도합니다
                             let text = new TextDecoder('utf-8').decode(buffer);
                             
-                            // 만약 글자가 깨졌거나(), 데이터에 필수 단어(열차번호)가 없다면 EUC-KR로 다시 디코딩합니다 (핵심 수정)
-                            if (text.includes('') || (!text.includes('열차번호') && text.length > 0 && !text.includes(','))) {
+                            // UTF-8 디코딩 시 깨진 문자가 발생(\uFFFD)하면 EUC-KR로 다시 디코딩합니다 (대구/대전 정상 파일 강제 변환 방지)
+                            if (text.includes('\uFFFD')) {
                                 text = new TextDecoder('euc-kr').decode(buffer);
                             }
                             
