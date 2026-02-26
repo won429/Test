@@ -511,12 +511,12 @@
                 holiday_down: 'jeon_line1_w_down.csv'
             },
             'busan_line1': {
-                weekday_up: 'busan.csv',
-                weekday_down: 'busan.csv',
-                saturday_up: 'busan.csv',
-                saturday_down: 'busan.csv',
-                holiday_up: 'busan.csv',
-                holiday_down: 'busan.csv'
+                weekday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                weekday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                saturday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                saturday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                holiday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                holiday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv']
             }
         };
 
@@ -671,17 +671,17 @@
                     const trains = [];
                     const stIdx = headers.findIndex(h => h.includes('운행구간정거장'));
                     const arrIdx = headers.findIndex(h => h.includes('정거장도착시각'));
-                    const depIdx = headers.findIndex(h => h.includes('정거장출발시각'));
                     const lineNameIdx = headers.findIndex(h => h.includes('노선명'));
                     const dayTypeIdx = headers.findIndex(h => h.includes('요일구분'));
                     
                     // 요일 매핑 (평일, 토요일, 일요일)
-                    const dayMap = { 'weekday': '평일', 'saturday': '토요일', 'holiday': '일요일' };
-                    const expectedDayStr = dayMap[currentDayType];
+                    const dayMap = { 'weekday': ['평일'], 'saturday': ['토요일', '주말'], 'holiday': ['일요일', '공휴일', '휴일', '주말'] };
+                    const expectedDays = dayMap[currentDayType] || [];
                     
                     for (let i = 1; i < lines.length; i++) {
                         const row = splitCsvRow(lines[i]);
-                        if (row.length <= Math.max(stIdx, arrIdx)) continue;
+                        // 최소 정거장 도착 시각 배열이 있어야 함
+                        if (row.length <= Math.max(stIdx, arrIdx) || arrIdx === -1) continue;
                         
                         // 노선 필터링 (1호선만)
                         if (lineNameIdx !== -1 && currentLineId === 'busan_line1') {
@@ -689,14 +689,13 @@
                         }
                         
                         // 요일 필터링
-                        if (dayTypeIdx !== -1 && expectedDayStr) {
-                            if (!row[dayTypeIdx].includes(expectedDayStr)) continue;
+                        if (dayTypeIdx !== -1 && expectedDays.length > 0) {
+                            if (!expectedDays.some(d => row[dayTypeIdx].includes(d))) continue;
                         }
                         
                         const trainId = row[0].trim();
                         const stationsStr = row[stIdx];
                         const arrTimesStr = row[arrIdx];
-                        const depTimesStr = row[depIdx];
                         
                         if (!stationsStr) continue;
                         
@@ -711,14 +710,14 @@
                                 const stNum = parts[0].trim();
                                 let stName = parts.slice(1).join('-').trim();
                                 stName = stName.replace(/\([^)]*\)/g, '').trim(); 
+                                if (stName === '부산' && STATIONS['부산역']) stName = '부산역';
                                 stMap[stNum] = stName;
                                 stOrder.push(stNum);
                             }
                         }
                         
-                        // 2. 역번호 - 시간 매핑 (도착시간 우선, 없으면 출발시간)
+                        // 2. 역번호 - 시간 매핑 (요청하신 대로 도착시간만 사용)
                         const arrTokens = arrTimesStr ? arrTimesStr.split('+') : [];
-                        const depTokens = depTimesStr ? depTimesStr.split('+') : [];
                         const timeMap = {};
                         
                         for (let k = 0; k < arrTokens.length; k++) {
@@ -727,16 +726,6 @@
                                 const stNum = parts[0].trim();
                                 const timeVal = parts.slice(1).join('-').trim();
                                 if (timeVal && timeVal !== ':') timeMap[stNum] = timeVal;
-                            }
-                        }
-                        
-                        // 도착시간이 비어있는 첫 역 등을 위해 출발시간 보완
-                        for (let k = 0; k < depTokens.length; k++) {
-                            const parts = depTokens[k].split('-');
-                            if (parts.length >= 2) {
-                                const stNum = parts[0].trim();
-                                const timeVal = parts.slice(1).join('-').trim();
-                                if (!timeMap[stNum] && timeVal && timeVal !== ':') timeMap[stNum] = timeVal;
                             }
                         }
                         
@@ -794,13 +783,29 @@
                 trains.forEach(t => t.schedule.sort((a, b) => a.sec - b.sec));
                 return trains.filter(t => t.id && t.schedule.length >= 2);
             };
-            const safeFetch = async (url) => {
-                try {
-                    const response = await fetch(url);
-                    if (response.ok) return await response.text();
-                } catch (err) { }
+
+            const safeFetch = async (urls) => {
+                if (!Array.isArray(urls)) urls = [urls];
+                for (let url of urls) {
+                    try {
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const buffer = await response.arrayBuffer();
+                            let text = new TextDecoder('utf-8').decode(buffer);
+                            // 공공데이터 CSV 파일의 고질적인 EUC-KR 인코딩 깨짐 완벽 방지
+                            if (text.includes('')) {
+                                text = new TextDecoder('euc-kr').decode(buffer);
+                            }
+                            // 404 페이지 등 HTML이 넘어온 경우 무시
+                            if (!text.trim().startsWith('<')) {
+                                return text;
+                            }
+                        }
+                    } catch (err) { }
+                }
                 return "";
             };
+
             try {
                 const [upText, downText] = await Promise.all([safeFetch(targetUpUrl), safeFetch(targetDownUrl)]);
                 parsedTrainsUp = parseCsv(upText, 'up');
