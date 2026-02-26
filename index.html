@@ -134,7 +134,7 @@
                     <!-- 지역 선택 탭 -->
                     <div class="flex gap-1.5 overflow-x-auto hide-scrollbar mb-2 pb-1">
                         <button onclick="showPreparingPopup('수도권')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">수도권</button>
-                        <button onclick="showPreparingPopup('부산권')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">부산권</button>
+                        <button id="btn-region-busan" onclick="switchRegion('busan')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">부산권</button>
                         <button id="btn-region-daegu" onclick="switchRegion('daegu')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대구권</button>
                         <button id="btn-region-daejeon" onclick="switchRegion('daejeon')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">대전</button>
                         <button onclick="showPreparingPopup('광주')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">광주</button>
@@ -150,24 +150,27 @@
                     <div id="line-tabs-daejeon" class="hidden gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
                         <button id="btn-line-daejeon1" onclick="switchLine('daejeon_line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all">1호선</button>
                     </div>
+                    <div id="line-tabs-busan" class="hidden gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
+                        <button id="btn-line-busan1" onclick="switchLine('busan_line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#F06A00] text-white shadow-[0_2px_8px_rgba(240,106,0,0.3)] shrink-0 border border-[#F06A00] transition-all">1호선</button>
+                    </div>
 
                     <!-- 코레일 스타일 역명판 -->
                     <div onclick="openStationSelector()" class="relative w-full flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
                         <div class="station-plate-base w-full">
-                            <div class="flex-1 text-left pl-2">
+                            <div class="flex-1 text-left pl-2 pr-8 sm:pr-12 overflow-hidden">
                                 <div id="home-prev-station-container" class="opacity-0 transition-opacity">
-                                    <span id="home-prev-station" class="text-white text-[15px] font-bold tracking-tight"></span>
+                                    <span id="home-prev-station" class="text-white text-[14px] font-bold tracking-tight block truncate"></span>
                                 </div>
                             </div>
-                            <div class="flex-1 text-right pr-2">
+                            <div class="flex-1 text-right pr-2 pl-8 sm:pl-12 overflow-hidden">
                                 <div id="home-next-station-container" class="opacity-100 transition-opacity">
-                                    <span id="home-next-station" class="text-white text-[15px] font-bold tracking-tight">사곡 &gt;</span>
+                                    <span id="home-next-station" class="text-white text-[14px] font-bold tracking-tight block truncate">사곡 &gt;</span>
                                 </div>
                             </div>
                         </div>
                         <div class="station-plate-pill">
-                            <div class="metro-logo-circle">대</div>
-                            <span id="home-station-name" class="text-lg font-black text-black">구미</span>
+                            <div class="metro-logo-circle shrink-0">대</div>
+                            <span id="home-station-name" class="text-lg font-black text-black whitespace-nowrap">구미</span>
                         </div>
                     </div>
                 </div>
@@ -428,10 +431,50 @@
                 "노은": { progress: 0.9047 },
                 "지족": { progress: 0.9523 },
                 "반석": { progress: 1.0000 }
+            },
+            'busan_line1': {
+                "다대포해수욕장": { progress: 0.0000 },
+                "다대포항": { progress: 0.0256 },
+                "낫개": { progress: 0.0513 },
+                "신장림": { progress: 0.0769 },
+                "장림": { progress: 0.1026 },
+                "동매": { progress: 0.1282 },
+                "신평": { progress: 0.1538 },
+                "하단": { progress: 0.1795 },
+                "당리": { progress: 0.2051 },
+                "사하": { progress: 0.2308 },
+                "괴정": { progress: 0.2564 },
+                "대티": { progress: 0.2821 },
+                "서대신": { progress: 0.3077 },
+                "동대신": { progress: 0.3333 },
+                "토성": { progress: 0.3590 },
+                "자갈치": { progress: 0.3846 },
+                "남포": { progress: 0.4103 },
+                "중앙": { progress: 0.4359 },
+                "부산역": { progress: 0.4615, ktx: true },
+                "초량": { progress: 0.4872 },
+                "부산진": { progress: 0.5128 },
+                "좌천": { progress: 0.5385 },
+                "범일": { progress: 0.5641 },
+                "범내골": { progress: 0.5897 },
+                "서면": { progress: 0.6154 },
+                "부전": { progress: 0.6410 },
+                "양정": { progress: 0.6667 },
+                "시청": { progress: 0.6923 },
+                "연산": { progress: 0.7179 },
+                "교대": { progress: 0.7436 },
+                "동래": { progress: 0.7692 },
+                "명륜": { progress: 0.7949 },
+                "온천장": { progress: 0.8205 },
+                "부산대": { progress: 0.8462 },
+                "장전": { progress: 0.8718 },
+                "구서": { progress: 0.8974 },
+                "두실": { progress: 0.9231 },
+                "남산": { progress: 0.9487 },
+                "범어사": { progress: 0.9744 },
+                "노포": { progress: 1.0000 }
             }
         };
-
-        let STATIONS = STATIONS_ALL[currentLineId];
 
         const KOR_HOLIDAYS = [
             "2025-01-01", "2025-01-28", "2025-01-29", "2025-01-30", "2025-03-03",
@@ -466,6 +509,14 @@
                 saturday_down: 'jeon_line1_w_down.csv',
                 holiday_up: 'jeon_line1_w_up.csv',
                 holiday_down: 'jeon_line1_w_down.csv'
+            },
+            'busan_line1': {
+                weekday_up: 'busan_line1_up.csv',
+                weekday_down: 'busan_line1_down.csv',
+                saturday_up: 'busan_line1_sat_up.csv',
+                saturday_down: 'busan_line1_sat_down.csv',
+                holiday_up: 'busan_line1_hol_up.csv',
+                holiday_down: 'busan_line1_hol_down.csv'
             }
         };
 
@@ -593,6 +644,62 @@
                 const lines = csvStr.trim().split(/\r?\n/);
                 if (lines.length === 0) return [];
                 const headers = lines[0].split(',');
+
+                // 부산 데이터 포맷 (공공데이터 포맷) 감지
+                if (headers[0].includes('열차번호') && headers.findIndex(h => h.includes('운행구간정거장')) !== -1) {
+                    const trains = [];
+                    const stIdx = headers.findIndex(h => h.includes('운행구간정거장'));
+                    const arrIdx = headers.findIndex(h => h.includes('정거장도착시각'));
+                    const depIdx = headers.findIndex(h => h.includes('정거장출발시각'));
+                    
+                    for (let i = 1; i < lines.length; i++) {
+                        const row = lines[i].split(',');
+                        if (row.length <= Math.max(stIdx, arrIdx, depIdx)) continue;
+                        
+                        const trainId = row[0].trim();
+                        const stationsStr = row[stIdx];
+                        const arrTimesStr = row[arrIdx];
+                        const depTimesStr = row[depIdx];
+                        
+                        if (!stationsStr) continue;
+                        
+                        const stationTokens = stationsStr.split('+');
+                        const arrTokens = arrTimesStr ? arrTimesStr.split('+') : [];
+                        const depTokens = depTimesStr ? depTimesStr.split('+') : [];
+                        
+                        const schedule = [];
+                        for (let k = 0; k < stationTokens.length; k++) {
+                            const stParts = stationTokens[k].split('-');
+                            if (stParts.length < 2) continue;
+                            const stName = stParts.slice(1).join('-').trim();
+                            
+                            if (!STATIONS[stName]) continue;
+                            
+                            const aTime = arrTokens[k] ? arrTokens[k].split('-').slice(1).join('-').trim() : '';
+                            const dTime = depTokens[k] ? depTokens[k].split('-').slice(1).join('-').trim() : '';
+                            
+                            let timeStr = (dTime && dTime !== ':') ? dTime : ((aTime && aTime !== ':') ? aTime : null);
+                            
+                            if (timeStr) {
+                                if (timeStr.split(':').length === 2) timeStr += ':00'; // 초 단위가 없으면 추가
+                                schedule.push({
+                                    name: stName,
+                                    time: timeStr,
+                                    sec: timeToSeconds(timeStr),
+                                    progress: STATIONS[stName].progress
+                                });
+                            }
+                        }
+                        
+                        if (schedule.length >= 2) {
+                            schedule.sort((a, b) => a.sec - b.sec);
+                            trains.push({ id: trainId, schedule: schedule });
+                        }
+                    }
+                    return trains;
+                }
+
+                // 기존 대구/대전 포맷 (행: 역, 열: 열차)
                 const trainIds = headers.slice(1);
                 const trains = trainIds.map(id => ({ id: id.trim(), schedule: [] }));
                 for (let i = 1; i < lines.length; i++) {
@@ -641,34 +748,49 @@
             
             const btnDaegu = document.getElementById('btn-region-daegu');
             const btnDaejeon = document.getElementById('btn-region-daejeon');
+            const btnBusan = document.getElementById('btn-region-busan');
             const tabsDaegu = document.getElementById('line-tabs-daegu');
             const tabsDaejeon = document.getElementById('line-tabs-daejeon');
+            const tabsBusan = document.getElementById('line-tabs-busan');
 
             if (region === 'daegu') {
                 btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all';
                 btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btnBusan) btnBusan.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 tabsDaegu.classList.remove('hidden'); tabsDaegu.classList.add('flex');
                 tabsDaejeon.classList.add('hidden'); tabsDaejeon.classList.remove('flex');
+                if(tabsBusan) { tabsBusan.classList.add('hidden'); tabsBusan.classList.remove('flex'); }
                 if (!isInit) await window.switchLine('daegyeong');
             } else if (region === 'daejeon') {
                 btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all';
                 btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btnBusan) btnBusan.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 tabsDaegu.classList.add('hidden'); tabsDaegu.classList.remove('flex');
                 tabsDaejeon.classList.remove('hidden'); tabsDaejeon.classList.add('flex');
+                if(tabsBusan) { tabsBusan.classList.add('hidden'); tabsBusan.classList.remove('flex'); }
                 if (!isInit) await window.switchLine('daejeon_line1');
+            } else if (region === 'busan') {
+                if(btnBusan) btnBusan.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#F06A00] text-white shadow-[0_2px_8px_rgba(240,106,0,0.3)] shrink-0 border border-[#F06A00] transition-all';
+                btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                tabsDaegu.classList.add('hidden'); tabsDaegu.classList.remove('flex');
+                tabsDaejeon.classList.add('hidden'); tabsDaejeon.classList.remove('flex');
+                if(tabsBusan) { tabsBusan.classList.remove('hidden'); tabsBusan.classList.add('flex'); }
+                if (!isInit) await window.switchLine('busan_line1');
             }
         };
 
         window.switchLine = async (lineId, isInit = false) => {
             if (currentLineId === lineId && !isInit) return;
             currentLineId = lineId;
-            THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : (currentLineId === 'daejeon_line1' ? '#007448' : '#0054A6');
-            DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : '#5998D6');
+            THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : (currentLineId === 'daejeon_line1' ? '#007448' : (currentLineId === 'busan_line1' ? '#F06A00' : '#0054A6'));
+            DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : (currentLineId === 'busan_line1' ? '#F58A33' : '#5998D6'));
             STATIONS = STATIONS_ALL[lineId];
 
             const btnD = document.getElementById('btn-line-daegyeong');
             const btn1 = document.getElementById('btn-line-1');
             const btnDaejeon1 = document.getElementById('btn-line-daejeon1');
+            const btnBusan1 = document.getElementById('btn-line-busan1');
 
             if (lineId === 'daegyeong') {
                 btnD.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
@@ -699,9 +821,18 @@
                 document.getElementById('home-up-dir-label').textContent = '판암 방면';
                 document.getElementById('home-down-dir-label').textContent = '반석 방면';
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
+            } else if (lineId === 'busan_line1') {
+                if(btnBusan1) btnBusan1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(240,106,0,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
+                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '다대포해수욕장';
+                document.querySelector('#home-screen h2').textContent = '부산 1호선 지하철역';
+                dom.lineHeaderTitle.textContent = '부산 1호선 지하철 현황';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (다대포 방면)</option><option value="down" class="text-gray-900">하행 (노포 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '다대포 방면';
+                document.getElementById('home-down-dir-label').textContent = '노포 방면';
+                document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             }
 
-            document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : (lineId === 'daejeon_line1' ? '대' : '1');
+            document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : (lineId === 'daejeon_line1' ? '대' : (lineId === 'busan_line1' ? '1' : '1'));
             document.querySelector('.metro-logo-circle').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-base').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-pill').style.borderColor = THEME_COLOR;
@@ -709,7 +840,7 @@
             document.getElementById('btn-icon-2').style.color = THEME_COLOR;
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
-            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : 1600);
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 3800 : 1600));
             const svg = document.getElementById('line-svg');
             if (svg) {
                 svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
@@ -1005,6 +1136,11 @@
                 } else if (STATIONS_ALL['daejeon_line1'][favoriteStation]) {
                     await window.switchRegion('daejeon', true);
                     await window.switchLine('daejeon_line1', true);
+                    homeSelectedStation = favoriteStation;
+                    foundFav = true;
+                } else if (STATIONS_ALL['busan_line1'] && STATIONS_ALL['busan_line1'][favoriteStation]) {
+                    await window.switchRegion('busan', true);
+                    await window.switchLine('busan_line1', true);
                     homeSelectedStation = favoriteStation;
                     foundFav = true;
                 }
