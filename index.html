@@ -641,7 +641,9 @@
             
             const parseCsv = (csvStr, expectedDir) => {
                 if (!csvStr) return [];
-                const lines = csvStr.trim().split(/\r?\n/);
+                // 공공데이터 CSV의 쌍따옴표 포장 방어 및 제거
+                const cleanCsvStr = csvStr.replace(/"/g, '');
+                const lines = cleanCsvStr.trim().split(/\r?\n/);
                 if (lines.length === 0) return [];
                 const headers = lines[0].split(',');
 
@@ -651,20 +653,26 @@
                     const stIdx = headers.findIndex(h => h.includes('운행구간정거장'));
                     const arrIdx = headers.findIndex(h => h.includes('정거장도착시각'));
                     const depIdx = headers.findIndex(h => h.includes('정거장출발시각'));
-                    
-                    // 요일 필터링 추가
+                    const lineNameIdx = headers.findIndex(h => h.includes('노선명'));
                     const dayTypeIdx = headers.findIndex(h => h.includes('요일구분'));
-                    const dayMap = { 'weekday': '평일', 'saturday': '토요일', 'holiday': '일요일' };
-                    const expectedDayStr = dayMap[currentDayType];
+                    
+                    // 요일 필터링 (다양한 표현 대응)
+                    const dayMap = { 'weekday': ['평일'], 'saturday': ['토요일', '주말'], 'holiday': ['일요일', '공휴일', '휴일', '주말'] };
+                    const expectedDays = dayMap[currentDayType] || [];
                     
                     for (let i = 1; i < lines.length; i++) {
                         const row = lines[i].split(',');
                         if (row.length <= Math.max(stIdx, arrIdx, depIdx)) continue;
                         
+                        // 노선 필터링 (1호선만)
+                        if (lineNameIdx !== -1) {
+                            if (currentLineId === 'busan_line1' && !row[lineNameIdx].includes('1호선')) continue;
+                        }
+                        
                         // 현재 날짜(평일/주말)에 맞는 데이터만 필터링
                         if (dayTypeIdx !== -1) {
                             const dayStr = row[dayTypeIdx];
-                            if (dayStr && expectedDayStr && !dayStr.includes(expectedDayStr)) continue;
+                            if (dayStr && expectedDays.length > 0 && !expectedDays.some(d => dayStr.includes(d))) continue;
                         }
                         
                         const trainId = row[0].trim();
@@ -678,18 +686,35 @@
                         const arrTokens = arrTimesStr ? arrTimesStr.split('+') : [];
                         const depTokens = depTimesStr ? depTimesStr.split('+') : [];
                         
+                        // 시간 데이터를 인덱스가 아닌 '001', '002' 등 고유 접두사 기준으로 매핑하여 데이터 밀림 현상 완벽 방지
+                        const arrMap = {};
+                        arrTokens.forEach(t => {
+                            const p = t.split('-');
+                            if(p.length >= 2) arrMap[p[0].trim()] = p.slice(1).join('-').trim();
+                        });
+                        const depMap = {};
+                        depTokens.forEach(t => {
+                            const p = t.split('-');
+                            if(p.length >= 2) depMap[p[0].trim()] = p.slice(1).join('-').trim();
+                        });
+                        
                         const schedule = [];
                         for (let k = 0; k < stationTokens.length; k++) {
                             const stParts = stationTokens[k].split('-');
                             if (stParts.length < 2) continue;
-                            const stName = stParts.slice(1).join('-').trim();
+                            
+                            const prefix = stParts[0].trim();
+                            let stName = stParts.slice(1).join('-').trim();
+                            
+                            // 이름 보정 (부산역, 다대포해수욕장 등 공백이나 특수기호 제거)
+                            stName = stName.replace(/\([^)]*\)/g, '').trim(); 
                             
                             if (!STATIONS[stName]) continue;
                             
-                            const aTime = arrTokens[k] ? arrTokens[k].split('-').slice(1).join('-').trim() : '';
-                            const dTime = depTokens[k] ? depTokens[k].split('-').slice(1).join('-').trim() : '';
+                            const aTime = arrMap[prefix] || '';
+                            const dTime = depMap[prefix] || '';
                             
-                            let timeStr = (dTime && dTime !== ':') ? dTime : ((aTime && aTime !== ':') ? aTime : null);
+                            let timeStr = (dTime && dTime !== ':' && dTime.includes(':')) ? dTime : ((aTime && aTime !== ':' && aTime.includes(':')) ? aTime : null);
                             
                             if (timeStr) {
                                 if (timeStr.split(':').length === 2) timeStr += ':00'; // 초 단위가 없으면 추가
@@ -860,7 +885,7 @@
             document.getElementById('btn-icon-2').style.color = THEME_COLOR;
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
-            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 3800 : 1600));
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : 1600));
             const svg = document.getElementById('line-svg');
             if (svg) {
                 svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
@@ -1086,7 +1111,7 @@
             
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
-            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 3800 : 1600));
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : 1600));
             const renderedT = activeT.map(t => {
                 const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
