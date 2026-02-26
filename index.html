@@ -157,6 +157,7 @@
                         <button id="btn-line-busan4" onclick="switchLine('busan_line4')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">4호선</button>
                         <button id="btn-line-bglrt" onclick="switchLine('busan_bglrt')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">부산김해</button>
                         <button id="btn-line-donghae" onclick="switchLine('busan_donghae')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">동해선</button>
+                        <button onclick="showPreparingPopup('양산선')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">양산선</button>
                     </div>
 
                     <!-- 코레일 스타일 역명판 -->
@@ -999,6 +1000,21 @@
                     if (!row[0]) continue;
                     let stationName = row[0].trim();
                     if (currentLineId === 'daejeon_line1' && stationName === '대전') stationName = '대전역';
+                    
+                    // 동해선 역명 퍼지 매칭 및 하드코딩 예외처리
+                    if (currentLineId === 'busan_donghae' && !STATIONS[stationName]) {
+                        if (stationName === '부교대') {
+                            stationName = '교대';
+                        } else {
+                            // 세 글자 이상 겹치면 동일역으로 간주 (ex: 부산원동역 -> 부산원동)
+                            let matched = Object.keys(STATIONS).find(k => 
+                                (stationName.length >= 3 && k.includes(stationName)) || 
+                                (k.length >= 3 && stationName.includes(k))
+                            );
+                            if (matched) stationName = matched;
+                        }
+                    }
+
                     if (!STATIONS[stationName]) continue;
                     for (let j = 1; j < row.length; j++) {
                         if (!row[j]) continue;
@@ -1593,7 +1609,11 @@
             const textElem = document.getElementById('preparing-text');
             
             if (textElem && name) {
-                textElem.innerHTML = `<b class="text-[#111827]">${name}</b> 서비스는<br>현재 준비 중입니다.`;
+                if (name === '양산선') {
+                    textElem.innerHTML = `<b class="text-[#111827]">${name}</b>은(는)<br>2026년 11월 개통 예정입니다.`;
+                } else {
+                    textElem.innerHTML = `<b class="text-[#111827]">${name}</b> 서비스는<br>현재 준비 중입니다.`;
+                }
             }
             
             // 현재 테마 색상으로 업데이트
