@@ -511,12 +511,12 @@
                 holiday_down: 'jeon_line1_w_down.csv'
             },
             'busan_line1': {
-                weekday_up: 'busan_line1_up.csv',
-                weekday_down: 'busan_line1_down.csv',
-                saturday_up: 'busan_line1_sat_up.csv',
-                saturday_down: 'busan_line1_sat_down.csv',
-                holiday_up: 'busan_line1_hol_up.csv',
-                holiday_down: 'busan_line1_hol_down.csv'
+                weekday_up: 'busan.csv',
+                weekday_down: 'busan.csv',
+                saturday_up: 'busan.csv',
+                saturday_down: 'busan.csv',
+                holiday_up: 'busan.csv',
+                holiday_down: 'busan.csv'
             }
         };
 
@@ -639,7 +639,7 @@
             let targetUpUrl = FILE_URLS[currentLineId][currentDayType + '_up'];
             let targetDownUrl = FILE_URLS[currentLineId][currentDayType + '_down'];
             
-            const parseCsv = (csvStr) => {
+            const parseCsv = (csvStr, expectedDir) => {
                 if (!csvStr) return [];
                 const lines = csvStr.trim().split(/\r?\n/);
                 if (lines.length === 0) return [];
@@ -652,9 +652,20 @@
                     const arrIdx = headers.findIndex(h => h.includes('정거장도착시각'));
                     const depIdx = headers.findIndex(h => h.includes('정거장출발시각'));
                     
+                    // 요일 필터링 추가
+                    const dayTypeIdx = headers.findIndex(h => h.includes('요일구분'));
+                    const dayMap = { 'weekday': '평일', 'saturday': '토요일', 'holiday': '일요일' };
+                    const expectedDayStr = dayMap[currentDayType];
+                    
                     for (let i = 1; i < lines.length; i++) {
                         const row = lines[i].split(',');
                         if (row.length <= Math.max(stIdx, arrIdx, depIdx)) continue;
+                        
+                        // 현재 날짜(평일/주말)에 맞는 데이터만 필터링
+                        if (dayTypeIdx !== -1) {
+                            const dayStr = row[dayTypeIdx];
+                            if (dayStr && expectedDayStr && !dayStr.includes(expectedDayStr)) continue;
+                        }
                         
                         const trainId = row[0].trim();
                         const stationsStr = row[stIdx];
@@ -693,6 +704,15 @@
                         
                         if (schedule.length >= 2) {
                             schedule.sort((a, b) => a.sec - b.sec);
+                            
+                            // 진행도를 비교하여 상/하행 필터링 (다대포가 0.0, 노포가 1.0)
+                            const firstProg = schedule[0].progress;
+                            const lastProg = schedule[schedule.length - 1].progress;
+                            const isUp = lastProg < firstProg; // 0.0을 향해 가면 상행(다대포행)
+                            
+                            if (expectedDir === 'up' && !isUp) continue;
+                            if (expectedDir === 'down' && isUp) continue;
+
                             trains.push({ id: trainId, schedule: schedule });
                         }
                     }
@@ -726,8 +746,8 @@
             };
             try {
                 const [upText, downText] = await Promise.all([safeFetch(targetUpUrl), safeFetch(targetDownUrl)]);
-                parsedTrainsUp = parseCsv(upText);
-                parsedTrainsDown = parseCsv(downText);
+                parsedTrainsUp = parseCsv(upText, 'up');
+                parsedTrainsDown = parseCsv(downText, 'down');
                 let isMockUsed = false;
                 if (parsedTrainsUp.length === 0) { parsedTrainsUp = createMockData('up'); isMockUsed = true; }
                 if (parsedTrainsDown.length === 0) { parsedTrainsDown = createMockData('down'); isMockUsed = true; }
@@ -1066,7 +1086,7 @@
             
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
-            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : 1600);
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 3800 : 1600));
             const renderedT = activeT.map(t => {
                 const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
