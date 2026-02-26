@@ -675,26 +675,22 @@
                     const lineNameIdx = headers.findIndex(h => h.includes('노선명'));
                     const dayTypeIdx = headers.findIndex(h => h.includes('요일구분'));
                     
-                    // 요일 필터링
-                    const dayMap = { 'weekday': ['평일'], 'saturday': ['토요일', '주말'], 'holiday': ['일요일', '공휴일', '휴일', '주말'] };
-                    const expectedDays = dayMap[currentDayType] || [];
-                    
-                    // 시간만 정확히 빼오는 정규식 (어떤 Prefix가 붙든 무시)
-                    const timeRegex = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/;
+                    // 요일 매핑 (평일, 토요일, 일요일)
+                    const dayMap = { 'weekday': '평일', 'saturday': '토요일', 'holiday': '일요일' };
+                    const expectedDayStr = dayMap[currentDayType];
                     
                     for (let i = 1; i < lines.length; i++) {
                         const row = splitCsvRow(lines[i]);
-                        if (row.length <= Math.max(stIdx, arrIdx, depIdx)) continue;
+                        if (row.length <= Math.max(stIdx, arrIdx)) continue;
                         
                         // 노선 필터링 (1호선만)
                         if (lineNameIdx !== -1 && currentLineId === 'busan_line1') {
                             if (!row[lineNameIdx].includes('1호선')) continue;
                         }
                         
-                        // 날짜(평일/주말) 필터링
-                        if (dayTypeIdx !== -1) {
-                            const dayStr = row[dayTypeIdx];
-                            if (dayStr && expectedDays.length > 0 && !expectedDays.some(d => dayStr.includes(d))) continue;
+                        // 요일 필터링
+                        if (dayTypeIdx !== -1 && expectedDayStr) {
+                            if (!row[dayTypeIdx].includes(expectedDayStr)) continue;
                         }
                         
                         const trainId = row[0].trim();
@@ -704,28 +700,54 @@
                         
                         if (!stationsStr) continue;
                         
-                        const stationTokens = stationsStr.split('+');
+                        // 1. 역번호 - 역이름 매핑
+                        const stTokens = stationsStr.split('+');
+                        const stOrder = [];
+                        const stMap = {};
+                        
+                        for (let k = 0; k < stTokens.length; k++) {
+                            const parts = stTokens[k].split('-');
+                            if (parts.length >= 2) {
+                                const stNum = parts[0].trim();
+                                let stName = parts.slice(1).join('-').trim();
+                                stName = stName.replace(/\([^)]*\)/g, '').trim(); 
+                                stMap[stNum] = stName;
+                                stOrder.push(stNum);
+                            }
+                        }
+                        
+                        // 2. 역번호 - 시간 매핑 (도착시간 우선, 없으면 출발시간)
                         const arrTokens = arrTimesStr ? arrTimesStr.split('+') : [];
                         const depTokens = depTimesStr ? depTimesStr.split('+') : [];
+                        const timeMap = {};
                         
+                        for (let k = 0; k < arrTokens.length; k++) {
+                            const parts = arrTokens[k].split('-');
+                            if (parts.length >= 2) {
+                                const stNum = parts[0].trim();
+                                const timeVal = parts.slice(1).join('-').trim();
+                                if (timeVal && timeVal !== ':') timeMap[stNum] = timeVal;
+                            }
+                        }
+                        
+                        // 도착시간이 비어있는 첫 역 등을 위해 출발시간 보완
+                        for (let k = 0; k < depTokens.length; k++) {
+                            const parts = depTokens[k].split('-');
+                            if (parts.length >= 2) {
+                                const stNum = parts[0].trim();
+                                const timeVal = parts.slice(1).join('-').trim();
+                                if (!timeMap[stNum] && timeVal && timeVal !== ':') timeMap[stNum] = timeVal;
+                            }
+                        }
+                        
+                        // 3. 최종 스케줄 조립
                         const schedule = [];
-                        for (let k = 0; k < stationTokens.length; k++) {
-                            const stRaw = stationTokens[k];
-                            // "001-노포" 또는 "노포" 에서 역명 추출
-                            let stName = stRaw.includes('-') ? stRaw.substring(stRaw.indexOf('-') + 1) : stRaw;
-                            stName = stName.replace(/\([^)]*\)/g, '').trim(); 
-                            
+                        for (let k = 0; k < stOrder.length; k++) {
+                            const stNum = stOrder[k];
+                            const stName = stMap[stNum];
                             if (!STATIONS[stName]) continue;
                             
-                            // 인덱스로 시간 매핑 후 시간 형식(HH:MM)만 추출
-                            const aTimeRaw = arrTokens[k] || '';
-                            const dTimeRaw = depTokens[k] || '';
-                            
-                            const aMatch = aTimeRaw.match(timeRegex);
-                            const dMatch = dTimeRaw.match(timeRegex);
-                            
-                            let timeStr = dMatch ? dMatch[1] : (aMatch ? aMatch[1] : null);
-                            
+                            let timeStr = timeMap[stNum];
                             if (timeStr) {
                                 if (timeStr.split(':').length === 2) timeStr += ':00';
                                 schedule.push({
@@ -740,7 +762,7 @@
                         if (schedule.length >= 2) {
                             schedule.sort((a, b) => a.sec - b.sec);
                             
-                            // 방향(상/하행) 필터링
+                            // 진행도를 비교하여 상/하행 필터링 (다대포가 0.0, 노포가 1.0)
                             const firstProg = schedule[0].progress;
                             const lastProg = schedule[schedule.length - 1].progress;
                             const isUp = lastProg < firstProg; 
