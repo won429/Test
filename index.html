@@ -559,27 +559,27 @@
                 "안평": { progress: 1.0000 }
             },
             'busan_bglrt': {
-                "가야대": { progress: 0.00 },
-                "장신대": { progress: 0.05 },
-                "영지공원": { progress: 0.10 },
-                "박물관": { progress: 0.15 },
-                "수로왕릉": { progress: 0.20 },
-                "봉황": { progress: 0.25 },
-                "부원": { progress: 0.30 },
-                "김해시청": { progress: 0.35 },
-                "인제대": { progress: 0.40 },
-                "김해대학": { progress: 0.45 },
+                "사상": { progress: 0.00 },
+                "괘법르네시떼": { progress: 0.05 },
+                "서부산유통지구": { progress: 0.10 },
+                "김해공항": { progress: 0.15 },
+                "덕두": { progress: 0.20 },
+                "동구": { progress: 0.25 },
+                "대저": { progress: 0.30 },
+                "평강": { progress: 0.35 },
+                "대사": { progress: 0.40 },
+                "불암": { progress: 0.45 },
                 "지내": { progress: 0.50 },
-                "불암": { progress: 0.55 },
-                "대사": { progress: 0.60 },
-                "평강": { progress: 0.65 },
-                "대저": { progress: 0.70 },
-                "동구": { progress: 0.75 },
-                "덕두": { progress: 0.80 },
-                "김해공항": { progress: 0.85 },
-                "서부산유통지구": { progress: 0.90 },
-                "괘법르네시떼": { progress: 0.95 },
-                "사상": { progress: 1.00 }
+                "김해대학": { progress: 0.55 },
+                "인제대": { progress: 0.60 },
+                "김해시청": { progress: 0.65 },
+                "부원": { progress: 0.70 },
+                "봉황": { progress: 0.75 },
+                "수로왕릉": { progress: 0.80 },
+                "박물관": { progress: 0.85 },
+                "영지공원": { progress: 0.90 },
+                "장신대": { progress: 0.95 },
+                "가야대": { progress: 1.00 }
             }
         };
 
@@ -1147,12 +1147,12 @@
                 if(btnBusan2) btnBusan2.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
-                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '가야대';
+                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '사상';
                 document.querySelector('#home-screen h2').textContent = '부산김해경전철 역';
                 dom.lineHeaderTitle.textContent = '부산김해경전철 현황';
-                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (가야대 방면)</option><option value="down" class="text-gray-900">하행 (사상 방면)</option>';
-                document.getElementById('home-up-dir-label').textContent = '가야대 방면';
-                document.getElementById('home-down-dir-label').textContent = '사상 방면';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (사상 방면)</option><option value="down" class="text-gray-900">하행 (가야대 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '사상 방면';
+                document.getElementById('home-down-dir-label').textContent = '가야대 방면';
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             }
 
