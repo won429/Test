@@ -154,6 +154,7 @@
                         <button id="btn-line-busan1" onclick="switchLine('busan_line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#F06A00] text-white shadow-[0_2px_8px_rgba(240,106,0,0.3)] shrink-0 border border-[#F06A00] transition-all">1호선</button>
                         <button id="btn-line-busan2" onclick="switchLine('busan_line2')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">2호선</button>
                         <button id="btn-line-busan3" onclick="switchLine('busan_line3')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">3호선</button>
+                        <button id="btn-line-busan4" onclick="switchLine('busan_line4')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">4호선</button>
                     </div>
 
                     <!-- 코레일 스타일 역명판 -->
@@ -539,6 +540,22 @@
                 "강서구청": { progress: 0.8750 },
                 "체육공원": { progress: 0.9375 },
                 "대저": { progress: 1.0000 }
+            },
+            'busan_line4': {
+                "미남": { progress: 0.0000 },
+                "동래": { progress: 0.0769 },
+                "수안": { progress: 0.1538 },
+                "낙민": { progress: 0.2307 },
+                "충렬사": { progress: 0.3076 },
+                "명장": { progress: 0.3846 },
+                "서동": { progress: 0.4615 },
+                "금사": { progress: 0.5384 },
+                "반여농산물시장": { progress: 0.6153 },
+                "석대": { progress: 0.6923 },
+                "영산대": { progress: 0.7692 },
+                "윗반송": { progress: 0.8461 },
+                "고촌": { progress: 0.9230 },
+                "안평": { progress: 1.0000 }
             }
         };
 
@@ -593,6 +610,14 @@
                 holiday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv']
             },
             'busan_line3': {
+                weekday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                weekday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                saturday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                saturday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                holiday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
+                holiday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv']
+            },
+            'busan_line4': {
                 weekday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
                 weekday_down: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
                 saturday_up: ['busan.csv', '부산교통공사_부산도시철도 운행 정보_20250714.csv'],
@@ -782,6 +807,12 @@
                         if (lineNameIdx !== -1 && currentLineId === 'busan_line3') {
                             const rowLine = row[lineNameIdx] || '';
                             if (!rowLine.includes('3호선')) continue;
+                        }
+
+                        // 노선 필터링 (4호선 추가)
+                        if (lineNameIdx !== -1 && currentLineId === 'busan_line4') {
+                            const rowLine = row[lineNameIdx] || '';
+                            if (!rowLine.includes('4호선')) continue;
                         }
                         
                         // 요일 필터링
@@ -984,8 +1015,8 @@
         window.switchLine = async (lineId, isInit = false) => {
             if (currentLineId === lineId && !isInit) return;
             currentLineId = lineId;
-            THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : (currentLineId === 'daejeon_line1' ? '#007448' : (currentLineId === 'busan_line1' ? '#F06A00' : (currentLineId === 'busan_line2' ? '#81C147' : (currentLineId === 'busan_line3' ? '#B07C4A' : '#0054A6'))));
-            DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : (currentLineId === 'busan_line1' ? '#F58A33' : (currentLineId === 'busan_line2' ? '#97D86B' : (currentLineId === 'busan_line3' ? '#C5A67C' : '#5998D6'))));
+            THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : (currentLineId === 'daejeon_line1' ? '#007448' : (currentLineId === 'busan_line1' ? '#F06A00' : (currentLineId === 'busan_line2' ? '#81C147' : (currentLineId === 'busan_line3' ? '#B07C4A' : (currentLineId === 'busan_line4' ? '#217DCB' : '#0054A6')))));
+            DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : (currentLineId === 'busan_line1' ? '#F58A33' : (currentLineId === 'busan_line2' ? '#97D86B' : (currentLineId === 'busan_line3' ? '#C5A67C' : (currentLineId === 'busan_line4' ? '#53A1E2' : '#5998D6')))));
             STATIONS = STATIONS_ALL[lineId];
 
             const btnD = document.getElementById('btn-line-daegyeong');
@@ -994,6 +1025,7 @@
             const btnBusan1 = document.getElementById('btn-line-busan1');
             const btnBusan2 = document.getElementById('btn-line-busan2');
             const btnBusan3 = document.getElementById('btn-line-busan3');
+            const btnBusan4 = document.getElementById('btn-line-busan4');
 
             if (lineId === 'daegyeong') {
                 btnD.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
@@ -1028,6 +1060,7 @@
                 if(btnBusan1) btnBusan1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(240,106,0,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
                 if(btnBusan2) btnBusan2.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '다대포해수욕장';
                 document.querySelector('#home-screen h2').textContent = '부산 1호선 지하철역';
                 dom.lineHeaderTitle.textContent = '부산 1호선 지하철 현황';
@@ -1039,6 +1072,7 @@
                 if(btnBusan2) btnBusan2.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(129,193,71,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
                 if(btnBusan1) btnBusan1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '장산';
                 document.querySelector('#home-screen h2').textContent = '부산 2호선 지하철역';
                 dom.lineHeaderTitle.textContent = '부산 2호선 지하철 현황';
@@ -1050,6 +1084,7 @@
                 if(btnBusan3) btnBusan3.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(176,124,74,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
                 if(btnBusan1) btnBusan1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if(btnBusan2) btnBusan2.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '수영';
                 document.querySelector('#home-screen h2').textContent = '부산 3호선 지하철역';
                 dom.lineHeaderTitle.textContent = '부산 3호선 지하철 현황';
@@ -1057,9 +1092,21 @@
                 document.getElementById('home-up-dir-label').textContent = '수영 방면';
                 document.getElementById('home-down-dir-label').textContent = '대저 방면';
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
+            } else if (lineId === 'busan_line4') {
+                if(btnBusan4) btnBusan4.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(33,125,203,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
+                if(btnBusan1) btnBusan1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btnBusan2) btnBusan2.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '미남';
+                document.querySelector('#home-screen h2').textContent = '부산 4호선 지하철역';
+                dom.lineHeaderTitle.textContent = '부산 4호선 지하철 현황';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (미남 방면)</option><option value="down" class="text-gray-900">하행 (안평 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '미남 방면';
+                document.getElementById('home-down-dir-label').textContent = '안평 방면';
+                document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             }
 
-            document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : (lineId === 'daejeon_line1' ? '대' : (lineId === 'busan_line1' ? '1' : (lineId === 'busan_line2' ? '2' : (lineId === 'busan_line3' ? '3' : '1'))));
+            document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : (lineId === 'daejeon_line1' ? '대' : (lineId === 'busan_line1' ? '1' : (lineId === 'busan_line2' ? '2' : (lineId === 'busan_line3' ? '3' : (lineId === 'busan_line4' ? '4' : '1')))));
             document.querySelector('.metro-logo-circle').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-base').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-pill').style.borderColor = THEME_COLOR;
@@ -1067,7 +1114,7 @@
             document.getElementById('btn-icon-2').style.color = THEME_COLOR;
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
-            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : 1600))));
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : (currentLineId === 'busan_line4' ? 1800 : 1600)))));
             const svg = document.getElementById('line-svg');
             if (svg) {
                 svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
@@ -1293,7 +1340,7 @@
             
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
-            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : 1600))));
+            const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : (currentLineId === 'busan_line4' ? 1800 : 1600)))));
             const renderedT = activeT.map(t => {
                 const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
@@ -1378,6 +1425,11 @@
                 } else if (STATIONS_ALL['busan_line3'] && STATIONS_ALL['busan_line3'][favoriteStation]) {
                     await window.switchRegion('busan', true);
                     await window.switchLine('busan_line3', true);
+                    homeSelectedStation = favoriteStation;
+                    foundFav = true;
+                } else if (STATIONS_ALL['busan_line4'] && STATIONS_ALL['busan_line4'][favoriteStation]) {
+                    await window.switchRegion('busan', true);
+                    await window.switchLine('busan_line4', true);
                     homeSelectedStation = favoriteStation;
                     foundFav = true;
                 }
