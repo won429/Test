@@ -247,6 +247,28 @@ const STATIONS_ALL = {
         "덕하": { progress: 0.9090 },
         "개운포": { progress: 0.9545 },
         "태화강": { progress: 1.0000 }
+    },
+    'gwangju_line1': {
+        "녹동": { progress: 0.0000 },
+        "소태": { progress: 0.0526 },
+        "학동 중심사입구": { progress: 0.1052 },
+        "남광주": { progress: 0.1578 },
+        "문화전당": { progress: 0.2105 },
+        "금남로4가": { progress: 0.2631 },
+        "금남로5가": { progress: 0.3157 },
+        "양동시장": { progress: 0.3684 },
+        "돌고개": { progress: 0.4210 },
+        "농성": { progress: 0.4736 },
+        "화정": { progress: 0.5263 },
+        "쌍촌": { progress: 0.5789 },
+        "운천": { progress: 0.6315 },
+        "상무": { progress: 0.6842 },
+        "김대중컨벤션센터": { progress: 0.7368 },
+        "공항": { progress: 0.7894 },
+        "송정공원": { progress: 0.8421 },
+        "광주송정역": { progress: 0.8947, ktx: true },
+        "도산": { progress: 0.9473 },
+        "평동": { progress: 1.0000 }
     }
 };
 
@@ -331,6 +353,14 @@ const FILE_URLS = {
         saturday_down: 'dong_w_down.csv',
         holiday_up: 'dong_w_up.csv',
         holiday_down: 'dong_w_down.csv'
+    },
+    'gwangju_line1': {
+        weekday_up: 'gj_up.csv',
+        weekday_down: 'gj_down.csv',
+        saturday_up: 'gj_w_up.csv',
+        saturday_down: 'gj_w_down.csv',
+        holiday_up: 'gj_w_up.csv',
+        holiday_down: 'gj_w_down.csv'
     }
 };
 
@@ -716,42 +746,65 @@ window.switchRegion = async (region, isInit = false) => {
     const btnDaegu = document.getElementById('btn-region-daegu');
     const btnDaejeon = document.getElementById('btn-region-daejeon');
     const btnBusan = document.getElementById('btn-region-busan');
+    const btnGwangju = document.getElementById('btn-region-gwangju');
+    
     const tabsDaegu = document.getElementById('line-tabs-daegu');
     const tabsDaejeon = document.getElementById('line-tabs-daejeon');
     const tabsBusan = document.getElementById('line-tabs-busan');
+    const tabsGwangju = document.getElementById('line-tabs-gwangju');
 
     if (region === 'daegu') {
         btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all';
         btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBusan) btnBusan.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju) btnGwangju.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        
         tabsDaegu.classList.remove('hidden'); tabsDaegu.classList.add('flex');
         tabsDaejeon.classList.add('hidden'); tabsDaejeon.classList.remove('flex');
         if(tabsBusan) { tabsBusan.classList.add('hidden'); tabsBusan.classList.remove('flex'); }
+        if(tabsGwangju) { tabsGwangju.classList.add('hidden'); tabsGwangju.classList.remove('flex'); }
         if (!isInit) await window.switchLine('daegyeong');
     } else if (region === 'daejeon') {
         btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#007448] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[#007448] transition-all';
         btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBusan) btnBusan.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju) btnGwangju.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        
         tabsDaegu.classList.add('hidden'); tabsDaegu.classList.remove('flex');
         tabsDaejeon.classList.remove('hidden'); tabsDaejeon.classList.add('flex');
         if(tabsBusan) { tabsBusan.classList.add('hidden'); tabsBusan.classList.remove('flex'); }
+        if(tabsGwangju) { tabsGwangju.classList.add('hidden'); tabsGwangju.classList.remove('flex'); }
         if (!isInit) await window.switchLine('daejeon_line1');
     } else if (region === 'busan') {
         if(btnBusan) btnBusan.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#F06A00] text-white shadow-[0_2px_8px_rgba(240,106,0,0.3)] shrink-0 border border-[#F06A00] transition-all';
         btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju) btnGwangju.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        
         tabsDaegu.classList.add('hidden'); tabsDaegu.classList.remove('flex');
         tabsDaejeon.classList.add('hidden'); tabsDaejeon.classList.remove('flex');
         if(tabsBusan) { tabsBusan.classList.remove('hidden'); tabsBusan.classList.add('flex'); }
+        if(tabsGwangju) { tabsGwangju.classList.add('hidden'); tabsGwangju.classList.remove('flex'); }
         if (!isInit) await window.switchLine('busan_line1');
+    } else if (region === 'gwangju') {
+        if(btnGwangju) btnGwangju.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-[#0090D2] text-white shadow-[0_2px_8px_rgba(0,144,210,0.3)] shrink-0 border border-[#0090D2] transition-all';
+        btnDaegu.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        btnDaejeon.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnBusan) btnBusan.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        
+        tabsDaegu.classList.add('hidden'); tabsDaegu.classList.remove('flex');
+        tabsDaejeon.classList.add('hidden'); tabsDaejeon.classList.remove('flex');
+        if(tabsBusan) { tabsBusan.classList.add('hidden'); tabsBusan.classList.remove('flex'); }
+        if(tabsGwangju) { tabsGwangju.classList.remove('hidden'); tabsGwangju.classList.add('flex'); }
+        if (!isInit) await window.switchLine('gwangju_line1');
     }
 };
 
 window.switchLine = async (lineId, isInit = false) => {
     if (currentLineId === lineId && !isInit) return;
     currentLineId = lineId;
-    THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : (currentLineId === 'daejeon_line1' ? '#007448' : (currentLineId === 'busan_line1' ? '#F06A00' : (currentLineId === 'busan_line2' ? '#81C147' : (currentLineId === 'busan_line3' ? '#B07C4A' : (currentLineId === 'busan_line4' ? '#217DCB' : (currentLineId === 'busan_bglrt' ? '#8652A1' : (currentLineId === 'busan_donghae' ? '#003DA5' : '#0054A6')))))));
-    DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : (currentLineId === 'busan_line1' ? '#F58A33' : (currentLineId === 'busan_line2' ? '#97D86B' : (currentLineId === 'busan_line3' ? '#C5A67C' : (currentLineId === 'busan_line4' ? '#53A1E2' : (currentLineId === 'busan_bglrt' ? '#A77BC0' : (currentLineId === 'busan_donghae' ? '#4B77C2' : '#5998D6')))))));
+    THEME_COLOR = currentLineId === 'line1' ? '#D93F5C' : (currentLineId === 'daejeon_line1' ? '#007448' : (currentLineId === 'busan_line1' ? '#F06A00' : (currentLineId === 'busan_line2' ? '#81C147' : (currentLineId === 'busan_line3' ? '#B07C4A' : (currentLineId === 'busan_line4' ? '#217DCB' : (currentLineId === 'busan_bglrt' ? '#8652A1' : (currentLineId === 'busan_donghae' ? '#003DA5' : (currentLineId === 'gwangju_line1' ? '#0090D2' : '#0054A6'))))))));
+    DOWN_COLOR = currentLineId === 'line1' ? '#FF7EB3' : (currentLineId === 'daejeon_line1' ? '#009F62' : (currentLineId === 'busan_line1' ? '#F58A33' : (currentLineId === 'busan_line2' ? '#97D86B' : (currentLineId === 'busan_line3' ? '#C5A67C' : (currentLineId === 'busan_line4' ? '#53A1E2' : (currentLineId === 'busan_bglrt' ? '#A77BC0' : (currentLineId === 'busan_donghae' ? '#4B77C2' : (currentLineId === 'gwangju_line1' ? '#4DB2E0' : '#5998D6'))))))));
     STATIONS = STATIONS_ALL[lineId];
 
     const btnD = document.getElementById('btn-line-daegyeong');
@@ -763,10 +816,12 @@ window.switchLine = async (lineId, isInit = false) => {
     const btnBusan4 = document.getElementById('btn-line-busan4');
     const btnBglrt = document.getElementById('btn-line-bglrt');
     const btnDonghae = document.getElementById('btn-line-donghae');
+    const btnGwangju1 = document.getElementById('btn-line-gwangju1');
 
     if (lineId === 'daegyeong') {
         btnD.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
         btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '구미';
         document.querySelector('#home-screen h2').textContent = '대구권 대경선 지하철역';
         dom.lineHeaderTitle.textContent = '대구권 대경선 지하철 현황';
@@ -777,6 +832,7 @@ window.switchLine = async (lineId, isInit = false) => {
     } else if (lineId === 'line1') {
         btn1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(217,63,92,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
         btnD.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '설화명곡';
         document.querySelector('#home-screen h2').textContent = '대구권 1호선 지하철역';
         dom.lineHeaderTitle.textContent = '대구권 1호선 지하철 현황';
@@ -786,6 +842,7 @@ window.switchLine = async (lineId, isInit = false) => {
         document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
     } else if (lineId === 'daejeon_line1') {
         btnDaejeon1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,116,72,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '판암';
         document.querySelector('#home-screen h2').textContent = '대전 1호선 지하철역';
         dom.lineHeaderTitle.textContent = '대전 1호선 지하철 현황';
@@ -800,6 +857,7 @@ window.switchLine = async (lineId, isInit = false) => {
         if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBglrt) btnBglrt.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnDonghae) btnDonghae.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '다대포해수욕장';
         document.querySelector('#home-screen h2').textContent = '부산 1호선 지하철역';
         dom.lineHeaderTitle.textContent = '부산 1호선 지하철 현황';
@@ -814,6 +872,7 @@ window.switchLine = async (lineId, isInit = false) => {
         if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBglrt) btnBglrt.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnDonghae) btnDonghae.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '장산';
         document.querySelector('#home-screen h2').textContent = '부산 2호선 지하철역';
         dom.lineHeaderTitle.textContent = '부산 2호선 지하철 현황';
@@ -828,6 +887,7 @@ window.switchLine = async (lineId, isInit = false) => {
         if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBglrt) btnBglrt.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnDonghae) btnDonghae.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '수영';
         document.querySelector('#home-screen h2').textContent = '부산 3호선 지하철역';
         dom.lineHeaderTitle.textContent = '부산 3호선 지하철 현황';
@@ -842,6 +902,7 @@ window.switchLine = async (lineId, isInit = false) => {
         if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBglrt) btnBglrt.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnDonghae) btnDonghae.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '미남';
         document.querySelector('#home-screen h2').textContent = '부산 4호선 지하철역';
         dom.lineHeaderTitle.textContent = '부산 4호선 지하철 현황';
@@ -856,6 +917,7 @@ window.switchLine = async (lineId, isInit = false) => {
         if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnDonghae) btnDonghae.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '사상';
         document.querySelector('#home-screen h2').textContent = '부산김해경전철 역';
         dom.lineHeaderTitle.textContent = '부산김해경전철 현황';
@@ -870,6 +932,7 @@ window.switchLine = async (lineId, isInit = false) => {
         if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if(btnBglrt) btnBglrt.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnGwangju1) btnGwangju1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
         if (!STATIONS[homeSelectedStation]) homeSelectedStation = '부전';
         document.querySelector('#home-screen h2').textContent = '동해선 전철역';
         dom.lineHeaderTitle.textContent = '동해선 전철 현황';
@@ -877,9 +940,27 @@ window.switchLine = async (lineId, isInit = false) => {
         document.getElementById('home-up-dir-label').textContent = '부전 방면';
         document.getElementById('home-down-dir-label').textContent = '태화강 방면';
         document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
+    } else if (lineId === 'gwangju_line1') {
+        if(btnGwangju1) btnGwangju1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,144,210,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
+        btnD.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnDaejeon1) btnDaejeon1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnBusan1) btnBusan1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnBusan2) btnBusan2.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnBusan3) btnBusan3.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnBusan4) btnBusan4.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnBglrt) btnBglrt.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if(btnDonghae) btnDonghae.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+        if (!STATIONS[homeSelectedStation]) homeSelectedStation = '녹동';
+        document.querySelector('#home-screen h2').textContent = '광주 1호선 지하철역';
+        dom.lineHeaderTitle.textContent = '광주 1호선 지하철 현황';
+        dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (녹동 방면)</option><option value="down" class="text-gray-900">하행 (평동 방면)</option>';
+        document.getElementById('home-up-dir-label').textContent = '녹동 방면';
+        document.getElementById('home-down-dir-label').textContent = '평동 방면';
+        document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
     }
 
-    document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : (lineId === 'daejeon_line1' ? '대' : (lineId === 'busan_line1' ? '1' : (lineId === 'busan_line2' ? '2' : (lineId === 'busan_line3' ? '3' : (lineId === 'busan_line4' ? '4' : (lineId === 'busan_bglrt' ? '부' : (lineId === 'busan_donghae' ? '동' : '1')))))));
+    document.querySelector('.metro-logo-circle').textContent = lineId === 'daegyeong' ? '대' : (lineId === 'daejeon_line1' ? '대' : (lineId === 'busan_line1' ? '1' : (lineId === 'busan_line2' ? '2' : (lineId === 'busan_line3' ? '3' : (lineId === 'busan_line4' ? '4' : (lineId === 'busan_bglrt' ? '부' : (lineId === 'busan_donghae' ? '동' : (lineId === 'gwangju_line1' ? '1' : '1'))))))));
     document.querySelector('.metro-logo-circle').style.backgroundColor = THEME_COLOR;
     document.querySelector('.station-plate-base').style.backgroundColor = THEME_COLOR;
     document.querySelector('.station-plate-pill').style.borderColor = THEME_COLOR;
@@ -887,7 +968,7 @@ window.switchLine = async (lineId, isInit = false) => {
     document.getElementById('btn-icon-2').style.color = THEME_COLOR;
     document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
-    const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : (currentLineId === 'busan_line4' ? 1800 : (currentLineId === 'busan_bglrt' ? 2100 : (currentLineId === 'busan_donghae' ? 2400 : 1600)))))));
+    const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : (currentLineId === 'busan_line4' ? 1800 : (currentLineId === 'busan_bglrt' ? 2100 : (currentLineId === 'busan_donghae' ? 2400 : (currentLineId === 'gwangju_line1' ? 2100 : 1600))))))));
     const svg = document.getElementById('line-svg');
     if (svg) {
         svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
@@ -1112,7 +1193,7 @@ window.render = () => {
     
     let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
     
-    const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : (currentLineId === 'busan_line4' ? 1800 : (currentLineId === 'busan_bglrt' ? 2100 : (currentLineId === 'busan_donghae' ? 2400 : 1600)))))));
+    const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : (currentLineId === 'busan_line4' ? 1800 : (currentLineId === 'busan_bglrt' ? 2100 : (currentLineId === 'busan_donghae' ? 2400 : (currentLineId === 'gwangju_line1' ? 2100 : 1600))))))));
     const renderedT = activeT.map(t => {
         const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
         let p = {x: 0, y: 0}, angle = 0;
@@ -1137,7 +1218,7 @@ window.render = () => {
             const currentIds = trains.map(t => t.id); Array.from(layer.children).forEach(c => { if (!currentIds.includes(c.dataset.id)) c.remove(); });
             trains.forEach(t => {
                 let g = layer.querySelector(`g[data-id="${t.id}"]`); const isSelected = t.id === selectedTrainId;
-                if (!g) { g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.dataset.id = t.id; g.setAttribute("class", "cursor-pointer"); g.setAttribute("onclick", `handleTrainClick('${t.id}')`); layer.appendChild(g); }
+                if (!g) { g = document.createElementNS("[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)", "g"); g.dataset.id = t.id; g.setAttribute("class", "cursor-pointer"); g.setAttribute("onclick", `handleTrainClick('${t.id}')`); layer.appendChild(g); }
                 g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
                 const tColor = t.direction === 'down' ? DOWN_COLOR : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#9ca3af');
                 const isUp = t.direction === 'up'; const textWidth = t.id.length * 6 + 14; const rectX = -(textWidth / 2);
@@ -1148,7 +1229,7 @@ window.render = () => {
     }
     let lineHTML = ''; for (const stationName in STATIONS) {
         const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
-        lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
+        lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="[https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg](https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg)" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
     }
     dom.lineStations.innerHTML = lineHTML;
     if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
@@ -1212,6 +1293,11 @@ window.onload = async () => {
         } else if (STATIONS_ALL['busan_donghae'] && STATIONS_ALL['busan_donghae'][favoriteStation]) {
             await window.switchRegion('busan', true);
             await window.switchLine('busan_donghae', true);
+            homeSelectedStation = favoriteStation;
+            foundFav = true;
+        } else if (STATIONS_ALL['gwangju_line1'] && STATIONS_ALL['gwangju_line1'][favoriteStation]) {
+            await window.switchRegion('gwangju', true);
+            await window.switchLine('gwangju_line1', true);
             homeSelectedStation = favoriteStation;
             foundFav = true;
         }

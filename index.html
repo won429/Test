@@ -6,11 +6,11 @@
     <title>대경선 지하철 현황 실시간 트래커</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
     
     <!-- 폰트 및 아이콘 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="[https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css](https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css)" type="text/css"/>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
     
     <!-- 외부 스타일시트 연결 -->
     <link rel="stylesheet" href="style.css">
@@ -40,7 +40,7 @@
                         <button id="btn-region-busan" onclick="switchRegion('busan')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">부산권</button>
                         <button id="btn-region-daegu" onclick="switchRegion('daegu')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0054A6] text-white shadow-[0_2px_8px_rgba(0,84,166,0.3)] shrink-0 border border-[#0054A6] transition-all">대구권</button>
                         <button id="btn-region-daejeon" onclick="switchRegion('daejeon')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">대전</button>
-                        <button onclick="showPreparingPopup('광주')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">광주</button>
+                        <button id="btn-region-gwangju" onclick="switchRegion('gwangju')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">광주</button>
                     </div>
 
                     <!-- 노선 선택 탭 -->
@@ -61,6 +61,9 @@
                         <button id="btn-line-bglrt" onclick="switchLine('busan_bglrt')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">부산김해</button>
                         <button id="btn-line-donghae" onclick="switchLine('busan_donghae')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">동해선</button>
                         <button onclick="showPreparingPopup('양산선')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-400 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all">양산선</button>
+                    </div>
+                    <div id="line-tabs-gwangju" class="hidden gap-1.5 overflow-x-auto hide-scrollbar mb-4 pb-1">
+                        <button id="btn-line-gwangju1" onclick="switchLine('gwangju_line1')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#0090D2] text-white shadow-[0_2px_8px_rgba(0,144,210,0.3)] shrink-0 border border-[#0090D2] transition-all">1호선</button>
                     </div>
 
                     <!-- 코레일 스타일 역명판 -->
@@ -149,7 +152,7 @@
             <div id="train-list" class="flex gap-2 overflow-x-auto px-4 pb-1 hide-scrollbar"></div>
         </header>
 
-        <!-- 3. 트래 세 맵 스크롤 뷰 -->
+        <!-- 3. 트래커 맵 스크롤 뷰 -->
         <main id="scroll-container" class="hidden flex-1 w-full h-full overflow-y-auto overflow-x-hidden bg-white scroll-smooth relative pt-[80px] pb-32">
             <div id="svg-wrapper" class="relative w-full h-[1500px]">
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
@@ -198,7 +201,7 @@
             <div class="flex items-center justify-between bg-white/90 backdrop-blur-[12px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-black/10 rounded-full p-1 gap-0.5 relative transition-all duration-300">
                 <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white shadow-sm rounded-full border border-black/5 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
-                <button id="tab-back" onclick="window.location.href='https://won429.github.io/enjoysite/'" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
+                <button id="tab-back" onclick="window.location.href='[https://won429.github.io/enjoysite/](https://won429.github.io/enjoysite/)'" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
                     <div class="flex flex-col items-center gap-[2px] pointer-events-none">
                         <i class="fa-solid fa-arrow-left text-[15px] text-gray-400 group-hover:text-black transition-colors"></i>
                         <span class="text-[10px] font-medium text-gray-400 group-hover:text-black whitespace-nowrap transition-colors">뒤로가기</span>
