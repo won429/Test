@@ -927,7 +927,7 @@
                         "116": "송정공원", "117": "광주송정역", "118": "도산", "119": "평동"
                     };
 
-                    let trainIdx = 1;
+                    const unnumberedTrains = [];
                     // 원본 도착 시간을 토대로 하나의 기차 경로로 순서대로 연결해주는 로직
                     for (let c = 0; c < stCodes.length; c++) {
                         const code = stCodes[c];
@@ -971,11 +971,21 @@
                                 }
                                 
                                 if (schedule.length >= 2) {
-                                    trains.push({ id: `#${trainIdx++}`, schedule });
+                                    unnumberedTrains.push({ schedule });
                                 }
                             }
                         }
                     }
+                    
+                    // 시간순 정렬 후 상행(홀수), 하행(짝수) 번호 부여
+                    unnumberedTrains.sort((a, b) => a.schedule[0].sec - b.schedule[0].sec);
+                    let trainIdx = expectedDir === 'up' ? 1 : 2;
+                    
+                    for (let i = 0; i < unnumberedTrains.length; i++) {
+                        trains.push({ id: `#${trainIdx}`, schedule: unnumberedTrains[i].schedule });
+                        trainIdx += 2;
+                    }
+                    
                     return trains;
                 }
 
