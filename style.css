@@ -1,0 +1,97 @@
+body { 
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    touch-action: pan-y;
+    background-color: #ffffff; /* 사이트 바탕색 흰색 */
+}
+
+/* 유리 재질 공통 클래스 (화이트 테마용) */
+.toss-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+}
+
+.list-card {
+    background: #f9fafb;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    transition: transform 0.1s;
+}
+.list-card:active {
+    transform: scale(0.97);
+    background: #f3f4f6;
+}
+
+/* 하단 네비게이션 인디케이터 */
+#nav-indicator { will-change: transform, width; }
+.nav-transition { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* 커스텀 스크롤바 숨김 */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.text-main { color: #111827; }
+.text-sub { color: #6B7280; }
+.pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
+
+/* 애니메이션 설정 */
+@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+.animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+@keyframes pulse { 50% { opacity: .5; } }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+@keyframes bounce { 
+    0%, 100% { transform: translateY(-25%) translateX(-50%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 
+    50% { transform: none translateX(-50%); animation-timing-function: cubic-bezier(0,0,0.2,1); } 
+}
+.animate-bounce { animation: bounce 1s infinite; }
+
+@keyframes slide-in-from-bottom { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+.animate-in { animation: slide-in-from-bottom 0.3s ease-out forwards; }
+
+/* 이미지 기반 실사 역명판 커스텀 CSS */
+.station-plate-base {
+    height: 34px; 
+    background-color: #0054A6;
+    border-radius: 9999px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+.station-plate-pill {
+    background-color: white;
+    height: 52px; 
+    padding: 0 24px;
+    border-radius: 9999px;
+    border: 3px solid #0054A6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: border-color 0.3s;
+}
+.metro-logo-circle {
+    width: 26px; 
+    height: 26px;
+    background-color: #0054A6; 
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 13px;
+    font-weight: 900;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+}
