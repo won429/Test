@@ -719,12 +719,12 @@
                 holiday_down: 'dong_w_down.csv'
             },
             'gwangju_line1': {
-                weekday_up: 'gj_up.csv',
-                weekday_down: 'gj_down.csv',
-                saturday_up: 'gj_w_up.csv',
-                saturday_down: 'gj_w_down.csv',
-                holiday_up: 'gj_w_up.csv',
-                holiday_down: 'gj_w_down.csv'
+                weekday_up: 'gwangju.csv',
+                weekday_down: 'gwangju.csv',
+                saturday_up: 'gwangju.csv',
+                saturday_down: 'gwangju.csv',
+                holiday_up: 'gwangju.csv',
+                holiday_down: 'gwangju.csv'
             }
         };
 
@@ -873,6 +873,111 @@
                 };
 
                 const headers = splitCsvRow(lines[0]);
+
+                // 광주 데이터 포맷 (역사코드 및 상하행 방향 분리 포맷) 감지
+                if (headers[0].includes('요일') && headers.includes('역사코드') && headers.includes('방향(상_하행)')) {
+                    const trains = [];
+                    let dayFilter = [];
+                    if (currentDayType === 'weekday') dayFilter = ['평일'];
+                    else if (currentDayType === 'saturday') dayFilter = ['토요일'];
+                    else if (currentDayType === 'holiday') dayFilter = ['휴일', '명절', '일요일']; 
+                    
+                    let targetDir = expectedDir === 'up' ? '2' : '1'; // 2: 상행(녹동 방면), 1: 하행(평동 방면)
+                    
+                    const timeMap = {}; 
+                    const stCodeIdx = headers.indexOf('역사코드');
+                    const timeIdx = headers.indexOf('도착시간');
+                    const dayIdx = headers.indexOf('요일');
+                    const dirIdx = headers.indexOf('방향(상_하행)');
+                    
+                    for(let i=1; i<lines.length; i++) {
+                        const row = splitCsvRow(lines[i]);
+                        if(row.length <= stCodeIdx) continue;
+                        
+                        const day = row[dayIdx];
+                        const dir = row[dirIdx];
+                        const timeStr = row[timeIdx];
+                        const stCode = row[stCodeIdx];
+                        
+                        // 파일에 있는 해당 요일과 방향 데이터만 그대로 가져옴
+                        if (!dayFilter.some(d => day && day.includes(d))) continue;
+                        if (dir !== targetDir) continue;
+                        
+                        const sec = timeToSeconds(timeStr);
+                        if (!timeMap[stCode]) timeMap[stCode] = [];
+                        timeMap[stCode].push({ sec, time: timeStr, used: false });
+                    }
+                    
+                    for (const key in timeMap) {
+                        timeMap[key].sort((a,b) => a.sec - b.sec);
+                    }
+                    
+                    const stCodes = [];
+                    if (expectedDir === 'up') {
+                        for(let i=119; i>=100; i--) stCodes.push(i.toString());
+                    } else {
+                        for(let i=100; i<=119; i++) stCodes.push(i.toString());
+                    }
+                    
+                    const GWANGJU_STATIONS = {
+                        "100": "녹동", "101": "소태", "102": "학동 중심사입구", "103": "남광주",
+                        "104": "문화전당", "105": "금남로4가", "106": "금남로5가", "107": "양동시장",
+                        "108": "돌고개", "109": "농성", "110": "화정", "111": "쌍촌",
+                        "112": "운천", "113": "상무", "114": "김대중컨벤션센터", "115": "공항",
+                        "116": "송정공원", "117": "광주송정역", "118": "도산", "119": "평동"
+                    };
+
+                    let trainIdx = 1;
+                    // 원본 도착 시간을 토대로 하나의 기차 경로로 순서대로 연결해주는 로직
+                    for (let c = 0; c < stCodes.length; c++) {
+                        const code = stCodes[c];
+                        if(!timeMap[code]) continue;
+                        
+                        for (let t = 0; t < timeMap[code].length; t++) {
+                            const startEvent = timeMap[code][t];
+                            if (startEvent.used) continue;
+                            
+                            const schedule = [];
+                            const stName = GWANGJU_STATIONS[code];
+                            if(stName && STATIONS[stName]) {
+                                schedule.push({ name: stName, time: startEvent.time, sec: startEvent.sec, progress: STATIONS[stName].progress });
+                                startEvent.used = true;
+                                
+                                let currentSec = startEvent.sec;
+                                for (let nextC = c + 1; nextC < stCodes.length; nextC++) {
+                                    const nCode = stCodes[nextC];
+                                    if(!timeMap[nCode]) continue;
+                                    
+                                    let foundEvent = null;
+                                    for (let nt = 0; nt < timeMap[nCode].length; nt++) {
+                                        const ne = timeMap[nCode][nt];
+                                        // 이전 정거장 시간 바로 다음으로 기록된 원본 시간을 찾아 묶어줌
+                                        if (!ne.used && ne.sec > currentSec && ne.sec - currentSec <= 1200) { 
+                                            foundEvent = ne;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (foundEvent) {
+                                        const nStName = GWANGJU_STATIONS[nCode];
+                                        if(nStName && STATIONS[nStName]) {
+                                            schedule.push({ name: nStName, time: foundEvent.time, sec: foundEvent.sec, progress: STATIONS[nStName].progress });
+                                            foundEvent.used = true;
+                                            currentSec = foundEvent.sec;
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                
+                                if (schedule.length >= 2) {
+                                    trains.push({ id: `#${trainIdx++}`, schedule });
+                                }
+                            }
+                        }
+                    }
+                    return trains;
+                }
 
                 // 부산 데이터 포맷 (공공데이터 포맷) 감지
                 if (headers[0].includes('열차번호') && headers.findIndex(h => h.includes('운행구간정거장')) !== -1) {
