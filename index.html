@@ -207,11 +207,11 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2.5 mt-2">
-                        <button onclick="openHomeTimetable()" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                        <button onclick="openHomeTimetable('all')" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
                             <i id="btn-icon-1" class="fa-regular fa-clock text-[#0054A6] text-[15px]"></i>
                             <span class="text-[12px] font-bold text-[#111827]">전체 시간표 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-400"></i></span>
                         </button>
-                        <button onclick="openHomeTimetable()" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                        <button onclick="openHomeTimetable('firstLast')" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
                             <i id="btn-icon-2" class="fa-solid fa-train-tram text-[#0054A6] text-[15px]"></i>
                             <span class="text-[12px] font-bold text-[#111827]">첫차·막차 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-400"></i></span>
                         </button>
@@ -738,6 +738,7 @@
         let currentDayType = 'weekday'; 
         let stationDetailDirection = 'up'; 
         let modalDayType = null;
+        let modalViewMode = 'all';
         let parsedTrainsUp = [];
         let parsedTrainsDown = [];
         let parsedTrains = [];
@@ -1526,11 +1527,11 @@
 
         window.closeStationSelector = () => dom.stationSelectorModal.classList.add('hidden');
         window.selectHomeStation = (name) => { homeSelectedStation = name; window.updateHomeUI(); window.renderHomeArrivalInfo(); window.closeStationSelector(); };
-        window.openHomeTimetable = () => { window.handleStationClick(homeSelectedStation); window.openModal(); };
+        window.openHomeTimetable = (mode = 'all') => { modalViewMode = mode; window.handleStationClick(homeSelectedStation); window.openModal(); };
 
         window.switchTab = (tabId) => {
             activeTab = tabId;
-            selectedStation = null; selectedTrainId = null; modalDayType = null;
+            selectedStation = null; selectedTrainId = null; modalDayType = null; modalViewMode = 'all';
             dom.timetableModal.classList.add('hidden'); dom.stationSelectorModal.classList.add('hidden'); dom.floatingPanel.classList.add('hidden');
             if (tabId === 'home') {
                 dom.homeScreen.classList.remove('hidden'); dom.homeScreen.classList.add('flex');
@@ -1584,7 +1585,7 @@
             if (!selectedStation) return;
             
             dom.timetableModal.classList.remove('hidden');
-            dom.modalTitle.textContent = `${selectedStation}역 시간표`;
+            dom.modalTitle.textContent = `${selectedStation}역 ${modalViewMode === 'firstLast' ? '첫차·막차' : '시간표'}`;
             
             if (forcedDayType) modalDayType = forcedDayType;
             else if (!modalDayType) modalDayType = currentDayType;
@@ -1622,11 +1623,44 @@
                 const isDown = id === 'tt-down';
                 const curColor = isDown ? DOWN_COLOR : THEME_COLOR;
                 let listHtml = `<div id="${id}" class="space-y-1.5 mt-2 ${isHidden ? 'hidden' : ''}">`;
-                if(times.length === 0) listHtml += `<div class="text-center text-gray-400 py-10 font-medium text-[12px]">운행 정보가 없습니다.</div>`;
-                times.forEach(t => {
-                    const isPast = (modalDayType === currentDayType) && (t.sec < currentSec);
-                    listHtml += `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-400' : 'text-[#111827] tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-400' : 'text-gray-600'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-400 bg-gray-100 border-black/5' : 'text-white shadow-sm'}" style="${!isPast ? `background-color: ${curColor}; border-color: ${curColor};` : ''} padding: 2px 8px; border-radius: 4px; border-width: 1px;">${t.id}</span></div>`;
-                });
+                if(times.length === 0) {
+                    listHtml += `<div class="text-center text-gray-400 py-10 font-medium text-[12px]">운행 정보가 없습니다.</div>`;
+                } else if (modalViewMode === 'firstLast') {
+                    const grouped = {};
+                    times.forEach(t => {
+                        if (!grouped[t.dest]) grouped[t.dest] = { first: t, last: t };
+                        else {
+                            if (t.sec < grouped[t.dest].first.sec) grouped[t.dest].first = t;
+                            if (t.sec > grouped[t.dest].last.sec) grouped[t.dest].last = t;
+                        }
+                    });
+                    for (const dest in grouped) {
+                        const first = grouped[dest].first;
+                        const last = grouped[dest].last;
+                        listHtml += `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] p-3.5 shadow-sm border border-black/5 flex flex-col gap-2.5 mb-2">
+                            <div class="font-extrabold text-[13px] text-[#111827] border-b border-black/5 pb-1.5 flex items-center gap-1.5"><i class="fa-solid fa-flag-checkered text-gray-400 text-[11px]"></i>${dest} 방면</div>
+                            <div class="flex justify-between items-center px-1">
+                                <span class="text-[12px] font-bold text-gray-500">첫차</span>
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-[15px] font-black tracking-tight" style="color:${curColor}">${first.time.slice(0,5)}</span>
+                                    <span class="text-[9px] font-bold text-gray-500 bg-gray-200/80 px-1.5 py-0.5 rounded border border-black/5">${first.id}</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center px-1">
+                                <span class="text-[12px] font-bold text-gray-500">막차</span>
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-[15px] font-black tracking-tight" style="color:${curColor}">${last.time.slice(0,5)}</span>
+                                    <span class="text-[9px] font-bold text-gray-500 bg-gray-200/80 px-1.5 py-0.5 rounded border border-black/5">${last.id}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                } else {
+                    times.forEach(t => {
+                        const isPast = (modalDayType === currentDayType) && (t.sec < currentSec);
+                        listHtml += `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center ${isPast ? 'opacity-40' : 'future-time'}"><div class="flex items-center gap-3"><span class="text-[14px] font-bold ${isPast ? 'text-gray-400' : 'text-[#111827] tracking-tight'}">${t.time.slice(0,5)}</span><span class="text-[11px] font-medium ${isPast ? 'text-gray-400' : 'text-gray-600'}">${t.dest}행</span></div><span class="text-[10px] font-bold ${isPast ? 'text-gray-400 bg-gray-100 border-black/5' : 'text-white shadow-sm'}" style="${!isPast ? `background-color: ${curColor}; border-color: ${curColor};` : ''} padding: 2px 8px; border-radius: 4px; border-width: 1px;">${t.id}</span></div>`;
+                    });
+                }
                 listHtml += `</div>`; return listHtml;
             };
 
@@ -1650,7 +1684,7 @@
             setTimeout(() => {
                 const activeTabId = isDownDefault ? 'tt-down' : 'tt-up';
                 const activeTab = document.getElementById(activeTabId);
-                if (activeTab && modalDayType === currentDayType) { 
+                if (activeTab && modalDayType === currentDayType && modalViewMode === 'all') { 
                     const firstFuture = activeTab.querySelector('.future-time'); 
                     if (firstFuture) firstFuture.scrollIntoView({ behavior: 'auto', block: 'center' }); 
                 }
@@ -1726,7 +1760,7 @@
             let panelHtml = ''; if (selectedStation) {
                 dom.floatingPanel.classList.remove('hidden'); let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
                 let upcoming = target.map(t => { const s = t.schedule.find(st => st.name === selectedStation); return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null; }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
-                panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-2xl transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-[#111827] tracking-tight">${selectedStation}역</h3><div class="flex bg-gray-100 rounded-full p-0.5 border border-black/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='down' ? `background-color: ${DOWN_COLOR};` : ''}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center hover:text-black hover:bg-gray-200 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center shadow-sm border border-black/5"><span class="text-[#111827] font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-500 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : `color: ${DOWN_COLOR};`}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-400 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="window.openModal()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 border border-black/5 transition-colors rounded-[14px] font-bold text-gray-700 text-[12px] flex items-center justify-center gap-1.5 shadow-sm"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
+                panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-2xl transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-[#111827] tracking-tight">${selectedStation}역</h3><div class="flex bg-gray-100 rounded-full p-0.5 border border-black/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='down' ? `background-color: ${DOWN_COLOR};` : ''}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center hover:text-black hover:bg-gray-200 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center shadow-sm border border-black/5"><span class="text-[#111827] font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-500 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : `color: ${DOWN_COLOR};`}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-400 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="modalViewMode='all'; window.openModal()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 border border-black/5 transition-colors rounded-[14px] font-bold text-gray-700 text-[12px] flex items-center justify-center gap-1.5 shadow-sm"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
             } else if (selectedData) {
                 dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? DOWN_COLOR : THEME_COLOR;
                 panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-2xl min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-black/10 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-500">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-500">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
@@ -1812,7 +1846,7 @@
         dom.scrollContainer.addEventListener('touchstart', () => isAutoScroll = false, {passive: true});
         dom.scrollContainer.addEventListener('wheel', () => isAutoScroll = false, {passive: true});
         dom.autoScrollBtn.addEventListener('click', () => { isAutoScroll = true; window.render(); });
-        dom.closeModalBtn.addEventListener('click', () => { dom.timetableModal.classList.add('hidden'); modalDayType = null; });
+        dom.closeModalBtn.addEventListener('click', () => { dom.timetableModal.classList.add('hidden'); modalDayType = null; modalViewMode = 'all'; });
 
         window.showPreparingPopup = (name) => {
             const modal = document.getElementById('preparing-modal');
