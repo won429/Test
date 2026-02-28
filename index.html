@@ -1946,7 +1946,11 @@
                 const activeTab = document.getElementById(activeTabId);
                 if (activeTab && modalDayType === currentDayType && modalViewMode === 'all') { 
                     const firstFuture = activeTab.querySelector('.future-time'); 
-                    if (firstFuture) firstFuture.scrollIntoView({ behavior: 'auto', block: 'center' }); 
+                    if (firstFuture && dom.modalContent) { 
+                        const cRect = dom.modalContent.getBoundingClientRect();
+                        const eRect = firstFuture.getBoundingClientRect();
+                        dom.modalContent.scrollTop += (eRect.top - cRect.top) - (cRect.height / 2) + (eRect.height / 2);
+                    } 
                 }
             }, 100);
         };
