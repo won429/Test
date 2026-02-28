@@ -404,7 +404,7 @@
                 "종로3가": { progress: 0.4177, branch: 'main', transfer: [{name: '3', color: '#EF7C1C'}, {name: '5', color: '#996CAC'}] },
                 "종각": { progress: 0.4304, branch: 'main' },
                 "시청": { progress: 0.4430, branch: 'main', transfer: [{name: '2', color: '#00A84D'}] },
-                "서울역": { progress: 0.4557, branch: 'main', ktx: true, transfer: [{name: '4', color: '#00A5DE'}, {name: '공', color: '#0090D2'}, {name: '경의', color: '#77C4A3'}] },
+                "서울역": { progress: 0.4557, branch: 'main', ktx: true, transfer: [{name: '4', color: '#00A5DE'}, {name: '공', color: '#0090D2'}, {name: '경의', color: '#77C4A3'}, {name: 'GTX-A', color: '#9A6292'}] },
                 "남영": { progress: 0.4684, branch: 'main' },
                 "용산": { progress: 0.4810, branch: 'main', ktx: true, transfer: [{name: '경의', color: '#77C4A3'}] },
                 "노량진": { progress: 0.4937, branch: 'main', transfer: [{name: '9', color: '#BDB092'}] },
@@ -414,7 +414,7 @@
                 "신도림": { progress: 0.5443, branch: 'main', transfer: [{name: '2', color: '#00A84D'}] },
                 "구로": { progress: 0.5570, branch: 'main' },
 
-                // 1호선 인천 지선 (구일 ~ 인천) -> 직진 (main 취급)
+                // 1호선 경인선 지선 (구일 ~ 인천)
                 "구일": { progress: 0.5800, branch: 'incheon' },
                 "개봉": { progress: 0.6031, branch: 'incheon' },
                 "오류동": { progress: 0.6262, branch: 'incheon' },
@@ -435,10 +435,11 @@
                 "동인천": { progress: 0.9727, branch: 'incheon' },
                 "인천": { progress: 0.9958, branch: 'incheon', transfer: [{name: '수인', color: '#FABE00'}] },
 
-                // 1호선 경부/장항선 지선 (가산디지털단지 ~ 신창) -> 좌/우 양갈래 분기
+                // 1호선 경부/장항선 지선 (가산디지털단지 ~ 신창) 및 광명/서동탄 가지치기 추가
                 "가산디지털단지": { progress: 0.5696, branch: 'sinchang', transfer: [{name: '7', color: '#747F00'}] },
                 "독산": { progress: 0.5822, branch: 'sinchang' },
                 "금천구청": { progress: 0.5949, branch: 'sinchang' },
+                "광명": { progress: 0.6012, branch: 'gwangmyeong', ktx: true }, // 새로 추가된 가지치기 역
                 "석수": { progress: 0.6075, branch: 'sinchang' },
                 "관악": { progress: 0.6202, branch: 'sinchang' },
                 "안양": { progress: 0.6329, branch: 'sinchang' },
@@ -452,6 +453,7 @@
                 "수원": { progress: 0.7341, branch: 'sinchang', ktx: true, transfer: [{name: '수인', color: '#FABE00'}] },
                 "세류": { progress: 0.7468, branch: 'sinchang' },
                 "병점": { progress: 0.7594, branch: 'sinchang' },
+                "서동탄": { progress: 0.7658, branch: 'seodongtan' }, // 새로 추가된 가지치기 역
                 "세마": { progress: 0.7721, branch: 'sinchang' },
                 "오산대": { progress: 0.7848, branch: 'sinchang' },
                 "오산": { progress: 0.7974, branch: 'sinchang' },
@@ -800,6 +802,19 @@
                         M 320 ${sinY} L 320 ${splitYUp} L 240 ${splitYUp}
                     `;
                     
+                    if (STATIONS['광명']) {
+                        const geumcheonY = 60 + lineLen * STATIONS['금천구청'].progress;
+                        const gwangmyeongY = 60 + lineLen * STATIONS['광명'].progress;
+                        downBgPathD += ` M 80 ${geumcheonY} L 50 ${gwangmyeongY}`;
+                        upBgPathD += ` M 320 ${geumcheonY} L 350 ${gwangmyeongY}`;
+                    }
+                    if (STATIONS['서동탄']) {
+                        const byeongjeomY = 60 + lineLen * STATIONS['병점'].progress;
+                        const seodongtanY = 60 + lineLen * STATIONS['서동탄'].progress;
+                        downBgPathD += ` M 80 ${byeongjeomY} L 50 ${seodongtanY}`;
+                        upBgPathD += ` M 320 ${byeongjeomY} L 350 ${seodongtanY}`;
+                    }
+                    
                     document.getElementById('svg-down-top').innerHTML = drawCap(160, 40, DOWN_COLOR, '하행');
                     document.getElementById('svg-up-top').innerHTML = drawCap(240, 40, THEME_COLOR, '상행');
                     
@@ -821,7 +836,6 @@
                 document.getElementById('line-path-down-bg').setAttribute('d', downBgPathD);
                 document.getElementById('line-path-up-bg').setAttribute('d', upBgPathD);
                 
-                // 기존 동적 캡 외에 추가적인 캡 삽입
                 let extraCapsGroup = document.getElementById('extra-caps-group');
                 if (!extraCapsGroup) {
                     extraCapsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -927,8 +941,12 @@
                             else if(tr.name === '경춘') lineName = '경춘선';
                             else if(tr.name === '인2') lineName = '인천 2호선';
                             else if(tr.name === '서해') lineName = '서해선';
+                            else if(tr.name === 'GTX-A') lineName = 'GTX-A';
 
-                            trHtml += `<div class="flex items-center gap-1.5 bg-white border border-black/10 px-2.5 py-1 rounded-full shadow-sm"><div class="w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-black" style="background-color: ${tr.color}">${tr.name}</div><span class="text-[11px] font-bold text-[#111827] tracking-tight">${lineName}</span></div>`;
+                            let iconHtml = tr.name.length > 3 
+                                ? `<div class="px-1.5 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-black tracking-tighter" style="background-color: ${tr.color}">${tr.name}</div>`
+                                : `<div class="w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-black" style="background-color: ${tr.color}">${tr.name}</div>`;
+                            trHtml += `<div class="flex items-center gap-1.5 bg-white border border-black/10 px-2.5 py-1 rounded-full shadow-sm">${iconHtml}<span class="text-[11px] font-bold text-[#111827] tracking-tight">${lineName}</span></div>`;
                         });
                     }
                     if (s.ktx) {
@@ -1167,9 +1185,10 @@
             }, 100);
         };
 
-        // 분기형 X좌표 계산기
+        // 분기형 X좌표 계산기 (광명/서동탄 가지치기 추가)
         const getX = (branch, dir, lineId) => {
             if (lineId === 'seoul_line1') {
+                if (branch === 'gwangmyeong' || branch === 'seodongtan') return dir === 'down' ? 50 : 350;
                 if (branch === 'sinchang') return dir === 'down' ? 80 : 320;
                 return dir === 'down' ? 160 : 240; // main & incheon
             }
@@ -1265,6 +1284,7 @@
                         }
                     }
                 } else {
+                    // 메인/인천/광명/서동탄선 애니메이션 자연스러운 대각선 이동 처리
                     p.x = x1 + (x2 - x1) * localRatio;
                     p.y = y1 + (y2 - y1) * localRatio;
                     if (Math.abs(x2 - x1) > 0.001 || Math.abs(y2 - y1) > 0.001) {
@@ -1305,66 +1325,137 @@
             for (const stationName in STATIONS) {
                 const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
                 
-                if (currentLineId === 'seoul_line1' && s.branch === 'sinchang') {
+                let fontSize = 12; 
+                let charW = 11;
+                
+                if (currentLineId === 'seoul_line1' && (s.branch === 'gwangmyeong' || s.branch === 'seodongtan')) {
+                    // ==========================================
+                    // 광명 / 서동탄 가지치기 추가 렌더링
+                    // ==========================================
+                    let stationNameL = `<text x="-15" y="4" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" font-size="${fontSize}px" class="font-bold tracking-tight">${stationName}</text>`;
+                    let extraHtmlL = '';
+                    if (s.ktx) {
+                        extraHtmlL += `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-45" y="16" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    }
+                    lineHTML += `<g transform="translate(50, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
+                        ${stationNameL}
+                        ${extraHtmlL}
+                    </g>`;
+                    
+                    let stationNameR = `<text x="15" y="4" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" font-size="${fontSize}px" class="font-bold tracking-tight">${stationName}</text>`;
+                    let extraHtmlR = '';
+                    if (s.ktx) {
+                        extraHtmlR += `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="15" y="16" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    }
+                    lineHTML += `<g transform="translate(350, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
+                        ${stationNameR}
+                        ${extraHtmlR}
+                    </g>`;
+
+                } else if (currentLineId === 'seoul_line1' && s.branch === 'sinchang') {
+                    // ==========================================
                     // 왼쪽 기둥 (신창 방면 하행)
-                    let transferHtmlL = '';
-                    if (s.transfer && s.transfer.length > 0) {
-                        s.transfer.forEach((tr, i) => {
-                            const trX = -45 - (i * 16);
-                            transferHtmlL += `<circle cx="${trX}" cy="-2" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="0.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
-                        });
+                    // ==========================================
+                    let stationNameL = `<text x="-15" y="4" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" font-size="${fontSize}px" class="font-bold tracking-tight">${stationName}</text>`;
+                    let trX_start_L = -45;
+                    let trY_cy_L = -20; 
+                    let trY_ty_L = -17.5;
+                    let imgYL = 16; 
+
+                    if (stationName === '가산디지털단지') {
+                        stationNameL = `<text x="-15" y="-6" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" font-size="${fontSize}px" class="font-bold tracking-tight"><tspan x="-15" dy="0">가산</tspan><tspan x="-15" dy="14">디지털단지</tspan></text>`;
+                        trX_start_L = -26; // '가산' 글자 정중앙
+                        trY_cy_L = -26; 
+                        trY_ty_L = -23.5;
+                        imgYL = 24; 
                     }
                     
-                    let ktxSrtHtmlL = '';
-                    if (s.ktx && s.srt) {
-                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-85" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-50" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    } else if (s.ktx) {
-                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-45" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    } else if (s.srt) {
-                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-45" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    let extraHtmlL = '';
+                    if (s.transfer && s.transfer.length > 0) {
+                        let currentX_L = trX_start_L;
+                        s.transfer.slice().reverse().forEach((tr) => {
+                            extraHtmlL += `<circle cx="${currentX_L}" cy="${trY_cy_L}" r="10" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${currentX_L}" y="${trY_ty_L}" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                            currentX_L -= 22;
+                        });
                     }
 
-                    let stationNameL = `<text x="-15" y="4" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>`;
-                    if (stationName === '가산디지털단지') {
-                        stationNameL = `<text x="-15" y="-2" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold"><tspan x="-15" dy="0">가산</tspan><tspan x="-15" dy="12">디지털단지</tspan></text>`;
+                    if (s.ktx || s.srt) {
+                        let items = [];
+                        if (s.ktx) items.push('ktx');
+                        if (s.srt) items.push('srt');
+                        
+                        let currentImgX_L = -15 - (items.length * 30) - Math.max(0, items.length - 1) * 4; 
+                        
+                        items.forEach(type => {
+                            if (type === 'ktx') {
+                                extraHtmlL += `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="${currentImgX_L}" y="${imgYL}" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                            } else if (type === 'srt') {
+                                extraHtmlL += `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="${currentImgX_L}" y="${imgYL}" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                            }
+                            currentImgX_L += 34; 
+                        });
                     }
 
                     lineHTML += `<g transform="translate(80, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
                         <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
                         ${stationNameL}
-                        ${transferHtmlL}${ktxSrtHtmlL}
+                        ${extraHtmlL}
                     </g>`;
                     
+                    // ==========================================
                     // 오른쪽 기둥 (신창 방면 상행)
-                    let transferHtmlR = '';
+                    // ==========================================
+                    let stationNameR = `<text x="15" y="4" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>`;
+                    let trX_start_R = 45;
+                    let trY_cy_R = -20; 
+                    let trY_ty_R = -17.5;
+                    let imgYR = 16; 
+
+                    if (stationName === '가산디지털단지') {
+                        stationNameR = `<text x="15" y="-6" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" font-size="${fontSize}px" class="font-bold tracking-tight"><tspan x="15" dy="0">가산</tspan><tspan x="15" dy="14">디지털단지</tspan></text>`;
+                        trX_start_R = 26; // '가산' 글자 정중앙
+                        trY_cy_R = -26;
+                        trY_ty_R = -23.5;
+                        imgYR = 24;
+                    }
+
+                    let extraHtmlR = '';
                     if (s.transfer && s.transfer.length > 0) {
-                        s.transfer.forEach((tr, i) => {
-                            const trX = 45 + (i * 16);
-                            transferHtmlR += `<circle cx="${trX}" cy="-2" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="0.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                        let currentX_R = trX_start_R;
+                        s.transfer.forEach((tr) => {
+                            extraHtmlR += `<circle cx="${currentX_R}" cy="${trY_cy_R}" r="10" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${currentX_R}" y="${trY_ty_R}" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                            currentX_R += 22;
                         });
                     }
 
-                    let ktxSrtHtmlR = '';
-                    if (s.ktx && s.srt) {
-                        ktxSrtHtmlR = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="50" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    } else if (s.ktx) {
-                        ktxSrtHtmlR = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    } else if (s.srt) {
-                        ktxSrtHtmlR = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    }
-
-                    let stationNameR = `<text x="15" y="4" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>`;
-                    if (stationName === '가산디지털단지') {
-                        stationNameR = `<text x="15" y="-2" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold"><tspan x="15" dy="0">가산</tspan><tspan x="15" dy="12">디지털단지</tspan></text>`;
+                    if (s.ktx || s.srt) {
+                        let items = [];
+                        if (s.ktx) items.push('ktx');
+                        if (s.srt) items.push('srt');
+                        
+                        let currentImgX_R = 15; 
+                        
+                        items.forEach(type => {
+                            if (type === 'ktx') {
+                                extraHtmlR += `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="${currentImgX_R}" y="${imgYR}" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                            } else if (type === 'srt') {
+                                extraHtmlR += `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="${currentImgX_R}" y="${imgYR}" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                            }
+                            currentImgX_R += 34; 
+                        });
                     }
 
                     lineHTML += `<g transform="translate(320, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
                         <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
                         ${stationNameR}
-                        ${transferHtmlR}${ktxSrtHtmlR}
+                        ${extraHtmlR}
                     </g>`;
                 } else {
-                    // 중앙 기둥 (메인 및 인천 방면)
+                    // ==========================================
+                    // 중앙 기둥 (메인 및 인천 지선, 기타 노선)
+                    // ==========================================
                     let stationX = 200;
                     let dashPath = `M -80 0 L 80 0`;
                     
@@ -1372,35 +1463,66 @@
                         dashPath = `M -40 0 L 40 0`;
                     }
                     
-                    let transferHtml = '';
-                    if (s.transfer && s.transfer.length > 0) {
-                        const totalW = s.transfer.length * 16;
-                        let startX = -(totalW / 2) + 8;
-                        s.transfer.forEach((tr, i) => {
-                            const trX = startX + (i * 16);
-                            transferHtml += `<circle cx="${trX}" cy="-28" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="-25.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
-                        });
-                    }
-                    
-                    let ktxSrtHtml = '';
-                    if (s.ktx && s.srt) {
-                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="25" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="58" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    } else if (s.ktx) {
-                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="25" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    } else if (s.srt) {
-                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="25" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                    }
-                    
                     let stationNameC = `<text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>`;
+                    let trCyC = -34; 
+                    let trTyC = -31.5;
+                    let imgYC = 6; 
+                    
                     if (stationName === '동대문역사문화공원') {
                         stationNameC = `<text x="0" y="-20" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold"><tspan x="0" dy="0">동대문</tspan><tspan x="0" dy="12">역사문화공원</tspan></text>`;
+                        trCyC = -44;
+                        trTyC = -41.5;
+                        imgYC = 8;
+                    }
+
+                    let extraHtmlC = '';
+                    if (s.transfer && s.transfer.length > 0) {
+                        let bottomTransfers = s.transfer.filter(tr => tr.name !== 'GTX-A');
+                        let topTransfers = s.transfer.filter(tr => tr.name === 'GTX-A');
+                        
+                        if (bottomTransfers.length > 0) {
+                            let totalW = bottomTransfers.length * 22;
+                            let currentX = -(totalW / 2) + 11;
+                            bottomTransfers.forEach(tr => {
+                                extraHtmlC += `<circle cx="${currentX}" cy="${trCyC}" r="10" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${currentX}" y="${trTyC}" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                                currentX += 22;
+                            });
+                        }
+                        
+                        if (topTransfers.length > 0) {
+                            let topY = trCyC - 24; 
+                            let totalW = topTransfers.length * 36;
+                            let currentX = -(totalW / 2) + 18;
+                            topTransfers.forEach(tr => {
+                                extraHtmlC += `<rect x="${currentX - 17}" y="${topY - 10}" width="34" height="20" rx="10" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${currentX}" y="${topY}" text-anchor="middle" fill="#fff" font-size="7.5px" font-weight="900" dy="0.3em" class="pointer-events-none">${tr.name}</text>`;
+                                currentX += 36;
+                            });
+                        }
+                    }
+                    
+                    if (s.ktx || s.srt) {
+                        let items = [];
+                        if (s.ktx) items.push('ktx');
+                        if (s.srt) items.push('srt');
+                        
+                        let totalW = items.length * 30 + Math.max(0, items.length - 1) * 4;
+                        let currentX = -(totalW / 2);
+                        
+                        items.forEach(type => {
+                            if (type === 'ktx') {
+                                extraHtmlC += `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="${currentX}" y="${imgYC}" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                            } else if (type === 'srt') {
+                                extraHtmlC += `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="${currentX}" y="${imgYC}" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                            }
+                            currentX += 34;
+                        });
                     }
 
                     lineHTML += `<g transform="translate(${stationX}, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
                         <path d="${dashPath}" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" />
                         <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
                         ${stationNameC}
-                        ${transferHtml}${ktxSrtHtml}
+                        ${extraHtmlC}
                     </g>`;
                 }
             }
