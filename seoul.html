@@ -805,14 +805,16 @@
                     if (STATIONS['광명']) {
                         const geumcheonY = 60 + lineLen * STATIONS['금천구청'].progress;
                         const gwangmyeongY = 60 + lineLen * STATIONS['광명'].progress;
+                        const gwangmyeongY_up = geumcheonY - (gwangmyeongY - geumcheonY); // 상행은 위로 뻗어나가게 역방향 대칭 적용
                         downBgPathD += ` M 80 ${geumcheonY} L 50 ${gwangmyeongY}`;
-                        upBgPathD += ` M 320 ${geumcheonY} L 350 ${gwangmyeongY}`;
+                        upBgPathD += ` M 320 ${geumcheonY} L 350 ${gwangmyeongY_up}`;
                     }
                     if (STATIONS['서동탄']) {
                         const byeongjeomY = 60 + lineLen * STATIONS['병점'].progress;
                         const seodongtanY = 60 + lineLen * STATIONS['서동탄'].progress;
+                        const seodongtanY_up = byeongjeomY - (seodongtanY - byeongjeomY); // 상행은 위로 뻗어나가게 역방향 대칭 적용
                         downBgPathD += ` M 80 ${byeongjeomY} L 50 ${seodongtanY}`;
-                        upBgPathD += ` M 320 ${byeongjeomY} L 350 ${seodongtanY}`;
+                        upBgPathD += ` M 320 ${byeongjeomY} L 350 ${seodongtanY_up}`;
                     }
                     
                     document.getElementById('svg-down-top').innerHTML = drawCap(160, 40, DOWN_COLOR, '하행');
@@ -1230,6 +1232,24 @@
                 let y1 = 60 + lineLen * s1.progress;
                 let y2 = 60 + lineLen * s2.progress;
                 
+                // 상행(오른쪽) 광명/서동탄 가지치기 대칭 역방향 Y 계산
+                if (t.direction === 'up' && currentLineId === 'seoul_line1') {
+                    if (s1.branch === 'gwangmyeong') {
+                        let base = 60 + lineLen * STATIONS['금천구청'].progress;
+                        y1 = base - (y1 - base);
+                    } else if (s1.branch === 'seodongtan') {
+                        let base = 60 + lineLen * STATIONS['병점'].progress;
+                        y1 = base - (y1 - base);
+                    }
+                    if (s2.branch === 'gwangmyeong') {
+                        let base = 60 + lineLen * STATIONS['금천구청'].progress;
+                        y2 = base - (y2 - base);
+                    } else if (s2.branch === 'seodongtan') {
+                        let base = 60 + lineLen * STATIONS['병점'].progress;
+                        y2 = base - (y2 - base);
+                    }
+                }
+
                 let localRatio = 0;
                 if (s2.progress !== s1.progress) {
                     localRatio = (t.overallProgress - s1.progress) / (s2.progress - s1.progress);
@@ -1343,12 +1363,21 @@
                         ${extraHtmlL}
                     </g>`;
                     
+                    let lineY_R = lineY;
+                    if (stationName === '광명') {
+                        let base = 60 + lineLen * STATIONS['금천구청'].progress;
+                        lineY_R = base - (lineY - base);
+                    } else if (stationName === '서동탄') {
+                        let base = 60 + lineLen * STATIONS['병점'].progress;
+                        lineY_R = base - (lineY - base);
+                    }
+
                     let stationNameR = `<text x="15" y="4" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" font-size="${fontSize}px" class="font-bold tracking-tight">${stationName}</text>`;
                     let extraHtmlR = '';
                     if (s.ktx) {
                         extraHtmlR += `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="15" y="16" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
                     }
-                    lineHTML += `<g transform="translate(350, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                    lineHTML += `<g transform="translate(350, ${lineY_R})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
                         <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
                         ${stationNameR}
                         ${extraHtmlR}
