@@ -382,9 +382,9 @@
                 "사곡": { progress: 0.08 },
                 "북삼": { progress: 0.23 },
                 "왜관": { progress: 0.39 },
-                "서대구": { progress: 0.54, ktx: true },
+                "서대구": { progress: 0.54, ktx: true, srt: true },
                 "대구": { progress: 0.67, transfer: [{name: '1', color: '#D93F5C'}] },
-                "동대구": { progress: 0.80, ktx: true, transfer: [{name: '1', color: '#D93F5C'}] },
+                "동대구": { progress: 0.80, ktx: true, srt: true, transfer: [{name: '1', color: '#D93F5C'}] },
                 "경산": { progress: 1.00, ktx: true }
             },
             'line1': {
@@ -408,7 +408,7 @@
                 "대구": { progress: 0.5000, transfer: [{name: '대', color: '#0054A6'}] },
                 "칠성시장": { progress: 0.5294 },
                 "신천": { progress: 0.5588 },
-                "동대구역": { progress: 0.5882, ktx: true, transfer: [{name: '대', color: '#0054A6'}] },
+                "동대구역": { progress: 0.5882, ktx: true, srt: true, transfer: [{name: '대', color: '#0054A6'}] },
                 "동구청": { progress: 0.6176 },
                 "아양교": { progress: 0.6470 },
                 "동촌": { progress: 0.6764 },
@@ -491,7 +491,7 @@
                 "판암": { progress: 0.0000 },
                 "신흥": { progress: 0.0476 },
                 "대동": { progress: 0.0952 },
-                "대전역": { progress: 0.1428, ktx: true },
+                "대전역": { progress: 0.1428, ktx: true, srt: true },
                 "중앙로": { progress: 0.1904 },
                 "중구청": { progress: 0.2380 },
                 "서대전네거리": { progress: 0.2857 },
@@ -530,14 +530,14 @@
                 "자갈치": { progress: 0.3846 },
                 "남포": { progress: 0.4103 },
                 "중앙": { progress: 0.4359 },
-                "부산역": { progress: 0.4615, ktx: true },
+                "부산역": { progress: 0.4615, ktx: true, srt: true },
                 "초량": { progress: 0.4872 },
                 "부산진": { progress: 0.5128 },
                 "좌천": { progress: 0.5385 },
                 "범일": { progress: 0.5641 },
                 "범내골": { progress: 0.5897 },
                 "서면": { progress: 0.6154, transfer: [{name: '2', color: '#81C147'}] },
-                "부전": { progress: 0.6410, transfer: [{name: '동', color: '#003DA5'}] },
+                "부전": { progress: 0.6410, ktx: true, transfer: [{name: '동', color: '#003DA5'}] },
                 "양정": { progress: 0.6667 },
                 "시청": { progress: 0.6923 },
                 "연산": { progress: 0.7179, transfer: [{name: '3', color: '#B07C4A'}] },
@@ -657,7 +657,7 @@
                 "가야대": { progress: 1.00 }
             },
             'busan_donghae': {
-                "부전": { progress: 0.0000, transfer: [{name: '1', color: '#F06A00'}] },
+                "부전": { progress: 0.0000, ktx: true, transfer: [{name: '1', color: '#F06A00'}] },
                 "거제해맞이": { progress: 0.0454 },
                 "거제": { progress: 0.0909, transfer: [{name: '3', color: '#B07C4A'}] },
                 "교대": { progress: 0.1363, transfer: [{name: '1', color: '#F06A00'}] },
@@ -665,21 +665,21 @@
                 "안락": { progress: 0.2272 },
                 "부산원동": { progress: 0.2727 },
                 "재송": { progress: 0.3181 },
-                "센텀": { progress: 0.3636 },
+                "센텀": { progress: 0.3636, ktx: true },
                 "벡스코": { progress: 0.4090, transfer: [{name: '2', color: '#81C147'}] },
-                "신해운대": { progress: 0.4545 },
+                "신해운대": { progress: 0.4545, ktx: true },
                 "송정": { progress: 0.5000 },
                 "오시리아": { progress: 0.5454 },
-                "기장": { progress: 0.5909 },
+                "기장": { progress: 0.5909, ktx: true },
                 "일광": { progress: 0.6363 },
                 "좌천": { progress: 0.6818 },
                 "월내": { progress: 0.7272 },
                 "서생": { progress: 0.7727 },
-                "남창": { progress: 0.8181 },
+                "남창": { progress: 0.8181, ktx: true },
                 "망양": { progress: 0.8636 },
                 "덕하": { progress: 0.9090 },
                 "개운포": { progress: 0.9545 },
-                "태화강": { progress: 1.0000 }
+                "태화강": { progress: 1.0000, ktx: true }
             },
             'gwangju_line1': {
                 "녹동": { progress: 0.0000 },
@@ -699,7 +699,7 @@
                 "김대중컨벤션센터": { progress: 0.7368 },
                 "공항": { progress: 0.7894 },
                 "송정공원": { progress: 0.8421 },
-                "광주송정역": { progress: 0.8947, ktx: true },
+                "광주송정역": { progress: 0.8947, ktx: true, srt: true },
                 "도산": { progress: 0.9473 },
                 "평동": { progress: 1.0000 }
             }
@@ -1717,7 +1717,7 @@
             const transferContainer = document.getElementById('home-transfer-container');
             const transferList = document.getElementById('home-transfer-list');
             if (transferContainer && transferList) {
-                if (s && ((s.transfer && s.transfer.length > 0) || s.ktx)) {
+                if (s && ((s.transfer && s.transfer.length > 0) || s.ktx || s.srt)) {
                     let trHtml = '';
                     if (s.transfer) {
                         s.transfer.forEach(tr => {
@@ -1730,6 +1730,9 @@
                     }
                     if (s.ktx) {
                         trHtml += `<div class="flex items-center gap-1.5 bg-white border border-black/10 px-2.5 py-1 rounded-full shadow-sm"><img src="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" class="h-3 object-contain" alt="KTX"></div>`;
+                    }
+                    if (s.srt) {
+                        trHtml += `<div class="flex items-center gap-1.5 bg-white border border-black/10 px-2.5 py-1 rounded-full shadow-sm"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" class="h-3 object-contain" alt="SRT"></div>`;
                     }
                     transferList.innerHTML = trHtml;
                     transferContainer.classList.remove('hidden');
@@ -2016,7 +2019,16 @@
                         transferHtml += `<circle cx="${trX}" cy="-28" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="-25.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
                     });
                 }
-                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${transferHtml}${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
+                
+                let ktxSrtHtml = '';
+                if (s.ktx && s.srt) {
+                    ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-32" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="2" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                } else if (s.ktx) {
+                    ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                } else if (s.srt) {
+                    ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                }
+                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${transferHtml}${ktxSrtHtml}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
@@ -2051,46 +2063,59 @@
                 if (favoriteStation) {
                     if (STATIONS_ALL['line1'][favoriteStation]) {
                         await window.switchRegion('daegu', true);
-                    foundFav = true;
-                } else if (STATIONS_ALL['daegyeong'][favoriteStation]) {
-                    await window.switchRegion('daegu', true);
-                    await window.switchLine('daegyeong', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['daejeon_line1'][favoriteStation]) {
-                    await window.switchRegion('daejeon', true);
-                    await window.switchLine('daejeon_line1', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['busan_line1'] && STATIONS_ALL['busan_line1'][favoriteStation]) {
-                    await window.switchRegion('busan', true);
-                    await window.switchLine('busan_line1', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['busan_line2'] && STATIONS_ALL['busan_line2'][favoriteStation]) {
-                    await window.switchRegion('busan', true);
-                    await window.switchLine('busan_line2', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['busan_line3'] && STATIONS_ALL['busan_line3'][favoriteStation]) {
-                    await window.switchRegion('busan', true);
-                    await window.switchLine('busan_line3', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['busan_line4'] && STATIONS_ALL['busan_line4'][favoriteStation]) {
-                    await window.switchRegion('busan', true);
-                    await window.switchLine('busan_line4', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['busan_bglrt'] && STATIONS_ALL['busan_bglrt'][favoriteStation]) {
-                    await window.switchRegion('busan', true);
-                    await window.switchLine('busan_bglrt', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['busan_donghae'] && STATIONS_ALL['busan_donghae'][favoriteStation]) {
-                    await window.switchRegion('busan', true);
-                    await window.switchLine('busan_donghae', true);
-                    homeSelectedStation = favoriteStation;
+                        await window.switchLine('line1', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['line2'] && STATIONS_ALL['line2'][favoriteStation]) {
+                        await window.switchRegion('daegu', true);
+                        await window.switchLine('line2', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['line3'] && STATIONS_ALL['line3'][favoriteStation]) {
+                        await window.switchRegion('daegu', true);
+                        await window.switchLine('line3', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['daegyeong'][favoriteStation]) {
+                        await window.switchRegion('daegu', true);
+                        await window.switchLine('daegyeong', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['daejeon_line1'][favoriteStation]) {
+                        await window.switchRegion('daejeon', true);
+                        await window.switchLine('daejeon_line1', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['busan_line1'] && STATIONS_ALL['busan_line1'][favoriteStation]) {
+                        await window.switchRegion('busan', true);
+                        await window.switchLine('busan_line1', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['busan_line2'] && STATIONS_ALL['busan_line2'][favoriteStation]) {
+                        await window.switchRegion('busan', true);
+                        await window.switchLine('busan_line2', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['busan_line3'] && STATIONS_ALL['busan_line3'][favoriteStation]) {
+                        await window.switchRegion('busan', true);
+                        await window.switchLine('busan_line3', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['busan_line4'] && STATIONS_ALL['busan_line4'][favoriteStation]) {
+                        await window.switchRegion('busan', true);
+                        await window.switchLine('busan_line4', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['busan_bglrt'] && STATIONS_ALL['busan_bglrt'][favoriteStation]) {
+                        await window.switchRegion('busan', true);
+                        await window.switchLine('busan_bglrt', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    } else if (STATIONS_ALL['busan_donghae'] && STATIONS_ALL['busan_donghae'][favoriteStation]) {
+                        await window.switchRegion('busan', true);
+                        await window.switchLine('busan_donghae', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
                     } else if (STATIONS_ALL['gwangju_line1'] && STATIONS_ALL['gwangju_line1'][favoriteStation]) {
                         await window.switchRegion('gwangju', true);
                         await window.switchLine('gwangju_line1', true);
