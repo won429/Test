@@ -67,7 +67,7 @@
         /* 이미지 기반 실사 역명판 커스텀 CSS */
         .station-plate-base {
             height: 34px; 
-            background-color: #0052A4; /* 1호선 색상 기본값 */
+            background-color: #0052A4; 
             border-radius: 9999px;
             position: relative;
             display: flex;
@@ -204,7 +204,7 @@
 
                     <div class="grid grid-cols-2 gap-2.5">
                         <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
-                            <span id="home-up-dir-label" class="text-[12px] font-bold text-gray-500 mb-2.5">소요산 방면</span>
+                            <span id="home-up-dir-label" class="text-[12px] font-bold text-gray-500 mb-2.5">연천 방면</span>
                             <div id="home-up-info" class="flex-1 flex flex-col justify-center items-center gap-1.5"></div>
                         </div>
                         <div class="list-card p-3.5 flex flex-col min-h-[110px] relative overflow-hidden text-center">
@@ -233,7 +233,7 @@
                 <div class="flex items-center gap-2">
                     <h1 id="line-header-title" class="text-[17px] font-extrabold tracking-tight text-[#111827] drop-shadow-sm">수도권 1호선 지하철 현황</h1>
                     <select id="direction-toggle" class="bg-gray-100 text-gray-700 text-[11px] font-bold px-2 py-1 rounded-md outline-none cursor-pointer border border-black/5 shadow-sm transition-all focus:ring-2 focus:ring-[#0052A4]/50 appearance-none pr-5 relative" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 4px center;">
-                        <option value="up" class="text-gray-900">상행 (소요산 방면)</option>
+                        <option value="up" class="text-gray-900">상행 (연천 방면)</option>
                         <option value="down" class="text-gray-900">하행 (인천/신창 방면)</option>
                     </select>
                 </div>
@@ -262,29 +262,16 @@
                 <div id="line-view" class="absolute top-0 left-0 w-full transition-opacity duration-500 opacity-0 z-0 pointer-events-none">
                     <svg id="line-svg" viewBox="0 0 400 1300" class="w-full h-[1300px]">
                         <!-- 노선 상단 표시 -->
-                        <g id="svg-down-top">
-                            <rect x="94" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" class="transition-colors duration-300" />
-                            <text x="120" y="40.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">하행</text>
-                        </g>
-                        <g id="svg-up-top">
-                            <rect x="254" y="24" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0052A4" stroke-width="2" class="transition-colors duration-300" />
-                            <text x="280" y="40.5" text-anchor="middle" fill="#0052A4" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">상행</text>
-                        </g>
+                        <g id="svg-down-top"></g>
+                        <g id="svg-up-top"></g>
 
-                        <path id="line-path-down-bg" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" />
-                        <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0052A4" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" />
-                        <path id="line-path-down" d="M 120 60 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
-                        <path id="line-path-up" d="M 280 60 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
+                        <!-- 동적으로 궤도와 배경이 추가됨 -->
+                        <path id="line-path-down-bg" fill="none" stroke="#5998D6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.3" class="transition-colors duration-300" />
+                        <path id="line-path-up-bg" fill="none" stroke="#0052A4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.3" class="transition-colors duration-300" />
                         
                         <!-- 노선 하단 표시 -->
-                        <g id="svg-down-bottom" transform="translate(0,0)" class="transition-transform duration-300">
-                            <rect x="94" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#5998D6" stroke-width="2" class="transition-colors duration-300" />
-                            <text x="120" y="1235.5" text-anchor="middle" fill="#5998D6" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">하행</text>
-                        </g>
-                        <g id="svg-up-bottom" transform="translate(0,0)" class="transition-transform duration-300">
-                            <rect x="254" y="1219" width="52" height="24" rx="12" fill="#FFFFFF" stroke="#0052A4" stroke-width="2" class="transition-colors duration-300" />
-                            <text x="280" y="1235.5" text-anchor="middle" fill="#0052A4" class="text-[13px] font-extrabold tracking-widest transition-colors duration-300">상행</text>
-                        </g>
+                        <g id="svg-down-bottom"></g>
+                        <g id="svg-up-bottom"></g>
 
                         <g id="line-stations"></g>
                         <g id="line-trains-down"></g>
@@ -377,39 +364,117 @@
         let DOWN_COLOR = "#4B90D6";
         const STOP_DURATION = 25; 
 
-        // 샘플: 수도권 1호선, 2호선 주요 역
-        const STATIONS_ALL = {
+        // var 사용 (재할당으로 인한 환경 문법 에러 방지)
+        var STATIONS_ALL = {
             'seoul_line1': {
-                "청량리": { progress: 0.00, ktx: true, transfer: [{name: '경의', color: '#77C4A3'}, {name: '수인', color: '#FABE00'}] },
-                "제기동": { progress: 0.10 },
-                "신설동": { progress: 0.20, transfer: [{name: '2', color: '#00A84D'}, {name: '우', color: '#B0CE18'}] },
-                "동묘앞": { progress: 0.30, transfer: [{name: '6', color: '#CD7C2F'}] },
-                "동대문": { progress: 0.40, transfer: [{name: '4', color: '#00A5DE'}] },
-                "종로5가": { progress: 0.50 },
-                "종로3가": { progress: 0.60, transfer: [{name: '3', color: '#EF7C1C'}, {name: '5', color: '#996CAC'}] },
-                "종각": { progress: 0.70 },
-                "시청": { progress: 0.80, transfer: [{name: '2', color: '#00A84D'}] },
-                "서울역": { progress: 0.90, ktx: true, transfer: [{name: '4', color: '#00A5DE'}, {name: '공', color: '#0090D2'}, {name: '경의', color: '#77C4A3'}] },
-                "남영": { progress: 1.00 }
-            },
-            'seoul_line2': {
-                "시청": { progress: 0.00, transfer: [{name: '1', color: '#0052A4'}] },
-                "을지로입구": { progress: 0.08 },
-                "을지로3가": { progress: 0.16, transfer: [{name: '3', color: '#EF7C1C'}] },
-                "을지로4가": { progress: 0.25, transfer: [{name: '5', color: '#996CAC'}] },
-                "동대문역사문화공원": { progress: 0.33, transfer: [{name: '4', color: '#00A5DE'}, {name: '5', color: '#996CAC'}] },
-                "신당": { progress: 0.41, transfer: [{name: '6', color: '#CD7C2F'}] },
-                "상왕십리": { progress: 0.50 },
-                "왕십리": { progress: 0.58, ktx: true, transfer: [{name: '5', color: '#996CAC'}, {name: '수인', color: '#FABE00'}, {name: '경의', color: '#77C4A3'}] },
-                "한양대": { progress: 0.66 },
-                "뚝섬": { progress: 0.75 },
-                "성수": { progress: 0.83 },
-                "건대입구": { progress: 0.91, transfer: [{name: '7', color: '#747F00'}] },
-                "구의": { progress: 1.00 }
+                // 1호선 메인 (연천 ~ 구로)
+                "연천": { progress: 0.0000, branch: 'main' },
+                "전곡": { progress: 0.0127, branch: 'main' },
+                "청산": { progress: 0.0253, branch: 'main' },
+                "소요산": { progress: 0.0380, branch: 'main' },
+                "동두천": { progress: 0.0506, branch: 'main' },
+                "보산": { progress: 0.0633, branch: 'main' },
+                "동두천중앙": { progress: 0.0759, branch: 'main' },
+                "지행": { progress: 0.0886, branch: 'main' },
+                "덕정": { progress: 0.1013, branch: 'main' },
+                "덕계": { progress: 0.1139, branch: 'main' },
+                "양주": { progress: 0.1266, branch: 'main' },
+                "녹양": { progress: 0.1392, branch: 'main' },
+                "가능": { progress: 0.1519, branch: 'main' },
+                "의정부": { progress: 0.1646, branch: 'main' },
+                "회룡": { progress: 0.1772, branch: 'main', transfer: [{name: '의', color: '#FDA600'}] },
+                "망월사": { progress: 0.1899, branch: 'main' },
+                "도봉산": { progress: 0.2025, branch: 'main', transfer: [{name: '7', color: '#747F00'}] },
+                "도봉": { progress: 0.2152, branch: 'main' },
+                "방학": { progress: 0.2278, branch: 'main' },
+                "창동": { progress: 0.2405, branch: 'main', transfer: [{name: '4', color: '#00A5DE'}] },
+                "녹천": { progress: 0.2532, branch: 'main' },
+                "월계": { progress: 0.2658, branch: 'main' },
+                "광운대": { progress: 0.2785, branch: 'main', transfer: [{name: '경춘', color: '#0C8E72'}] },
+                "석계": { progress: 0.2911, branch: 'main', transfer: [{name: '6', color: '#CD7C2F'}] },
+                "신이문": { progress: 0.3038, branch: 'main' },
+                "외대앞": { progress: 0.3165, branch: 'main' },
+                "회기": { progress: 0.3291, branch: 'main', transfer: [{name: '경의', color: '#77C4A3'}, {name: '경춘', color: '#0C8E72'}] },
+                "청량리": { progress: 0.3418, branch: 'main', ktx: true, transfer: [{name: '경의', color: '#77C4A3'}, {name: '수인', color: '#FABE00'}, {name: '경춘', color: '#0C8E72'}] },
+                "제기동": { progress: 0.3544, branch: 'main' },
+                "신설동": { progress: 0.3671, branch: 'main', transfer: [{name: '2', color: '#00A84D'}, {name: '우', color: '#B0CE18'}] },
+                "동묘앞": { progress: 0.3797, branch: 'main', transfer: [{name: '6', color: '#CD7C2F'}] },
+                "동대문": { progress: 0.3924, branch: 'main', transfer: [{name: '4', color: '#00A5DE'}] },
+                "종로5가": { progress: 0.4051, branch: 'main' },
+                "종로3가": { progress: 0.4177, branch: 'main', transfer: [{name: '3', color: '#EF7C1C'}, {name: '5', color: '#996CAC'}] },
+                "종각": { progress: 0.4304, branch: 'main' },
+                "시청": { progress: 0.4430, branch: 'main', transfer: [{name: '2', color: '#00A84D'}] },
+                "서울역": { progress: 0.4557, branch: 'main', ktx: true, transfer: [{name: '4', color: '#00A5DE'}, {name: '공', color: '#0090D2'}, {name: '경의', color: '#77C4A3'}] },
+                "남영": { progress: 0.4684, branch: 'main' },
+                "용산": { progress: 0.4810, branch: 'main', ktx: true, transfer: [{name: '경의', color: '#77C4A3'}] },
+                "노량진": { progress: 0.4937, branch: 'main', transfer: [{name: '9', color: '#BDB092'}] },
+                "대방": { progress: 0.5063, branch: 'main', transfer: [{name: '신림', color: '#6789CA'}] },
+                "신길": { progress: 0.5190, branch: 'main', transfer: [{name: '5', color: '#996CAC'}] },
+                "영등포": { progress: 0.5316, branch: 'main', ktx: true },
+                "신도림": { progress: 0.5443, branch: 'main', transfer: [{name: '2', color: '#00A84D'}] },
+                "구로": { progress: 0.5570, branch: 'main' },
+
+                // 1호선 인천 지선 (구일 ~ 인천) -> 직진 (main 취급)
+                "구일": { progress: 0.5800, branch: 'incheon' },
+                "개봉": { progress: 0.6031, branch: 'incheon' },
+                "오류동": { progress: 0.6262, branch: 'incheon' },
+                "온수": { progress: 0.6493, branch: 'incheon', transfer: [{name: '7', color: '#747F00'}] },
+                "역곡": { progress: 0.6724, branch: 'incheon' },
+                "소사": { progress: 0.6955, branch: 'incheon', transfer: [{name: '서해', color: '#81A914'}] },
+                "부천": { progress: 0.7186, branch: 'incheon' },
+                "중동": { progress: 0.7417, branch: 'incheon' },
+                "송내": { progress: 0.7648, branch: 'incheon' },
+                "부개": { progress: 0.7879, branch: 'incheon' },
+                "백운": { progress: 0.8110, branch: 'incheon' },
+                "동암": { progress: 0.8341, branch: 'incheon' },
+                "간석": { progress: 0.8572, branch: 'incheon' },
+                "주안": { progress: 0.8803, branch: 'incheon', transfer: [{name: '인2', color: '#FD8400'}] },
+                "도화": { progress: 0.9034, branch: 'incheon' },
+                "제물포": { progress: 0.9265, branch: 'incheon' },
+                "도원": { progress: 0.9496, branch: 'incheon' },
+                "동인천": { progress: 0.9727, branch: 'incheon' },
+                "인천": { progress: 0.9958, branch: 'incheon', transfer: [{name: '수인', color: '#FABE00'}] },
+
+                // 1호선 경부/장항선 지선 (가산디지털단지 ~ 신창) -> 좌/우 양갈래 분기
+                "가산디지털단지": { progress: 0.5696, branch: 'sinchang', transfer: [{name: '7', color: '#747F00'}] },
+                "독산": { progress: 0.5822, branch: 'sinchang' },
+                "금천구청": { progress: 0.5949, branch: 'sinchang' },
+                "석수": { progress: 0.6075, branch: 'sinchang' },
+                "관악": { progress: 0.6202, branch: 'sinchang' },
+                "안양": { progress: 0.6329, branch: 'sinchang' },
+                "명학": { progress: 0.6455, branch: 'sinchang' },
+                "금정": { progress: 0.6582, branch: 'sinchang', transfer: [{name: '4', color: '#00A5DE'}] },
+                "군포": { progress: 0.6708, branch: 'sinchang' },
+                "당정": { progress: 0.6835, branch: 'sinchang' },
+                "의왕": { progress: 0.6962, branch: 'sinchang' },
+                "성균관대": { progress: 0.7088, branch: 'sinchang' },
+                "화서": { progress: 0.7215, branch: 'sinchang' },
+                "수원": { progress: 0.7341, branch: 'sinchang', ktx: true, transfer: [{name: '수인', color: '#FABE00'}] },
+                "세류": { progress: 0.7468, branch: 'sinchang' },
+                "병점": { progress: 0.7594, branch: 'sinchang' },
+                "세마": { progress: 0.7721, branch: 'sinchang' },
+                "오산대": { progress: 0.7848, branch: 'sinchang' },
+                "오산": { progress: 0.7974, branch: 'sinchang' },
+                "진위": { progress: 0.8101, branch: 'sinchang' },
+                "송탄": { progress: 0.8227, branch: 'sinchang' },
+                "서정리": { progress: 0.8354, branch: 'sinchang' },
+                "평택지제": { progress: 0.8481, branch: 'sinchang', srt: true },
+                "평택": { progress: 0.8607, branch: 'sinchang' },
+                "성환": { progress: 0.8734, branch: 'sinchang' },
+                "직산": { progress: 0.8860, branch: 'sinchang' },
+                "두정": { progress: 0.8987, branch: 'sinchang' },
+                "천안": { progress: 0.9113, branch: 'sinchang' },
+                "봉명": { progress: 0.9240, branch: 'sinchang' },
+                "쌍용": { progress: 0.9367, branch: 'sinchang' },
+                "아산": { progress: 0.9493, branch: 'sinchang', ktx: true, srt: true },
+                "탕정": { progress: 0.9620, branch: 'sinchang' },
+                "배방": { progress: 0.9746, branch: 'sinchang' },
+                "온양온천": { progress: 0.9873, branch: 'sinchang' },
+                "신창": { progress: 1.0000, branch: 'sinchang' }
             }
         };
 
-        const KOR_HOLIDAYS = [
+        var KOR_HOLIDAYS = [
             "2025-01-01", "2025-01-28", "2025-01-29", "2025-01-30", "2025-03-03",
             "2025-05-05", "2025-05-06", "2025-06-06", "2025-08-15", "2025-10-03",
             "2025-10-06", "2025-10-07", "2025-10-09", "2025-12-25",
@@ -418,8 +483,7 @@
             "2026-09-25", "2026-09-26", "2026-10-03", "2026-10-09", "2026-12-25"
         ];
 
-        // 준비될 csv 파일명 매핑
-        const FILE_URLS = {
+        var FILE_URLS = {
             'seoul_line1': {
                 weekday_up: 'seoul_line1_up.csv',
                 weekday_down: 'seoul_line1_down.csv',
@@ -427,14 +491,6 @@
                 saturday_down: 'seoul_line1_sat_down.csv',
                 holiday_up: 'seoul_line1_hol_up.csv',
                 holiday_down: 'seoul_line1_hol_down.csv'
-            },
-            'seoul_line2': {
-                weekday_up: 'seoul_line2_up.csv',
-                weekday_down: 'seoul_line2_down.csv',
-                saturday_up: 'seoul_line2_sat_up.csv',
-                saturday_down: 'seoul_line2_sat_down.csv',
-                holiday_up: 'seoul_line2_hol_up.csv',
-                holiday_down: 'seoul_line2_hol_down.csv'
             }
         };
 
@@ -453,7 +509,7 @@
         let parsedTrainsDown = [];
         let parsedTrains = [];
 
-        const dom = {
+        var dom = {
             mainHeader: document.getElementById('main-header'),
             homeScreen: document.getElementById('home-screen'),
             clock: document.getElementById('clock-display'),
@@ -494,7 +550,7 @@
             lineHeaderTitle: document.getElementById('line-header-title')
         };
 
-        const getDayType = (dateObj) => {
+        var getDayType = (dateObj) => {
             const day = dateObj.getDay();
             const yyyy = dateObj.getFullYear();
             const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -535,19 +591,44 @@
             const baseSec = h * 3600 + now.getMinutes() * 60 + now.getSeconds();
             const trainList = [];
             const stationNames = Object.keys(STATIONS);
-            const orderedStations = direction === 'up' ? [...stationNames].reverse() : stationNames;
-            for (let i = -5; i <= 5; i++) {
-                const train = { id: `MOCK${direction === 'up' ? 'U' : 'D'}${i + 5}`, schedule: [] };
-                const startSec = baseSec + (i * 1800) - 2000; 
-                orderedStations.forEach((st) => {
-                    const firstProg = STATIONS[orderedStations[0]].progress;
-                    const myProg = STATIONS[st].progress;
-                    const progDiff = Math.abs(myProg - firstProg);
-                    const stSec = startSec + Math.floor(progDiff * 3600); 
-                    train.schedule.push({ name: st, time: secondsToTime(stSec), sec: stSec, progress: myProg });
-                });
-                train.schedule.sort((a,b) => a.sec - b.sec);
-                trainList.push(train);
+            
+            if (currentLineId === 'seoul_line1') {
+                const trunk = stationNames.filter(s => !STATIONS[s].branch || STATIONS[s].branch === 'main');
+                const incheonBranch = stationNames.filter(s => STATIONS[s].branch === 'incheon');
+                const sinchangBranch = stationNames.filter(s => STATIONS[s].branch === 'sinchang');
+                
+                // 가짜 데이터 생성 시 인천행과 신창행을 교대로 생성
+                for (let i = -10; i <= 10; i++) {
+                    const isSinchang = i % 2 === 0;
+                    const route = isSinchang ? [...trunk, ...sinchangBranch] : [...trunk, ...incheonBranch];
+                    const ordered = direction === 'up' ? [...route].reverse() : route;
+                    const train = { id: `MOCK${direction === 'up' ? 'U' : 'D'}${i + 10}`, schedule: [] };
+                    const startSec = baseSec + (i * 900) - 2000; 
+                    ordered.forEach((st) => {
+                        const firstProg = STATIONS[ordered[0]].progress;
+                        const myProg = STATIONS[st].progress;
+                        const progDiff = Math.abs(myProg - firstProg);
+                        const stSec = startSec + Math.floor(progDiff * 12000); 
+                        train.schedule.push({ name: st, time: secondsToTime(stSec), sec: stSec, progress: myProg });
+                    });
+                    train.schedule.sort((a,b) => a.sec - b.sec);
+                    trainList.push(train);
+                }
+            } else {
+                const orderedStations = direction === 'up' ? [...stationNames].reverse() : stationNames;
+                for (let i = -5; i <= 5; i++) {
+                    const train = { id: `MOCK${direction === 'up' ? 'U' : 'D'}${i + 5}`, schedule: [] };
+                    const startSec = baseSec + (i * 1800) - 2000; 
+                    orderedStations.forEach((st) => {
+                        const firstProg = STATIONS[orderedStations[0]].progress;
+                        const myProg = STATIONS[st].progress;
+                        const progDiff = Math.abs(myProg - firstProg);
+                        const stSec = startSec + Math.floor(progDiff * 3600); 
+                        train.schedule.push({ name: st, time: secondsToTime(stSec), sec: stSec, progress: myProg });
+                    });
+                    train.schedule.sort((a,b) => a.sec - b.sec);
+                    trainList.push(train);
+                }
             }
             return trainList;
         }
@@ -598,7 +679,6 @@
 
             const headers = splitCsvRow(lines[0]);
             
-            // 기존에 작성했던 csv 파싱 로직을 그대로 사용 (향후 수도권 데이터 추가시 확장)
             let trainIds = headers.slice(1);
             if (headers[0].includes('시발역') && lines.length > 2) {
                 const thirdRow = splitCsvRow(lines[2]);
@@ -632,8 +712,8 @@
             const statusDisplay = document.getElementById('data-status-display');
             const statusHome = document.getElementById('data-status-home');
 
-            let targetUpUrl = FILE_URLS[currentLineId][currentDayType + '_up'];
-            let targetDownUrl = FILE_URLS[currentLineId][currentDayType + '_down'];
+            let targetUpUrl = FILE_URLS[currentLineId] ? FILE_URLS[currentLineId][currentDayType + '_up'] : null;
+            let targetDownUrl = FILE_URLS[currentLineId] ? FILE_URLS[currentLineId][currentDayType + '_down'] : null;
 
             try {
                 const [upText, downText] = await Promise.all([safeFetch(targetUpUrl), safeFetch(targetDownUrl)]);
@@ -658,38 +738,24 @@
             currentLineId = lineId;
             modalDayType = null;
             
-            // 수도권 노선 색상 매핑
-            THEME_COLOR = currentLineId === 'seoul_line1' ? '#0052A4' : (currentLineId === 'seoul_line2' ? '#00A84D' : '#0052A4');
-            DOWN_COLOR = currentLineId === 'seoul_line1' ? '#4B90D6' : (currentLineId === 'seoul_line2' ? '#4DC685' : '#4B90D6');
+            THEME_COLOR = currentLineId === 'seoul_line1' ? '#0052A4' : '#0052A4';
+            DOWN_COLOR = currentLineId === 'seoul_line1' ? '#4B90D6' : '#4B90D6';
             STATIONS = STATIONS_ALL[lineId];
 
             const btn1 = document.getElementById('btn-line-seoul1');
-            const btn2 = document.getElementById('btn-line-seoul2');
 
             if (lineId === 'seoul_line1') {
-                btn1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,82,164,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
-                if(btn2) btn2.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
+                if(btn1) btn1.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,82,164,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
                 if (!STATIONS[homeSelectedStation]) homeSelectedStation = '서울역';
                 document.querySelector('#home-screen h2').textContent = '수도권 1호선 지하철역';
                 dom.lineHeaderTitle.textContent = '수도권 1호선 지하철 현황';
-                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (소요산 방면)</option><option value="down" class="text-gray-900">하행 (인천/신창 방면)</option>';
-                document.getElementById('home-up-dir-label').textContent = '소요산 방면';
+                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">상행 (연천 방면)</option><option value="down" class="text-gray-900">하행 (인천/신창 방면)</option>';
+                document.getElementById('home-up-dir-label').textContent = '연천 방면';
                 document.getElementById('home-down-dir-label').textContent = '인천/신창 방면';
-                document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
-            } else if (lineId === 'seoul_line2') {
-                if(btn2) btn2.className = `px-3 py-1 rounded-full text-[11px] font-bold bg-[${THEME_COLOR}] text-white shadow-[0_2px_8px_rgba(0,168,77,0.3)] shrink-0 border border-[${THEME_COLOR}] transition-all`;
-                btn1.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-500 shrink-0 border border-black/5 cursor-pointer hover:bg-gray-200 transition-all';
-                if (!STATIONS[homeSelectedStation]) homeSelectedStation = '시청';
-                document.querySelector('#home-screen h2').textContent = '수도권 2호선 지하철역';
-                dom.lineHeaderTitle.textContent = '수도권 2호선 지하철 현황';
-                dom.directionToggle.innerHTML = '<option value="up" class="text-gray-900">내선순환</option><option value="down" class="text-gray-900">외선순환</option>';
-                document.getElementById('home-up-dir-label').textContent = '내선순환';
-                document.getElementById('home-down-dir-label').textContent = '외선순환';
                 document.getElementById('data-status-display').className = `text-[10px] font-bold`; document.getElementById('data-status-display').style.color = THEME_COLOR;
             }
 
-            // 노선 아이콘 텍스트 변경
-            document.querySelector('#metro-logo-text').textContent = lineId === 'seoul_line1' ? '1' : (lineId === 'seoul_line2' ? '2' : '1');
+            document.querySelector('#metro-logo-text').textContent = '1';
             document.querySelector('.metro-logo-circle').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-base').style.backgroundColor = THEME_COLOR;
             document.querySelector('.station-plate-pill').style.borderColor = THEME_COLOR;
@@ -697,29 +763,72 @@
             document.getElementById('btn-icon-2').style.color = THEME_COLOR;
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
-            const lineLen = currentLineId === 'seoul_line1' ? 3200 : 3000;
+            const lineLen = currentLineId === 'seoul_line1' ? 9500 : 3000;
             const svg = document.getElementById('line-svg');
+            
+            // 상하행 배지 동적 렌더링 함수
+            const drawCap = (x, y, color, label) => `
+                <g transform="translate(${x}, ${y})">
+                    <rect x="-26" y="-12" width="52" height="24" rx="12" fill="#FFFFFF" stroke="${color}" stroke-width="2" />
+                    <text x="0" y="4.5" text-anchor="middle" fill="${color}" class="text-[13px] font-extrabold tracking-widest">${label}</text>
+                </g>
+            `;
+            
             if (svg) {
                 svg.setAttribute('viewBox', `0 0 400 ${lineLen + 160}`);
                 svg.style.height = `${lineLen + 160}px`;
                 dom.svgWrapper.style.height = `${lineLen + 160 + 80}px`;
                 
-                const pathY2 = 60 + lineLen;
-                document.getElementById('line-path-down-bg').setAttribute('d', `M 120 60 L 120 ${pathY2}`);
-                document.getElementById('line-path-up-bg').setAttribute('d', `M 280 60 L 280 ${pathY2}`);
-                dom.linePathDown.setAttribute('d', `M 120 60 L 120 ${pathY2}`);
-                dom.linePathUp.setAttribute('d', `M 280 60 L 280 ${pathY2}`);
-                
-                document.getElementById('svg-down-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
-                document.getElementById('svg-up-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
-                
-                document.querySelectorAll('#svg-up-top rect, #svg-up-bottom rect').forEach(r => r.setAttribute('stroke', THEME_COLOR));
-                document.querySelectorAll('#svg-up-top text, #svg-up-bottom text').forEach(t => t.setAttribute('fill', THEME_COLOR));
-                document.getElementById('line-path-up-bg').setAttribute('stroke', THEME_COLOR);
+                let downBgPathD = '';
+                let upBgPathD = '';
+                let extraCapsHtml = '';
 
-                document.querySelectorAll('#svg-down-top rect, #svg-down-bottom rect').forEach(r => r.setAttribute('stroke', DOWN_COLOR));
-                document.querySelectorAll('#svg-down-top text, #svg-down-bottom text').forEach(t => t.setAttribute('fill', DOWN_COLOR));
-                document.getElementById('line-path-down-bg').setAttribute('stroke', DOWN_COLOR);
+                if (currentLineId === 'seoul_line1') {
+                    const gY = 60 + lineLen * STATIONS['구로'].progress;
+                    const incY = 60 + lineLen * STATIONS['인천'].progress;
+                    const sinY = 60 + lineLen * STATIONS['신창'].progress;
+                    const splitYDown = gY + 15;
+                    const splitYUp = gY + 15;
+                    
+                    // 가운데 인천행 직진, 신창행 양옆 ㄱ자 분기형 레이아웃 구현!
+                    downBgPathD = `
+                        M 160 60 L 160 ${incY} 
+                        M 160 ${splitYDown} L 80 ${splitYDown} L 80 ${sinY}
+                    `;
+                    upBgPathD = `
+                        M 240 60 L 240 ${incY} 
+                        M 320 ${sinY} L 320 ${splitYUp} L 240 ${splitYUp}
+                    `;
+                    
+                    document.getElementById('svg-down-top').innerHTML = drawCap(160, 40, DOWN_COLOR, '하행');
+                    document.getElementById('svg-up-top').innerHTML = drawCap(240, 40, THEME_COLOR, '상행');
+                    
+                    document.getElementById('svg-down-bottom').innerHTML = drawCap(160, incY + 24, DOWN_COLOR, '인천');
+                    document.getElementById('svg-up-bottom').innerHTML = drawCap(240, incY + 24, THEME_COLOR, '상행');
+                    
+                    extraCapsHtml = drawCap(80, sinY + 24, DOWN_COLOR, '신창') + drawCap(320, sinY + 24, THEME_COLOR, '상행');
+                } else {
+                    downBgPathD = `M 120 60 L 120 ${60 + lineLen}`;
+                    upBgPathD = `M 280 60 L 280 ${60 + lineLen}`;
+                    
+                    document.getElementById('svg-down-top').innerHTML = drawCap(120, 40, DOWN_COLOR, '하행');
+                    document.getElementById('svg-up-top').innerHTML = drawCap(280, 40, THEME_COLOR, '상행');
+                    
+                    document.getElementById('svg-down-bottom').innerHTML = drawCap(120, 60 + lineLen + 24, DOWN_COLOR, '하행');
+                    document.getElementById('svg-up-bottom').innerHTML = drawCap(280, 60 + lineLen + 24, THEME_COLOR, '상행');
+                }
+                
+                document.getElementById('line-path-down-bg').setAttribute('d', downBgPathD);
+                document.getElementById('line-path-up-bg').setAttribute('d', upBgPathD);
+                
+                // 기존 동적 캡 외에 추가적인 캡 삽입
+                let extraCapsGroup = document.getElementById('extra-caps-group');
+                if (!extraCapsGroup) {
+                    extraCapsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    extraCapsGroup.id = 'extra-caps-group';
+                    svg.appendChild(extraCapsGroup);
+                }
+                extraCapsGroup.innerHTML = extraCapsHtml;
             }
 
             selectedStation = null;
@@ -747,8 +856,38 @@
         window.updateHomeUI = () => {
             const stationNames = Object.keys(STATIONS);
             const idx = stationNames.indexOf(homeSelectedStation);
-            const prevStation = idx > 0 ? stationNames[idx - 1] : null;
-            const nextStation = idx < stationNames.length - 1 ? stationNames[idx + 1] : null;
+            
+            let prevStation = null;
+            let nextStation = null;
+
+            if (currentLineId === 'seoul_line1') {
+                const curStation = STATIONS[homeSelectedStation];
+                const curBranch = curStation.branch || 'main';
+
+                const findStationByOffset = (offset) => {
+                    const sorted = stationNames.filter(n => {
+                        const b = STATIONS[n].branch || 'main';
+                        return b === curBranch || b === 'main';
+                    }).sort((a, b) => STATIONS[a].progress - STATIONS[b].progress);
+                    const i = sorted.indexOf(homeSelectedStation);
+                    return sorted[i + offset] || null;
+                };
+                
+                if (homeSelectedStation === '구로') {
+                    prevStation = stationNames[idx - 1];
+                    nextStation = '구일/가산디지털단지';
+                } else if (homeSelectedStation === '구일' || homeSelectedStation === '가산디지털단지') {
+                    prevStation = '구로';
+                    nextStation = findStationByOffset(1);
+                } else {
+                    prevStation = findStationByOffset(-1);
+                    nextStation = findStationByOffset(1);
+                }
+            } else {
+                prevStation = idx > 0 ? stationNames[idx - 1] : null;
+                nextStation = idx < stationNames.length - 1 ? stationNames[idx + 1] : null;
+            }
+
             dom.homeStationName.textContent = homeSelectedStation;
             if (prevStation) { dom.homePrevStation.textContent = `< ${prevStation}`; dom.homePrevStationContainer.classList.replace('opacity-0', 'opacity-100'); } 
             else { dom.homePrevStationContainer.classList.replace('opacity-100', 'opacity-0'); }
@@ -764,6 +903,14 @@
             const s = STATIONS[homeSelectedStation];
             const transferContainer = document.getElementById('home-transfer-container');
             const transferList = document.getElementById('home-transfer-list');
+            
+            if (currentLineId === 'seoul_line1') {
+                let downDirLabel = '인천/신창 방면';
+                if (s && s.branch === 'incheon') downDirLabel = '인천 방면';
+                else if (s && s.branch === 'sinchang') downDirLabel = '신창 방면';
+                document.getElementById('home-down-dir-label').textContent = downDirLabel;
+            }
+            
             if (transferContainer && transferList) {
                 if (s && ((s.transfer && s.transfer.length > 0) || s.ktx || s.srt)) {
                     let trHtml = '';
@@ -775,6 +922,12 @@
                             else if(tr.name === '수인') lineName = '수인분당';
                             else if(tr.name === '신') lineName = '신분당';
                             else if(tr.name === '우') lineName = '우이신설';
+                            else if(tr.name === '신림') lineName = '신림선';
+                            else if(tr.name === '의') lineName = '의정부경전철';
+                            else if(tr.name === '경춘') lineName = '경춘선';
+                            else if(tr.name === '인2') lineName = '인천 2호선';
+                            else if(tr.name === '서해') lineName = '서해선';
+
                             trHtml += `<div class="flex items-center gap-1.5 bg-white border border-black/10 px-2.5 py-1 rounded-full shadow-sm"><div class="w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-black" style="background-color: ${tr.color}">${tr.name}</div><span class="text-[11px] font-bold text-[#111827] tracking-tight">${lineName}</span></div>`;
                         });
                     }
@@ -818,21 +971,28 @@
                 }).join('');
             };
             
-            const stationNames = Object.keys(STATIONS);
-            const isFirst = homeSelectedStation === stationNames[0];
-            const isLast = homeSelectedStation === stationNames[stationNames.length - 1];
+            const isFirst = homeSelectedStation === '연천';
+            const isLast = homeSelectedStation === '인천' || homeSelectedStation === '신창';
 
-            dom.homeUpInfo.innerHTML = isFirst && currentLineId !== 'seoul_line2' ? `<span class="text-gray-400 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
-            dom.homeDownInfo.innerHTML = isLast && currentLineId !== 'seoul_line2' ? `<span class="text-gray-400 text-[12px] font-bold my-auto">종점</span>` : renderL(downTrains);
+            dom.homeUpInfo.innerHTML = isFirst ? `<span class="text-gray-400 text-[12px] font-bold my-auto">종점</span>` : renderL(upTrains);
+            dom.homeDownInfo.innerHTML = isLast ? `<span class="text-gray-400 text-[12px] font-bold my-auto">종점</span>` : renderL(downTrains);
         };
 
         window.openStationSelector = () => {
             dom.stationSelectorModal.classList.remove('hidden');
-            dom.selectorListContainer.innerHTML = Object.keys(STATIONS).map(name => `
+            dom.selectorListContainer.innerHTML = Object.keys(STATIONS).map(name => {
+                const s = STATIONS[name];
+                let bName = '';
+                if(currentLineId === 'seoul_line1') {
+                    if(s.branch === 'incheon') bName = ' <span class="text-[10px] text-gray-400 font-medium ml-1">인천행</span>';
+                    if(s.branch === 'sinchang') bName = ' <span class="text-[10px] text-gray-400 font-medium ml-1">신창행</span>';
+                }
+                return `
                 <div onclick="selectHomeStation('${name}')" class="flex justify-between items-center px-4 py-3 rounded-[14px] ${name === homeSelectedStation ? '' : 'bg-gray-50 border border-black/5 hover:bg-gray-100'} cursor-pointer active:scale-[0.98] transition-all" style="${name === homeSelectedStation ? `background-color: ${THEME_COLOR}22; border-color: ${THEME_COLOR}55;` : ''}">
-                    <span class="text-[14px] font-bold ${name === homeSelectedStation ? '' : 'text-gray-700'}" style="${name === homeSelectedStation ? `color: ${THEME_COLOR};` : ''}">${name}역</span>
+                    <span class="text-[14px] font-bold ${name === homeSelectedStation ? '' : 'text-gray-700'}" style="${name === homeSelectedStation ? `color: ${THEME_COLOR};` : ''}">${name}역${bName}</span>
                     ${name === homeSelectedStation ? `<i class="fa-solid fa-check text-[14px] drop-shadow-sm" style="color: ${THEME_COLOR};"></i>` : ''}
-                </div>`).join('');
+                </div>`;
+            }).join('');
         };
 
         window.closeStationSelector = () => dom.stationSelectorModal.classList.add('hidden');
@@ -926,8 +1086,10 @@
             const isDownDefault = stationDetailDirection === 'down';
             
             const stationNames = Object.keys(STATIONS);
-            const upLabel = currentLineId === 'seoul_line2' ? '내선순환' : `상행 (${stationNames[0]} 방면)`;
-            const downLabel = currentLineId === 'seoul_line2' ? '외선순환' : `하행 (${stationNames[stationNames.length - 1]} 방면)`;
+            const upLabel = `상행 (연천 방면)`;
+            let downLabel = `하행 (인천/신창 방면)`;
+            if(currentLineId === 'seoul_line1' && STATIONS[selectedStation].branch === 'incheon') downLabel = `하행 (인천 방면)`;
+            if(currentLineId === 'seoul_line1' && STATIONS[selectedStation].branch === 'sinchang') downLabel = `하행 (신창 방면)`;
 
             const renderList = (times, id, isHidden) => {
                 const isDown = id === 'tt-down';
@@ -1005,6 +1167,15 @@
             }, 100);
         };
 
+        // 분기형 X좌표 계산기
+        const getX = (branch, dir, lineId) => {
+            if (lineId === 'seoul_line1') {
+                if (branch === 'sinchang') return dir === 'down' ? 80 : 320;
+                return dir === 'down' ? 160 : 240; // main & incheon
+            }
+            return dir === 'down' ? 120 : 280;
+        };
+
         window.render = () => {
             dom.clock.textContent = secondsToTime(currentSec);
             if (activeTab === 'home') window.renderHomeArrivalInfo();
@@ -1028,17 +1199,84 @@
             
             let activeT = activeTab === 'line' ? [...activeTrainsUp, ...activeTrainsDown] : (currentDirection === 'up' ? activeTrainsUp : activeTrainsDown);
             
-            const lineLen = currentLineId === 'seoul_line1' ? 3200 : 3000;
+            const lineLen = currentLineId === 'seoul_line1' ? 9500 : 3000;
+            
             const renderedT = activeT.map(t => {
-                const ref = t.direction === 'up' ? dom.linePathUp : dom.linePathDown;
                 let p = {x: 0, y: 0}, angle = 0;
-                if (ref) {
-                    const currentLen = lineLen * (t.overallProgress || 0); p = ref.getPointAtLength(currentLen);
-                    const np = ref.getPointAtLength(Math.max(0, Math.min(lineLen, currentLen + (t.direction === 'up' ? -1 : 1))));
-                    angle = (Math.abs(np.x - p.x) > 0.001 || Math.abs(np.y - p.y) > 0.001) ? Math.atan2(np.y - p.y, np.x - p.x) * 180 / Math.PI : (t.direction === 'up' ? -90 : 90);
+                let s1 = STATIONS[t.curr.name];
+                let s2 = STATIONS[t.next.name] || s1;
+                
+                let x1 = getX(s1.branch || 'main', t.direction, currentLineId);
+                let x2 = getX(s2.branch || 'main', t.direction, currentLineId);
+                let y1 = 60 + lineLen * s1.progress;
+                let y2 = 60 + lineLen * s2.progress;
+                
+                let localRatio = 0;
+                if (s2.progress !== s1.progress) {
+                    localRatio = (t.overallProgress - s1.progress) / (s2.progress - s1.progress);
                 }
+                
+                // 구로역 기점 신창행 분기 애니메이션 직각 주행 계산
+                let isSinchangSplit = false;
+                if (currentLineId === 'seoul_line1') {
+                    let b1 = s1.branch || 'main';
+                    let b2 = s2.branch || 'main';
+                    if ((b1 === 'main' && b2 === 'sinchang') || (b1 === 'sinchang' && b2 === 'main')) {
+                        isSinchangSplit = true;
+                    }
+                }
+                
+                if (isSinchangSplit) {
+                    let splitY = 60 + lineLen * STATIONS['구로'].progress + 15;
+                    
+                    if (t.direction === 'down') {
+                        let distToSplit = splitY - y1;
+                        if(distToSplit < 0) distToSplit = 0;
+                        let distHori = 80; 
+                        let distVert = y2 - splitY;
+                        let totalDist = distToSplit + distHori + distVert;
+                        let currentDist = localRatio * totalDist;
+                        
+                        if (currentDist <= distToSplit) {
+                            p.x = 160; p.y = y1 + currentDist; angle = 90;
+                        } else if (currentDist <= distToSplit + distHori) {
+                            let remain = currentDist - distToSplit;
+                            p.y = splitY; p.x = 160 - remain; angle = 180; // Left
+                        } else {
+                            let remain = currentDist - distToSplit - distHori;
+                            p.x = 80; p.y = splitY + remain; angle = 90;
+                        }
+                    } else {
+                        let distVertUp = y1 - splitY;
+                        if(distVertUp < 0) distVertUp = 0;
+                        let distHoriUp = 80; 
+                        let distToGuro = splitY - y2;
+                        let totalDist = distVertUp + distHoriUp + distToGuro;
+                        let currentDist = localRatio * totalDist;
+                        
+                        if (currentDist <= distVertUp) {
+                            p.x = 320; p.y = y1 - currentDist; angle = -90;
+                        } else if (currentDist <= distVertUp + distHoriUp) {
+                            let remain = currentDist - distVertUp;
+                            p.y = splitY; p.x = 320 - remain; angle = 180; // Left (320 -> 240)
+                        } else {
+                            let remain = currentDist - distVertUp - distHoriUp;
+                            p.x = 240; p.y = splitY - remain; angle = -90;
+                        }
+                    }
+                } else {
+                    p.x = x1 + (x2 - x1) * localRatio;
+                    p.y = y1 + (y2 - y1) * localRatio;
+                    if (Math.abs(x2 - x1) > 0.001 || Math.abs(y2 - y1) > 0.001) {
+                        angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                    } else {
+                        angle = t.direction === 'up' ? -90 : 90;
+                    }
+                }
+                
                 return { ...t, point: p, angle };
             });
+            
             const selectedData = renderedT.find(t => t.id === selectedTrainId);
             let btnHtml = activeT.length === 0 ? `<span class="text-xs text-gray-400 font-medium py-1">운행 종료</span>` : '';
             activeT.forEach(t => {
@@ -1062,27 +1300,85 @@
                 };
                 updateLayer(dom.lineTrainsUp, renderedT.filter(t => t.direction === 'up'), true); updateLayer(dom.lineTrainsDown, renderedT.filter(t => t.direction === 'down'), true);
             }
-            let lineHTML = ''; for (const stationName in STATIONS) {
+            
+            let lineHTML = ''; 
+            for (const stationName in STATIONS) {
                 const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
-                let transferHtml = '';
-                if (s.transfer && s.transfer.length > 0) {
-                    const totalW = s.transfer.length * 16;
-                    let startX = -(totalW / 2) + 8;
-                    s.transfer.forEach((tr, i) => {
-                        const trX = startX + (i * 16);
-                        transferHtml += `<circle cx="${trX}" cy="-28" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="-25.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
-                    });
-                }
                 
-                let ktxSrtHtml = '';
-                if (s.ktx && s.srt) {
-                    ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-32" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="2" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                } else if (s.ktx) {
-                    ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
-                } else if (s.srt) {
-                    ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                if (currentLineId === 'seoul_line1' && s.branch === 'sinchang') {
+                    // 왼쪽 기둥 (신창 방면 하행)
+                    let transferHtmlL = '';
+                    if (s.transfer && s.transfer.length > 0) {
+                        s.transfer.forEach((tr, i) => {
+                            const trX = -45 - (i * 16);
+                            transferHtmlL += `<circle cx="${trX}" cy="-2" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="0.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                        });
+                    }
+                    
+                    let ktxSrtHtmlL = '';
+                    if (s.ktx && s.srt) {
+                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-32" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="2" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    } else if (s.ktx) {
+                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    } else if (s.srt) {
+                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-15" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    }
+
+                    lineHTML += `<g transform="translate(80, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
+                        <text x="-15" y="4" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>
+                        ${transferHtmlL}${ktxSrtHtmlL}
+                    </g>`;
+                    
+                    // 오른쪽 기둥 (신창 방면 상행)
+                    let transferHtmlR = '';
+                    if (s.transfer && s.transfer.length > 0) {
+                        s.transfer.forEach((tr, i) => {
+                            const trX = 45 + (i * 16);
+                            transferHtmlR += `<circle cx="${trX}" cy="-2" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="0.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                        });
+                    }
+
+                    lineHTML += `<g transform="translate(320, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
+                        <text x="15" y="4" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>
+                        ${transferHtmlR}${ktxSrtHtmlL}
+                    </g>`;
+                } else {
+                    // 중앙 기둥 (메인 및 인천 방면)
+                    let stationX = 200;
+                    let dashPath = `M -80 0 L 80 0`;
+                    
+                    if (currentLineId === 'seoul_line1') {
+                        dashPath = `M -40 0 L 40 0`;
+                    }
+                    
+                    let transferHtml = '';
+                    if (s.transfer && s.transfer.length > 0) {
+                        const totalW = s.transfer.length * 16;
+                        let startX = -(totalW / 2) + 8;
+                        s.transfer.forEach((tr, i) => {
+                            const trX = startX + (i * 16);
+                            transferHtml += `<circle cx="${trX}" cy="-28" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="-25.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                        });
+                    }
+                    
+                    let ktxSrtHtml = '';
+                    if (s.ktx && s.srt) {
+                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-32" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="2" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    } else if (s.ktx) {
+                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    } else if (s.srt) {
+                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    }
+                    
+                    lineHTML += `<g transform="translate(${stationX}, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
+                        <path d="${dashPath}" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" />
+                        <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
+                        <text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>
+                        ${transferHtml}${ktxSrtHtml}
+                    </g>`;
                 }
-                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${transferHtml}${ktxSrtHtml}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
@@ -1092,8 +1388,8 @@
             let panelHtml = ''; if (selectedStation) {
                 dom.floatingPanel.classList.remove('hidden'); let target = stationDetailDirection === 'up' ? parsedTrainsUp : parsedTrainsDown;
                 let upcoming = target.map(t => { const s = t.schedule.find(st => st.name === selectedStation); return s && s.sec >= currentSec ? { id: t.id, sec: s.sec, time: s.time, dest: t.schedule[t.schedule.length-1].name } : null; }).filter(t => t).sort((a,b) => a.sec-b.sec).slice(0, 4);
-                let btnLabelUp = currentLineId === 'seoul_line2' ? '내선순환' : '상행';
-                let btnLabelDown = currentLineId === 'seoul_line2' ? '외선순환' : '하행';
+                let btnLabelUp = '상행';
+                let btnLabelDown = '하행';
                 
                 panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-2xl transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-[#111827] tracking-tight">${selectedStation}역</h3><div class="flex bg-gray-100 rounded-full p-0.5 border border-black/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">${btnLabelUp}</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='down' ? `background-color: ${DOWN_COLOR};` : ''}">${btnLabelDown}</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center hover:text-black hover:bg-gray-200 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center shadow-sm border border-black/5"><span class="text-[#111827] font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-500 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : `color: ${DOWN_COLOR};`}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-400 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="modalViewMode='all'; window.openModal()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 border border-black/5 transition-colors rounded-[14px] font-bold text-gray-700 text-[12px] flex items-center justify-center gap-1.5 shadow-sm"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
             } else if (selectedData) {
@@ -1104,20 +1400,27 @@
         };
 
         window.onload = async () => {
-            let foundFav = false;
-            if (favoriteStation) {
-                if (STATIONS_ALL['seoul_line1'][favoriteStation]) {
-                    await window.switchLine('seoul_line1', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['seoul_line2'] && STATIONS_ALL['seoul_line2'][favoriteStation]) {
-                    await window.switchLine('seoul_line2', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRegion = urlParams.get('region');
+
+            if (urlRegion) {
+                await window.switchRegion(urlRegion, true);
+                if (urlRegion === 'daegu') await window.switchLine('daegyeong', true);
+                else if (urlRegion === 'daejeon') await window.switchLine('daejeon_line1', true);
+                else if (urlRegion === 'busan') await window.switchLine('busan_line1', true);
+                else if (urlRegion === 'gwangju') await window.switchLine('gwangju_line1', true);
+            } else {
+                let foundFav = false;
+                if (favoriteStation) {
+                    if (STATIONS_ALL['seoul_line1'] && STATIONS_ALL['seoul_line1'][favoriteStation]) {
+                        await window.switchLine('seoul_line1', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    }
                 }
-            }
-            if (!foundFav) {
-                await window.switchLine('seoul_line1', true);
+                if (!foundFav) {
+                    await window.switchLine('seoul_line1', true);
+                }
             }
 
             currentDayType = getDayType(new Date());
