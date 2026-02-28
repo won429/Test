@@ -1317,16 +1317,21 @@
                     
                     let ktxSrtHtmlL = '';
                     if (s.ktx && s.srt) {
-                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-32" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="2" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-85" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-50" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
                     } else if (s.ktx) {
-                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-45" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
                     } else if (s.srt) {
-                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-15" y="14" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                        ktxSrtHtmlL = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-45" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    }
+
+                    let stationNameL = `<text x="-15" y="4" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>`;
+                    if (stationName === '가산디지털단지') {
+                        stationNameL = `<text x="-15" y="-2" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold"><tspan x="-15" dy="0">가산</tspan><tspan x="-15" dy="12">디지털단지</tspan></text>`;
                     }
 
                     lineHTML += `<g transform="translate(80, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
                         <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
-                        <text x="-15" y="4" text-anchor="end" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>
+                        ${stationNameL}
                         ${transferHtmlL}${ktxSrtHtmlL}
                     </g>`;
                     
@@ -1339,10 +1344,24 @@
                         });
                     }
 
+                    let ktxSrtHtmlR = '';
+                    if (s.ktx && s.srt) {
+                        ktxSrtHtmlR = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="50" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    } else if (s.ktx) {
+                        ktxSrtHtmlR = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    } else if (s.srt) {
+                        ktxSrtHtmlR = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                    }
+
+                    let stationNameR = `<text x="15" y="4" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>`;
+                    if (stationName === '가산디지털단지') {
+                        stationNameR = `<text x="15" y="-2" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold"><tspan x="15" dy="0">가산</tspan><tspan x="15" dy="12">디지털단지</tspan></text>`;
+                    }
+
                     lineHTML += `<g transform="translate(320, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
                         <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
-                        <text x="15" y="4" text-anchor="start" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>
-                        ${transferHtmlR}${ktxSrtHtmlL}
+                        ${stationNameR}
+                        ${transferHtmlR}${ktxSrtHtmlR}
                     </g>`;
                 } else {
                     // 중앙 기둥 (메인 및 인천 방면)
@@ -1365,17 +1384,22 @@
                     
                     let ktxSrtHtml = '';
                     if (s.ktx && s.srt) {
-                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-32" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="2" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="25" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="58" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
                     } else if (s.ktx) {
-                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="25" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
                     } else if (s.srt) {
-                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
+                        ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="25" y="-22" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
                     }
                     
+                    let stationNameC = `<text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>`;
+                    if (stationName === '동대문역사문화공원') {
+                        stationNameC = `<text x="0" y="-20" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold"><tspan x="0" dy="0">동대문</tspan><tspan x="0" dy="12">역사문화공원</tspan></text>`;
+                    }
+
                     lineHTML += `<g transform="translate(${stationX}, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer">
                         <path d="${dashPath}" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" />
                         <circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" />
-                        <text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>
+                        ${stationNameC}
                         ${transferHtml}${ktxSrtHtml}
                     </g>`;
                 }
