@@ -1992,22 +1992,22 @@
         };
 
         window.onload = async () => {
-            let foundFav = false;
-            if (favoriteStation) {
-                if (STATIONS_ALL['line1'][favoriteStation]) {
-                    await window.switchRegion('daegu', true);
-                    await window.switchLine('line1', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['line2'] && STATIONS_ALL['line2'][favoriteStation]) {
-                    await window.switchRegion('daegu', true);
-                    await window.switchLine('line2', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['line3'] && STATIONS_ALL['line3'][favoriteStation]) {
-                    await window.switchRegion('daegu', true);
-                    await window.switchLine('line3', true);
-                    homeSelectedStation = favoriteStation;
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRegion = urlParams.get('region');
+
+            if (urlRegion) {
+                // URL 파라미터로 넘어온 지역이 있으면 가장 최우선으로 적용
+                await window.switchRegion(urlRegion, true);
+                if (urlRegion === 'daegu') await window.switchLine('daegyeong', true);
+                else if (urlRegion === 'daejeon') await window.switchLine('daejeon_line1', true);
+                else if (urlRegion === 'busan') await window.switchLine('busan_line1', true);
+                else if (urlRegion === 'gwangju') await window.switchLine('gwangju_line1', true);
+            } else {
+                // 직접 접속한 경우 기존처럼 즐겨찾기 또는 기본값(대구권) 적용
+                let foundFav = false;
+                if (favoriteStation) {
+                    if (STATIONS_ALL['line1'][favoriteStation]) {
+                        await window.switchRegion('daegu', true);
                     foundFav = true;
                 } else if (STATIONS_ALL['daegyeong'][favoriteStation]) {
                     await window.switchRegion('daegu', true);
@@ -2048,17 +2048,17 @@
                     await window.switchRegion('busan', true);
                     await window.switchLine('busan_donghae', true);
                     homeSelectedStation = favoriteStation;
-                    foundFav = true;
-                } else if (STATIONS_ALL['gwangju_line1'] && STATIONS_ALL['gwangju_line1'][favoriteStation]) {
-                    await window.switchRegion('gwangju', true);
-                    await window.switchLine('gwangju_line1', true);
-                    homeSelectedStation = favoriteStation;
-                    foundFav = true;
+                    } else if (STATIONS_ALL['gwangju_line1'] && STATIONS_ALL['gwangju_line1'][favoriteStation]) {
+                        await window.switchRegion('gwangju', true);
+                        await window.switchLine('gwangju_line1', true);
+                        homeSelectedStation = favoriteStation;
+                        foundFav = true;
+                    }
                 }
-            }
-            if (!foundFav) {
-                await window.switchRegion('daegu', true);
-                await window.switchLine('daegyeong', true);
+                if (!foundFav) {
+                    await window.switchRegion('daegu', true);
+                    await window.switchLine('daegyeong', true);
+                }
             }
 
             currentDayType = getDayType(new Date());
