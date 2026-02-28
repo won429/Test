@@ -182,6 +182,12 @@
                             <span id="home-station-name" class="text-lg font-black text-black whitespace-nowrap">구미</span>
                         </div>
                     </div>
+
+                    <!-- 환승 정보 섹션 -->
+                    <div id="home-transfer-container" class="hidden mt-4 flex-col gap-1.5 px-1">
+                        <span class="text-[12px] font-bold text-gray-500">환승 정보</span>
+                        <div id="home-transfer-list" class="flex flex-wrap gap-2 items-center"></div>
+                    </div>
                 </div>
 
                 <!-- 도착 정보 섹션 -->
@@ -377,8 +383,8 @@
                 "북삼": { progress: 0.23 },
                 "왜관": { progress: 0.39 },
                 "서대구": { progress: 0.54, ktx: true },
-                "대구": { progress: 0.67 },
-                "동대구": { progress: 0.80, ktx: true },
+                "대구": { progress: 0.67, transfer: [{name: '1', color: '#D93F5C'}] },
+                "동대구": { progress: 0.80, ktx: true, transfer: [{name: '1', color: '#D93F5C'}] },
                 "경산": { progress: 1.00, ktx: true }
             },
             'line1': {
@@ -396,13 +402,13 @@
                 "현충로": { progress: 0.3235 },
                 "영대병원": { progress: 0.3529 },
                 "교대": { progress: 0.3823 },
-                "명덕": { progress: 0.4117 },
-                "반월당": { progress: 0.4411 },
+                "명덕": { progress: 0.4117, transfer: [{name: '3', color: '#ffb100'}] },
+                "반월당": { progress: 0.4411, transfer: [{name: '2', color: '#00AA80'}] },
                 "중앙로": { progress: 0.4705 },
-                "대구": { progress: 0.5000, ktx: true },
+                "대구": { progress: 0.5000, transfer: [{name: '대', color: '#0054A6'}] },
                 "칠성시장": { progress: 0.5294 },
                 "신천": { progress: 0.5588 },
-                "동대구역": { progress: 0.5882, ktx: true },
+                "동대구역": { progress: 0.5882, ktx: true, transfer: [{name: '대', color: '#0054A6'}] },
                 "동구청": { progress: 0.6176 },
                 "아양교": { progress: 0.6470 },
                 "동촌": { progress: 0.6764 },
@@ -432,8 +438,8 @@
                 "두류": { progress: 0.3571 },
                 "내당": { progress: 0.3928 },
                 "반고개": { progress: 0.4285 },
-                "청라언덕": { progress: 0.4642 },
-                "반월당": { progress: 0.5000 },
+                "청라언덕": { progress: 0.4642, transfer: [{name: '3', color: '#ffb100'}] },
+                "반월당": { progress: 0.5000, transfer: [{name: '1', color: '#D93F5C'}] },
                 "경대병원": { progress: 0.5357 },
                 "대구은행": { progress: 0.5714 },
                 "범어": { progress: 0.6071 },
@@ -467,9 +473,9 @@
                 "북구청": { progress: 0.4827 },
                 "달성공원": { progress: 0.5172 },
                 "서문시장": { progress: 0.5517 },
-                "청라언덕": { progress: 0.5862 },
+                "청라언덕": { progress: 0.5862, transfer: [{name: '2', color: '#00AA80'}] },
                 "남산": { progress: 0.6206 },
-                "명덕": { progress: 0.6551 },
+                "명덕": { progress: 0.6551, transfer: [{name: '1', color: '#D93F5C'}] },
                 "건들바위": { progress: 0.6896 },
                 "대봉교": { progress: 0.7241 },
                 "수성시장": { progress: 0.7586 },
@@ -530,13 +536,13 @@
                 "좌천": { progress: 0.5385 },
                 "범일": { progress: 0.5641 },
                 "범내골": { progress: 0.5897 },
-                "서면": { progress: 0.6154 },
-                "부전": { progress: 0.6410 },
+                "서면": { progress: 0.6154, transfer: [{name: '2', color: '#81C147'}] },
+                "부전": { progress: 0.6410, transfer: [{name: '동', color: '#003DA5'}] },
                 "양정": { progress: 0.6667 },
                 "시청": { progress: 0.6923 },
-                "연산": { progress: 0.7179 },
-                "교대": { progress: 0.7436 },
-                "동래": { progress: 0.7692 },
+                "연산": { progress: 0.7179, transfer: [{name: '3', color: '#B07C4A'}] },
+                "교대": { progress: 0.7436, transfer: [{name: '동', color: '#003DA5'}] },
+                "동래": { progress: 0.7692, transfer: [{name: '4', color: '#217DCB'}] },
                 "명륜": { progress: 0.7949 },
                 "온천장": { progress: 0.8205 },
                 "부산대": { progress: 0.8462 },
@@ -552,10 +558,10 @@
                 "중동": { progress: 0.0238 },
                 "해운대": { progress: 0.0476 },
                 "동백": { progress: 0.0714 },
-                "벡스코": { progress: 0.0952 },
+                "벡스코": { progress: 0.0952, transfer: [{name: '동', color: '#003DA5'}] },
                 "센텀시티": { progress: 0.1190 },
                 "민락": { progress: 0.1428 },
-                "수영": { progress: 0.1666 },
+                "수영": { progress: 0.1666, transfer: [{name: '3', color: '#B07C4A'}] },
                 "광안": { progress: 0.1904 },
                 "금련산": { progress: 0.2142 },
                 "남천": { progress: 0.2380 },
@@ -566,7 +572,7 @@
                 "문현": { progress: 0.3571 },
                 "국제금융센터 부산은행": { progress: 0.3809 },
                 "전포": { progress: 0.4047 },
-                "서면": { progress: 0.4285 },
+                "서면": { progress: 0.4285, transfer: [{name: '1', color: '#F06A00'}] },
                 "부암": { progress: 0.4523 },
                 "가야": { progress: 0.4761 },
                 "동의대": { progress: 0.5000 },
@@ -574,13 +580,13 @@
                 "냉정": { progress: 0.5476 },
                 "주례": { progress: 0.5714 },
                 "감전": { progress: 0.5952 },
-                "사상": { progress: 0.6190 },
+                "사상": { progress: 0.6190, transfer: [{name: '부', color: '#8652A1'}] },
                 "덕포": { progress: 0.6428 },
                 "모덕": { progress: 0.6666 },
                 "모라": { progress: 0.6904 },
                 "구남": { progress: 0.7142 },
                 "구명": { progress: 0.7380 },
-                "덕천": { progress: 0.7619 },
+                "덕천": { progress: 0.7619, transfer: [{name: '3', color: '#B07C4A'}] },
                 "수정": { progress: 0.7857 },
                 "화명": { progress: 0.8095 },
                 "율리": { progress: 0.8333 },
@@ -593,27 +599,27 @@
                 "양산": { progress: 1.0000 }
             },
             'busan_line3': {
-                "수영": { progress: 0.0000 },
+                "수영": { progress: 0.0000, transfer: [{name: '2', color: '#81C147'}] },
                 "망미": { progress: 0.0625 },
                 "배산": { progress: 0.1250 },
                 "물만골": { progress: 0.1875 },
-                "연산": { progress: 0.2500 },
-                "거제": { progress: 0.3125 },
+                "연산": { progress: 0.2500, transfer: [{name: '1', color: '#F06A00'}] },
+                "거제": { progress: 0.3125, transfer: [{name: '동', color: '#003DA5'}] },
                 "종합운동장": { progress: 0.3750 },
                 "사직": { progress: 0.4375 },
-                "미남": { progress: 0.5000 },
+                "미남": { progress: 0.5000, transfer: [{name: '4', color: '#217DCB'}] },
                 "만덕": { progress: 0.5625 },
                 "남산정": { progress: 0.6250 },
                 "숙등": { progress: 0.6875 },
-                "덕천": { progress: 0.7500 },
+                "덕천": { progress: 0.7500, transfer: [{name: '2', color: '#81C147'}] },
                 "구포": { progress: 0.8125, ktx: true },
                 "강서구청": { progress: 0.8750 },
                 "체육공원": { progress: 0.9375 },
-                "대저": { progress: 1.0000 }
+                "대저": { progress: 1.0000, transfer: [{name: '부', color: '#8652A1'}] }
             },
             'busan_line4': {
-                "미남": { progress: 0.0000 },
-                "동래": { progress: 0.0769 },
+                "미남": { progress: 0.0000, transfer: [{name: '3', color: '#B07C4A'}] },
+                "동래": { progress: 0.0769, transfer: [{name: '1', color: '#F06A00'}] },
                 "수안": { progress: 0.1538 },
                 "낙민": { progress: 0.2307 },
                 "충렬사": { progress: 0.3076 },
@@ -628,13 +634,13 @@
                 "안평": { progress: 1.0000 }
             },
             'busan_bglrt': {
-                "사상": { progress: 0.00 },
+                "사상": { progress: 0.00, transfer: [{name: '2', color: '#81C147'}] },
                 "괘법르네시떼": { progress: 0.05 },
                 "서부산유통지구": { progress: 0.10 },
                 "김해공항": { progress: 0.15 },
                 "덕두": { progress: 0.20 },
                 "동구": { progress: 0.25 },
-                "대저": { progress: 0.30 },
+                "대저": { progress: 0.30, transfer: [{name: '3', color: '#B07C4A'}] },
                 "평강": { progress: 0.35 },
                 "대사": { progress: 0.40 },
                 "불암": { progress: 0.45 },
@@ -651,16 +657,16 @@
                 "가야대": { progress: 1.00 }
             },
             'busan_donghae': {
-                "부전": { progress: 0.0000 },
+                "부전": { progress: 0.0000, transfer: [{name: '1', color: '#F06A00'}] },
                 "거제해맞이": { progress: 0.0454 },
-                "거제": { progress: 0.0909 },
-                "교대": { progress: 0.1363 },
+                "거제": { progress: 0.0909, transfer: [{name: '3', color: '#B07C4A'}] },
+                "교대": { progress: 0.1363, transfer: [{name: '1', color: '#F06A00'}] },
                 "동래": { progress: 0.1818 },
                 "안락": { progress: 0.2272 },
                 "부산원동": { progress: 0.2727 },
                 "재송": { progress: 0.3181 },
                 "센텀": { progress: 0.3636 },
-                "벡스코": { progress: 0.4090 },
+                "벡스코": { progress: 0.4090, transfer: [{name: '2', color: '#81C147'}] },
                 "신해운대": { progress: 0.4545 },
                 "송정": { progress: 0.5000 },
                 "오시리아": { progress: 0.5454 },
@@ -1706,6 +1712,34 @@
             } else {
                 dom.favoriteIcon.className = "fa-regular fa-star";
             }
+
+            const s = STATIONS[homeSelectedStation];
+            const transferContainer = document.getElementById('home-transfer-container');
+            const transferList = document.getElementById('home-transfer-list');
+            if (transferContainer && transferList) {
+                if (s && ((s.transfer && s.transfer.length > 0) || s.ktx)) {
+                    let trHtml = '';
+                    if (s.transfer) {
+                        s.transfer.forEach(tr => {
+                            let lineName = tr.name + '호선';
+                            if(tr.name === '대') lineName = '대경선';
+                            else if(tr.name === '동') lineName = '동해선';
+                            else if(tr.name === '부') lineName = '부산김해';
+                            trHtml += `<div class="flex items-center gap-1.5 bg-white border border-black/10 px-2.5 py-1 rounded-full shadow-sm"><div class="w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-black" style="background-color: ${tr.color}">${tr.name}</div><span class="text-[11px] font-bold text-[#111827] tracking-tight">${lineName}</span></div>`;
+                        });
+                    }
+                    if (s.ktx) {
+                        trHtml += `<div class="flex items-center gap-1.5 bg-white border border-black/10 px-2.5 py-1 rounded-full shadow-sm"><img src="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" class="h-3 object-contain" alt="KTX"></div>`;
+                    }
+                    transferList.innerHTML = trHtml;
+                    transferContainer.classList.remove('hidden');
+                    transferContainer.classList.add('flex');
+                } else {
+                    transferContainer.classList.add('hidden');
+                    transferContainer.classList.remove('flex');
+                    transferList.innerHTML = '';
+                }
+            }
         };
 
         window.renderHomeArrivalInfo = () => {
@@ -1973,7 +2007,16 @@
             }
             let lineHTML = ''; for (const stationName in STATIONS) {
                 const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
-                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
+                let transferHtml = '';
+                if (s.transfer && s.transfer.length > 0) {
+                    const totalW = s.transfer.length * 16;
+                    let startX = -(totalW / 2) + 8;
+                    s.transfer.forEach((tr, i) => {
+                        const trX = startX + (i * 16);
+                        transferHtml += `<circle cx="${trX}" cy="-28" r="6.5" fill="${tr.color}" stroke="#fff" stroke-width="1.5" /><text x="${trX}" y="-25.5" text-anchor="middle" fill="#fff" class="text-[8px] font-black pointer-events-none">${tr.name}</text>`;
+                    });
+                }
+                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${transferHtml}${s.ktx ? `<image href="https://upload.wikimedia.org/wikipedia/en/e/e3/KTX_logo.svg" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />` : ''}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
