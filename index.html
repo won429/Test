@@ -192,12 +192,6 @@
         @keyframes loc-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
         .loc-loading i { animation: loc-pulse 0.7s ease-in-out infinite; }
 
-        /* 노선 진행 방향 흐르는 점선 */
-        @keyframes flow-down { to { stroke-dashoffset: -200; } }
-        @keyframes flow-up   { to { stroke-dashoffset: 200; } }
-        .line-flow-down { animation: flow-down 2.4s linear infinite; }
-        .line-flow-up   { animation: flow-up 2.4s linear infinite; }
-
         /* 정차역 점등 링 */
         @keyframes station-ring { 0% { transform: scale(0.6); opacity: 0.55; } 100% { transform: scale(2.2); opacity: 0; } }
         .station-ring { transform-box: fill-box; transform-origin: center; animation: station-ring 1.4s ease-out infinite; }
@@ -375,9 +369,6 @@
                         <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" />
                         <path id="line-path-down" d="M 120 60 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <path id="line-path-up" d="M 280 60 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
-                        <!-- 진행 방향을 보여주는 흐르는 점선 -->
-                        <path id="line-flow-down" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 18" class="line-flow line-flow-down" opacity="0.85" />
-                        <path id="line-flow-up" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 18" class="line-flow line-flow-up" opacity="0.85" />
                         
                         <!-- 노선 하단 표시 -->
                         <g id="svg-down-bottom" transform="translate(0,0)" class="transition-transform duration-300">
@@ -1775,11 +1766,6 @@
                 dom.linePathDown.setAttribute('d', `M 120 60 L 120 ${pathY2}`);
                 dom.linePathUp.setAttribute('d', `M 280 60 L 280 ${pathY2}`);
 
-                const flowDown = document.getElementById('line-flow-down');
-                const flowUp = document.getElementById('line-flow-up');
-                if (flowDown) { flowDown.setAttribute('d', `M 120 60 L 120 ${pathY2}`); flowDown.setAttribute('stroke', DOWN_COLOR); }
-                if (flowUp) { flowUp.setAttribute('d', `M 280 60 L 280 ${pathY2}`); flowUp.setAttribute('stroke', THEME_COLOR); }
-
                 document.getElementById('svg-down-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
                 document.getElementById('svg-up-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
                 
@@ -2254,7 +2240,50 @@
                 panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[28px] p-4 mx-auto w-full max-w-[320px] shadow-2xl transition-all duration-300"><div class="flex justify-between items-center mb-3 px-1"><div class="flex items-center gap-3"><h3 class="text-[18px] font-extrabold text-[#111827] tracking-tight">${selectedStation}역</h3><div class="flex bg-gray-100 rounded-full p-0.5 border border-black/5"><button onclick="setStationDetailDirection('up')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='up'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='up' ? `background-color: ${THEME_COLOR};` : ''}">상행</button><button onclick="setStationDetailDirection('down')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${stationDetailDirection==='down'?'text-white shadow-sm':'text-gray-400 hover:text-black'}" style="${stationDetailDirection==='down' ? `background-color: ${DOWN_COLOR};` : ''}">하행</button></div></div><button onclick="handleStationClick(null)" class="text-gray-400 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center hover:text-black hover:bg-gray-200 transition-all"><i class="fa-solid fa-xmark text-[11px]"></i></button></div><div class="space-y-1.5 mb-3">${upcoming.length ? upcoming.map(u => `<div class="bg-gray-50 hover:bg-gray-100 transition-colors rounded-[14px] py-2.5 px-3.5 flex justify-between items-center shadow-sm border border-black/5"><span class="text-[#111827] font-bold text-[13px]">${u.time.slice(0,5)} <span class="text-[11px] text-gray-500 ml-1.5 font-medium">${u.dest}행</span></span><span class="font-black text-[13px]" style="${stationDetailDirection==='up'? `color: ${THEME_COLOR};` : `color: ${DOWN_COLOR};`}">${(u.sec-currentSec) < 60 ? (u.sec-currentSec) + '초 후' : Math.ceil((u.sec-currentSec)/60) + '분 후'}</span></div>`).join('') : '<div class="text-center text-gray-400 py-3 text-[12px] font-medium">운행 종료</div>'}</div><button onclick="modalViewMode='all'; window.openModal()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 border border-black/5 transition-colors rounded-[14px] font-bold text-gray-700 text-[12px] flex items-center justify-center gap-1.5 shadow-sm"><i class="fa-regular fa-clock text-[11px]"></i> 시간표 보기</button></div>`;
             } else if (selectedData) {
                 dom.floatingPanel.classList.remove('hidden'); const pColor = selectedData.direction === 'down' ? DOWN_COLOR : THEME_COLOR;
-                panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[36px] p-4 mx-auto w-full max-w-[360px] shadow-2xl min-h-[72px] flex flex-col justify-center relative overflow-hidden"><div class="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-black/10 to-transparent"></div><div class="flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-500">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-500">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
+                // 이전역 ──열차── 다음역 구간 진행 미니뷰
+                const sdCurr = selectedData.curr, sdNext = selectedData.next;
+                let segFrac = 0;
+                if (!selectedData.isStopped && !selectedData.isWaiting) {
+                    const denom = sdNext.progress - sdCurr.progress;
+                    segFrac = denom !== 0 ? (selectedData.overallProgress - sdCurr.progress) / denom : 0;
+                    segFrac = Math.max(0, Math.min(1, segFrac));
+                }
+                const stNames = Object.keys(STATIONS);
+                const curIdx = stNames.indexOf(sdCurr.name);
+                const nxtIdx = stNames.indexOf(sdNext.name);
+                const isTerm = (i) => i === 0 || i === stNames.length - 1;
+                const leftExtends = !isTerm(curIdx);
+                const rightExtends = !isTerm(nxtIdx);
+                const nodeL = 22, nodeR = 78;
+                const tX = +(nodeL + segFrac * (nodeR - nodeL)).toFixed(1);
+                const grayStart = leftExtends ? 0 : nodeL;
+                const colorEnd = rightExtends ? 100 : nodeR;
+                const grayW = (tX - grayStart).toFixed(1);
+                const colorW = (colorEnd - tX).toFixed(1);
+                // 노선의 전동열차와 동일한 옆모습 SVG (오른쪽=진행 방향)
+                const trainSvg = `<svg width="44" height="24" viewBox="-21 -8.5 42 17" style="overflow:visible">
+                        <rect x="-19.6" y="-1.2" width="3" height="2.4" rx="0.7" fill="${pColor}"/>
+                        <rect x="-17" y="-6.6" width="34" height="13.2" rx="4" fill="${pColor}" stroke="#ffffff" stroke-width="1.1" stroke-linejoin="round"/>
+                        <rect x="-15" y="-6" width="30" height="1.5" rx="0.7" fill="#ffffff" opacity="0.3"/>
+                        <rect x="-13" y="-3.3" width="18.5" height="3.5" rx="1.2" fill="#ffffff" opacity="0.9"/>
+                        <path d="M 8.6 -4 L 14 -4 Q 16 -4 16 -2 L 16 2 Q 16 4 14 4 L 8.6 4 Z" fill="#ffffff" opacity="0.96"/>
+                        <line x1="-6" y1="-6.2" x2="-6" y2="6.2" stroke="#ffffff" stroke-width="0.7" opacity="0.4"/>
+                        <line x1="1" y1="-6.2" x2="1" y2="6.2" stroke="#ffffff" stroke-width="0.7" opacity="0.4"/>
+                        <circle cx="14.6" cy="3.6" r="1.1" fill="#FFF6B0"/>
+                    </svg>`;
+                const segHtml = `<div class="relative h-[74px] mb-2 mx-1">
+                    <div class="absolute top-[34px] h-[5px] bg-gray-300 ${leftExtends ? '' : 'rounded-l-full'}" style="left:${grayStart}%; width:${grayW}%"></div>
+                    <div class="absolute top-[34px] h-[5px] ${rightExtends ? '' : 'rounded-r-full'}" style="left:${tX}%; width:${colorW}%; background-color:${pColor}"></div>
+                    <div class="absolute top-[28px] -translate-x-1/2 w-[17px] h-[17px] rounded-full bg-white border-[3px] border-gray-300 z-10" style="left:${nodeL}%"></div>
+                    <div class="absolute top-[28px] -translate-x-1/2 w-[17px] h-[17px] rounded-full bg-white border-[3px] z-10" style="left:${nodeR}%; border-color:${pColor}"></div>
+                    <div class="absolute -translate-x-1/2 z-20 transition-all duration-700 flex flex-col items-center" style="left:${tX}%; top:4px;">
+                        <span class="text-[10px] font-extrabold text-gray-700 bg-white border border-black/10 rounded-full px-1.5 leading-[16px] shadow-sm mb-[1px]">${selectedData.id}</span>
+                        ${trainSvg}
+                    </div>
+                    <span class="absolute top-[50px] -translate-x-1/2 text-[12px] font-bold text-gray-600 whitespace-nowrap" style="left:${nodeL}%">${sdCurr.name}</span>
+                    <span class="absolute top-[50px] -translate-x-1/2 text-[12px] font-bold whitespace-nowrap" style="left:${nodeR}%; color:${pColor}">${sdNext.name}</span>
+                </div>`;
+                panelHtml = `<div class="bg-white/95 backdrop-blur-md border border-black/5 rounded-[36px] p-4 pt-4 mx-auto w-full max-w-[360px] shadow-2xl flex flex-col justify-center relative overflow-hidden">${segHtml}<div class="border-t border-black/5 pt-3 flex justify-between items-center px-2"><div><div class="flex items-center gap-2 mb-1"><span style="background-color: ${pColor}" class="text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">${selectedData.id}</span><span class="text-[11px] font-semibold text-gray-500">${selectedData.isWaiting ? '대기중' : selectedData.isStopped ? '도착' : `(${selectedData.curr.name} 출발)`}</span></div><h2 class="text-[18px] font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">${selectedData.isStopped || selectedData.isWaiting ? selectedData.curr.name : selectedData.next.name}역<span class="text-[12px] font-medium text-gray-500">${selectedData.isWaiting ? '출발 예정' : selectedData.isStopped ? '정차중' : '도착 예정'}</span></h2></div>${!selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.timeRemaining < 60 ? selectedData.timeRemaining : Math.ceil(selectedData.timeRemaining / 60)}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">${selectedData.timeRemaining < 60 ? '초 전' : '분 전'}</span></div>` : (selectedData.isStopped && !selectedData.isWaiting ? `<div class="text-right flex items-baseline gap-0.5"><p class="text-[28px] font-black tracking-tighter" style="color: ${pColor}">${selectedData.stopRemaining}</p><span class="text-[11px] text-gray-500 ml-0.5 font-bold">초 후 출발</span></div>` : '')}</div></div>`;
             } else dom.floatingPanel.classList.add('hidden');
             if(dom.floatingPanel.innerHTML !== panelHtml && activeTab !== 'home') dom.floatingPanel.innerHTML = panelHtml;
         };
