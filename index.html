@@ -13,93 +13,149 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { 
+        /* =======================================================
+           디자인 시스템 리뉴얼 — 강한 글래스 + 단색 + 미니멀
+           (그라데이션 미사용 / JS가 참조하는 ID·클래스는 모두 보존)
+           ======================================================= */
+        :root {
+            --ink: #0B1220;          /* 강한 본문 텍스트 */
+            --ink-soft: #5B6573;     /* 보조 텍스트 */
+            --surface: #EBEFF5;      /* 앱 바깥 바탕 (단색) */
+            --panel: #F6F8FC;        /* 앱 패널 바탕 (단색) */
+            --glass: rgba(255,255,255,0.62);
+            --glass-strong: rgba(255,255,255,0.78);
+            --line: rgba(15,23,42,0.06);
+            --line-2: rgba(15,23,42,0.10);
+            --shadow-card: 0 10px 30px -10px rgba(15,23,42,0.18), 0 2px 6px rgba(15,23,42,0.06);
+            --shadow-soft: 0 6px 18px -8px rgba(15,23,42,0.14);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
-            -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             touch-action: pan-y;
-            background-color: #ffffff; /* 사이트 바탕색 흰색 */
+            background-color: var(--surface);
+            color: var(--ink);
+            letter-spacing: -0.01em;
         }
-        
-        /* 유리 재질 공통 클래스 (화이트 테마용) */
+
+        /* 앱 패널: 흰색 → 부드러운 단색 패널 (JS가 노선색으로 미세 틴트) */
+        #app { background-color: var(--panel); }
+
+        /* 홈/스크롤 화면 바탕도 패널색으로 통일 */
+        #home-screen, #scroll-container { background-color: var(--panel) !important; }
+
+        /* 헤더 글래스 강화 */
+        #home-screen > header,
+        #main-header {
+            background-color: rgba(246,248,252,0.72) !important;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--line);
+        }
+
+        /* 유리 재질 공통 카드 */
         .toss-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
+            background: var(--glass-strong);
+            backdrop-filter: blur(22px) saturate(190%);
+            -webkit-backdrop-filter: blur(22px) saturate(190%);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 26px;
+            box-shadow: var(--shadow-card);
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
         }
-        
+
+        /* 리스트/정보 카드: 반투명 글래스 타일 */
         .list-card {
-            background: #f9fafb;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 20px;
-            transition: transform 0.1s;
+            background: var(--glass);
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.55);
+            border-radius: 22px;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.12s ease, box-shadow 0.2s ease;
         }
         .list-card:active {
-            transform: scale(0.97);
-            background: #f3f4f6;
+            transform: scale(0.975);
+            box-shadow: 0 3px 10px -6px rgba(15,23,42,0.16);
         }
 
         /* 하단 네비게이션 인디케이터 */
         #nav-indicator { will-change: transform, width; }
-        .nav-transition { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .nav-transition { transition: transform 0.34s cubic-bezier(0.2, 0.9, 0.2, 1), width 0.34s cubic-bezier(0.2, 0.9, 0.2, 1); }
+
+        /* 하단 네비 글래스 강화 */
+        #bottom-nav > div {
+            background-color: rgba(255,255,255,0.7) !important;
+            backdrop-filter: blur(22px) saturate(190%);
+            -webkit-backdrop-filter: blur(22px) saturate(190%);
+            border: 1px solid rgba(255,255,255,0.65) !important;
+            box-shadow: 0 12px 34px -10px rgba(15,23,42,0.28) !important;
+        }
 
         /* 커스텀 스크롤바 숨김 */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .text-main { color: #111827; }
-        .text-sub { color: #6B7280; }
+
+        .text-main { color: var(--ink); }
+        .text-sub { color: var(--ink-soft); }
         .pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
-        
+
+        /* 모달 시트 글래스 처리 */
+        #timetable-modal > div,
+        #station-selector-modal > div {
+            background-color: rgba(246,248,252,0.92) !important;
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+        }
+
         /* 애니메이션 설정 */
         @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
         .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
         @keyframes pulse { 50% { opacity: .5; } }
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes bounce { 
-            0%, 100% { transform: translateY(-25%) translateX(-50%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 
-            50% { transform: none translateX(-50%); animation-timing-function: cubic-bezier(0,0,0.2,1); } 
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-25%) translateX(-50%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+            50% { transform: none translateX(-50%); animation-timing-function: cubic-bezier(0,0,0.2,1); }
         }
         .animate-bounce { animation: bounce 1s infinite; }
-        
-        @keyframes slide-in-from-bottom { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
-        .animate-in { animation: slide-in-from-bottom 0.3s ease-out forwards; }
 
-        /* 이미지 기반 실사 역명판 커스텀 CSS */
+        @keyframes slide-in-from-bottom { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+        .animate-in { animation: slide-in-from-bottom 0.34s cubic-bezier(0.2,0.9,0.2,1) forwards; }
+
+        /* 역명판: 더 단단하고 프리미엄한 단색 캡슐 */
         .station-plate-base {
-            height: 34px; 
+            height: 40px;
             background-color: #0054A6;
             border-radius: 9999px;
             position: relative;
             display: flex;
             align-items: center;
-            padding: 0 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s;
+            padding: 0 18px;
+            box-shadow: 0 14px 30px -10px rgba(0,84,166,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
         .station-plate-pill {
-            background-color: white;
-            height: 52px; 
-            padding: 0 24px;
+            background-color: #ffffff;
+            height: 56px;
+            padding: 0 26px;
             border-radius: 9999px;
             border: 3px solid #0054A6;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 9px;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 24px -10px rgba(15,23,42,0.30), 0 0 0 4px rgba(255,255,255,0.7);
             transition: border-color 0.3s;
         }
         .metro-logo-circle {
-            width: 26px; 
-            height: 26px;
-            background-color: #0054A6; 
+            width: 28px;
+            height: 28px;
+            background-color: #0054A6;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -107,9 +163,48 @@
             color: white;
             font-size: 13px;
             font-weight: 900;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 8px -2px rgba(15,23,42,0.30);
             transition: background-color 0.3s;
         }
+
+        /* 섹션 제목 앞 노선색 액센트 바 */
+        .sect-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .sect-title::before {
+            content: "";
+            width: 4px;
+            height: 17px;
+            border-radius: 4px;
+            background-color: var(--theme, #0054A6);
+            transition: background-color 0.3s;
+        }
+
+        /* 홈 상단 노선색 히어로 밴드 (단색) */
+        #hero-band {
+            background-color: #0054A6;
+            transition: background-color 0.3s;
+        }
+
+        /* 위치 버튼 펄스 */
+        @keyframes loc-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+        .loc-loading i { animation: loc-pulse 0.7s ease-in-out infinite; }
+
+        /* 노선 진행 방향 흐르는 점선 */
+        @keyframes flow-down { to { stroke-dashoffset: -200; } }
+        @keyframes flow-up   { to { stroke-dashoffset: 200; } }
+        .line-flow-down { animation: flow-down 2.4s linear infinite; }
+        .line-flow-up   { animation: flow-up 2.4s linear infinite; }
+
+        /* 정차역 점등 링 */
+        @keyframes station-ring { 0% { transform: scale(0.6); opacity: 0.55; } 100% { transform: scale(2.2); opacity: 0; } }
+        .station-ring { transform-box: fill-box; transform-origin: center; animation: station-ring 1.4s ease-out infinite; }
+
+        /* 전동열차 잔상(모션 트레일) */
+        @keyframes trail-fade { 0% { opacity: 0.45; } 100% { opacity: 0.12; } }
+        .train-trail { animation: trail-fade 0.8s ease-in-out infinite alternate; }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex justify-center items-center overflow-hidden">
@@ -120,12 +215,18 @@
         <!-- 1. 홈 화면 -->
         <main id="home-screen" class="hidden absolute inset-0 z-[25] bg-white flex-col overflow-y-auto hide-scrollbar pb-24">
             <header class="flex-none pt-safe bg-white/90 backdrop-blur-md z-40 sticky top-0">
-                <div class="px-5 pb-1 flex justify-between items-center">
-                    <h2 class="text-[18px] font-extrabold text-[#111827] tracking-tight">대구권 대경선 지하철역</h2>
-                    <!-- 즐겨찾기 버튼 추가 -->
-                    <button id="favorite-toggle-btn" onclick="toggleFavorite()" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-400 hover:text-yellow-400 transition-colors">
-                        <i id="favorite-icon" class="fa-regular fa-star text-[14px]"></i>
-                    </button>
+                <div class="px-5 pt-1 pb-2 flex justify-between items-center">
+                    <h2 class="sect-title text-[20px] font-extrabold text-[#0B1220] tracking-tight">대구권 대경선 지하철역</h2>
+                    <div class="flex items-center gap-2">
+                        <!-- 내 위치에서 가까운 역 찾기 -->
+                        <button id="locate-btn" onclick="findNearestStation()" class="w-9 h-9 flex items-center justify-center bg-white/70 border border-white/60 shadow-sm backdrop-blur rounded-full text-gray-500 hover:text-[#0054A6] active:scale-95 transition-all">
+                            <i id="locate-icon" class="fa-solid fa-location-crosshairs text-[15px]"></i>
+                        </button>
+                        <!-- 즐겨찾기 버튼 -->
+                        <button id="favorite-toggle-btn" onclick="toggleFavorite()" class="w-9 h-9 flex items-center justify-center bg-white/70 border border-white/60 shadow-sm backdrop-blur rounded-full text-gray-400 hover:text-yellow-400 active:scale-95 transition-all">
+                            <i id="favorite-icon" class="fa-regular fa-star text-[15px]"></i>
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -193,11 +294,11 @@
                 <!-- 도착 정보 섹션 -->
                 <div class="flex flex-col gap-3.5">
                     <div class="flex justify-between items-end mb-1 px-1">
-                        <h3 class="text-lg font-bold text-[#111827] tracking-tight">도착 정보</h3>
+                        <h3 class="sect-title text-[19px] font-extrabold text-[#0B1220] tracking-tight">도착 정보</h3>
                         <div class="flex items-center gap-2">
-                            <span id="data-status-home" class="hidden text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded-md border border-red-500/20 animate-pulse">임의 데이터 사용중</span>
-                            <span id="home-current-time" class="text-xs font-bold text-gray-500 bg-black/5 px-2 py-1 rounded-md">오후 5:35</span>
-                            <button onclick="renderHomeArrivalInfo()" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-black transition-colors"><i class="fa-solid fa-rotate-right"></i></button>
+                            <span id="data-status-home" class="hidden text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded-full border border-red-500/20 animate-pulse">임의 데이터 사용중</span>
+                            <span id="home-current-time" class="text-xs font-bold text-gray-600 bg-white/70 border border-white/60 backdrop-blur px-2.5 py-1 rounded-full shadow-sm">오후 5:35</span>
+                            <button onclick="renderHomeArrivalInfo()" class="w-7 h-7 flex items-center justify-center bg-white/70 border border-white/60 shadow-sm backdrop-blur rounded-full text-gray-500 hover:text-black active:scale-95 transition-all"><i class="fa-solid fa-rotate-right text-[11px]"></i></button>
                         </div>
                     </div>
 
@@ -213,11 +314,11 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2.5 mt-2">
-                        <button onclick="openHomeTimetable('all')" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                        <button onclick="openHomeTimetable('all')" class="list-card py-3.5 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
                             <i id="btn-icon-1" class="fa-regular fa-clock text-[#0054A6] text-[15px]"></i>
                             <span class="text-[12px] font-bold text-[#111827]">전체 시간표 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-400"></i></span>
                         </button>
-                        <button onclick="openHomeTimetable('firstLast')" class="bg-gray-100 hover:bg-gray-200 border border-black/5 rounded-[16px] py-3 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+                        <button onclick="openHomeTimetable('firstLast')" class="list-card py-3.5 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
                             <i id="btn-icon-2" class="fa-solid fa-train-tram text-[#0054A6] text-[15px]"></i>
                             <span class="text-[12px] font-bold text-[#111827]">첫차·막차 <i class="fa-solid fa-chevron-down text-[8px] ml-0.5 text-gray-400"></i></span>
                         </button>
@@ -274,6 +375,9 @@
                         <path id="line-path-up-bg" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="6" stroke-linecap="round" opacity="0.3" class="transition-colors duration-300" />
                         <path id="line-path-down" d="M 120 60 L 120 1200" fill="none" stroke="transparent" stroke-width="8" />
                         <path id="line-path-up" d="M 280 60 L 280 1200" fill="none" stroke="transparent" stroke-width="8" />
+                        <!-- 진행 방향을 보여주는 흐르는 점선 -->
+                        <path id="line-flow-down" d="M 120 60 L 120 1200" fill="none" stroke="#5998D6" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 18" class="line-flow line-flow-down" opacity="0.85" />
+                        <path id="line-flow-up" d="M 280 60 L 280 1200" fill="none" stroke="#0054A6" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 18" class="line-flow line-flow-up" opacity="0.85" />
                         
                         <!-- 노선 하단 표시 -->
                         <g id="svg-down-bottom" transform="translate(0,0)" class="transition-transform duration-300">
@@ -300,26 +404,26 @@
         <div id="floating-panel" class="hidden absolute bottom-[100px] left-0 right-0 px-4 z-[90] min-h-[72px] transition-all duration-300"></div>
 
         <!-- 4. 하단 네비게이션 -->
-        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[75%] max-w-[240px] px-1.5 touch-pan-x select-none">
-            <div class="flex items-center justify-between bg-white/90 backdrop-blur-[12px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-black/10 rounded-full p-1 gap-0.5 relative transition-all duration-300">
-                <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white shadow-sm rounded-full border border-black/5 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
-                
-                <button id="tab-back" onclick="window.location.href='https://won429.github.io/enjoysite/'" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
-                        <i class="fa-solid fa-arrow-left text-[15px] text-gray-400 group-hover:text-black transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 group-hover:text-black whitespace-nowrap transition-colors">뒤로가기</span>
+        <nav id="bottom-nav" class="absolute bottom-7 left-1/2 -translate-x-1/2 z-[100] w-[78%] max-w-[262px] px-1.5 touch-pan-x select-none">
+            <div class="flex items-center justify-between rounded-full p-1.5 gap-1 relative transition-all duration-300">
+                <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 rounded-full z-0 nav-transition" style="left: 6px; width: 70px; background-color: #0054A6;"></div>
+
+                <button id="tab-back" onclick="window.location.href='https://won429.github.io/enjoy-app/'" class="relative py-2 flex-1 rounded-full group z-10 active:scale-90 transition-transform">
+                    <div class="flex flex-col items-center gap-[3px] pointer-events-none">
+                        <i class="fa-solid fa-chevron-left text-[15px] text-gray-400 transition-colors"></i>
+                        <span class="text-[9px] font-semibold text-gray-400 whitespace-nowrap transition-colors">뒤로</span>
                     </div>
                 </button>
-                <button id="tab-home" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
-                        <i class="fa-solid fa-house text-[15px] text-black drop-shadow-sm group-hover:text-black transition-colors"></i>
-                        <span class="text-[10px] text-black font-bold group-hover:text-black whitespace-nowrap transition-colors">홈</span>
+                <button id="tab-home" class="relative py-2 flex-1 rounded-full group z-10 active:scale-90 transition-transform">
+                    <div class="flex flex-col items-center gap-[3px] pointer-events-none">
+                        <i class="fa-solid fa-house text-[15px] text-white drop-shadow-sm transition-colors"></i>
+                        <span class="text-[9px] text-white font-bold whitespace-nowrap transition-colors">홈</span>
                     </div>
                 </button>
-                <button id="tab-line" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform">
-                    <div class="flex flex-col items-center gap-[2px] pointer-events-none">
-                        <i class="fa-solid fa-route text-[15px] text-gray-400 transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap transition-colors">노선</span>
+                <button id="tab-line" class="relative py-2 flex-1 rounded-full group z-10 active:scale-90 transition-transform">
+                    <div class="flex flex-col items-center gap-[3px] pointer-events-none">
+                        <i class="fa-solid fa-train-subway text-[15px] text-gray-400 transition-colors"></i>
+                        <span class="text-[9px] font-semibold text-gray-400 whitespace-nowrap transition-colors">노선</span>
                     </div>
                 </button>
             </div>
@@ -1649,6 +1753,15 @@
             document.getElementById('btn-icon-2').style.color = THEME_COLOR;
             document.getElementById('scroll-cross-icon').style.color = THEME_COLOR;
 
+            // 노선 테마를 전역 CSS 변수로 노출 + 앱 배경을 노선색으로 미세 틴트 (단색)
+            document.documentElement.style.setProperty('--theme', THEME_COLOR);
+            document.documentElement.style.setProperty('--theme-down', DOWN_COLOR);
+            document.documentElement.style.setProperty('--theme-soft', THEME_COLOR + '14');
+            const appEl = document.getElementById('app');
+            if (appEl) appEl.style.backgroundColor = THEME_COLOR + '08';
+            const heroBand = document.getElementById('hero-band');
+            if (heroBand) heroBand.style.backgroundColor = THEME_COLOR;
+
             const lineLen = currentLineId === 'line1' ? 3200 : (currentLineId === 'line2' ? 2900 : (currentLineId === 'line3' ? 3000 : (currentLineId === 'daejeon_line1' ? 2200 : (currentLineId === 'busan_line1' ? 4800 : (currentLineId === 'busan_line2' ? 5200 : (currentLineId === 'busan_line3' ? 2000 : (currentLineId === 'busan_line4' ? 1800 : (currentLineId === 'busan_bglrt' ? 2100 : (currentLineId === 'busan_donghae' ? 2400 : (currentLineId === 'gwangju_line1' ? 2100 : 1600))))))))));
             const svg = document.getElementById('line-svg');
             if (svg) {
@@ -1661,7 +1774,12 @@
                 document.getElementById('line-path-up-bg').setAttribute('d', `M 280 60 L 280 ${pathY2}`);
                 dom.linePathDown.setAttribute('d', `M 120 60 L 120 ${pathY2}`);
                 dom.linePathUp.setAttribute('d', `M 280 60 L 280 ${pathY2}`);
-                
+
+                const flowDown = document.getElementById('line-flow-down');
+                const flowUp = document.getElementById('line-flow-up');
+                if (flowDown) { flowDown.setAttribute('d', `M 120 60 L 120 ${pathY2}`); flowDown.setAttribute('stroke', DOWN_COLOR); }
+                if (flowUp) { flowUp.setAttribute('d', `M 280 60 L 280 ${pathY2}`); flowUp.setAttribute('stroke', THEME_COLOR); }
+
                 document.getElementById('svg-down-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
                 document.getElementById('svg-up-bottom').setAttribute('transform', `translate(0, ${lineLen - 1140})`);
                 
@@ -1789,6 +1907,75 @@
         window.selectHomeStation = (name) => { homeSelectedStation = name; window.updateHomeUI(); window.renderHomeArrivalInfo(); window.closeStationSelector(); };
         window.openHomeTimetable = (mode = 'all') => { modalViewMode = mode; window.handleStationClick(homeSelectedStation); window.openModal(); };
 
+        /* ===== 위치 기반 가까운 역 찾기 =====
+           역별 [위도, 경도] 좌표. 현재 대경선 전 역을 지원하며,
+           다른 노선도 좌표를 채우면 자동으로 검색 대상에 포함됩니다. */
+        const STATION_COORDS = {
+            'daegyeong': {
+                "구미":   [36.1287, 128.3320],
+                "사곡":   [36.0900, 128.3700],
+                "북삼":   [36.0540, 128.4290],
+                "왜관":   [35.9920, 128.4010],
+                "서대구": [35.8800, 128.5340],
+                "대구":   [35.8758, 128.5950],
+                "동대구": [35.8797, 128.6285],
+                "경산":   [35.8170, 128.7410]
+            }
+        };
+        const LINE_REGION = {
+            daegyeong: 'daegu', line1: 'daegu', line2: 'daegu', line3: 'daegu',
+            daejeon_line1: 'daejeon', gwangju_line1: 'gwangju',
+            busan_line1: 'busan', busan_line2: 'busan', busan_line3: 'busan',
+            busan_line4: 'busan', busan_bglrt: 'busan', busan_donghae: 'busan'
+        };
+
+        const haversine = (lat1, lon1, lat2, lon2) => {
+            const R = 6371, toRad = d => d * Math.PI / 180;
+            const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        };
+
+        window.findNearestStation = () => {
+            const btn = document.getElementById('locate-btn');
+            if (!navigator.geolocation) { alert('이 브라우저는 위치 기능을 지원하지 않습니다.'); return; }
+            if (btn) btn.classList.add('loc-loading');
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                let best = null;
+                for (const lid in STATION_COORDS) {
+                    for (const st in STATION_COORDS[lid]) {
+                        const [la, lo] = STATION_COORDS[lid][st];
+                        const d = haversine(latitude, longitude, la, lo);
+                        if (!best || d < best.d) best = { lid, st, d };
+                    }
+                }
+                if (btn) btn.classList.remove('loc-loading');
+                if (!best) { alert('가까운 역을 찾을 수 없습니다.'); return; }
+
+                if (best.lid !== currentLineId) {
+                    await window.switchRegion(LINE_REGION[best.lid]);
+                    await window.switchLine(best.lid);
+                }
+                window.selectHomeStation(best.st);
+
+                const distTxt = best.d < 1 ? `${Math.round(best.d * 1000)}m` : `${best.d.toFixed(1)}km`;
+                if (btn) {
+                    const ic = document.getElementById('locate-icon');
+                    if (ic) { ic.className = 'fa-solid fa-check text-[15px] text-[#16a34a]'; setTimeout(() => ic.className = 'fa-solid fa-location-crosshairs text-[15px]', 1600); }
+                }
+                if (dom.homeCurrentTime) {
+                    const prev = dom.homeCurrentTime.textContent;
+                    dom.homeCurrentTime.textContent = `${best.st} · ${distTxt}`;
+                    setTimeout(() => window.renderHomeArrivalInfo(), 2200);
+                }
+            }, (err) => {
+                if (btn) btn.classList.remove('loc-loading');
+                alert(err.code === 1 ? '위치 권한이 거부되었습니다. 브라우저 설정에서 허용해 주세요.' : '현재 위치를 가져오지 못했습니다.');
+            }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+        };
+
         window.switchTab = (tabId) => {
             activeTab = tabId;
             selectedStation = null; selectedTrainId = null; modalDayType = null; modalViewMode = 'all';
@@ -1816,23 +2003,25 @@
             if (navButtons[activeIndex]) {
                 const targetBtn = navButtons[activeIndex];
                 dom.navIndicator.style.width = `${targetBtn.offsetWidth}px`;
-                dom.navIndicator.style.transform = `translateX(${targetBtn.offsetLeft - 4}px)`;
+                dom.navIndicator.style.transform = `translateX(${targetBtn.offsetLeft - 6}px)`;
+                dom.navIndicator.style.backgroundColor = THEME_COLOR;
+                dom.navIndicator.style.boxShadow = `0 6px 16px -4px ${THEME_COLOR}80`;
             }
             tabs.forEach(id => {
                 const el = document.getElementById(id); if (!el) return;
                 const icon = el.querySelector('i'); const span = el.querySelector('span');
-                
+
                 let iconClass = 'fa-solid text-[15px] ';
-                if (id === 'tab-back') iconClass += 'fa-arrow-left ';
+                if (id === 'tab-back') iconClass += 'fa-chevron-left ';
                 if (id === 'tab-home') iconClass += 'fa-house ';
-                if (id === 'tab-line') iconClass += 'fa-route ';
-                
+                if (id === 'tab-line') iconClass += 'fa-train-subway ';
+
                 if (id === activeTabId) {
-                    icon.className = iconClass + 'text-black drop-shadow-sm';
-                    span.className = 'text-[10px] text-black font-bold whitespace-nowrap transition-colors';
+                    icon.className = iconClass + 'text-white drop-shadow-sm';
+                    span.className = 'text-[9px] text-white font-bold whitespace-nowrap transition-colors';
                 } else {
                     icon.className = iconClass + 'text-gray-400 transition-colors';
-                    span.className = 'text-[10px] text-gray-400 font-medium whitespace-nowrap transition-colors';
+                    span.className = 'text-[9px] text-gray-400 font-semibold whitespace-nowrap transition-colors';
                 }
             });
         }
@@ -2007,13 +2196,30 @@
                         g.setAttribute("transform", `translate(${t.point.x}, ${t.point.y}) rotate(${t.angle})`);
                         const tColor = t.direction === 'down' ? DOWN_COLOR : THEME_COLOR; const fillColor = isLine ? tColor : (isSelected ? THEME_COLOR : '#9ca3af');
                         const isUp = t.direction === 'up'; const textWidth = t.id.length * 6 + 14; const rectX = -(textWidth / 2);
-                        g.innerHTML = `${isSelected && !t.isStopped && !t.isWaiting ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}<rect x="-16" y="-7" width="32" height="14" rx="3" fill="${fillColor}" stroke="${isSelected ? '#000000' : '#ffffff'}" stroke-width="${isSelected ? '2' : '1'}" /><rect x="-10" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><rect x="-1" y="-4" width="6" height="8" rx="1" fill="#FFFFFF" opacity="0.9" /><path d="M 12 -7 L 16 -4 L 16 4 L 12 7 Z" fill="${fillColor}" /><circle cx="15" cy="-3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" /><circle cx="15" cy="3" r="1.5" fill="${isSelected ? '#FFE600' : '#FFFFFF'}" />${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?10:-25}" width="${textWidth}" height="16" rx="8" fill="#ffffff" stroke="${tColor}" stroke-width="1.5" shadow="0 2px 4px rgba(0,0,0,0.1)" /><text x="0" y="${isUp?21:-14}" text-anchor="middle" fill="#111827" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
+                        const trStroke = isSelected ? '#000000' : '#ffffff';
+                        const trStrokeW = isSelected ? '1.8' : '1.1';
+                        const lightColor = isSelected ? '#FFE600' : '#FFF6B0';
+                        const moving = !t.isStopped && !t.isWaiting;
+                        // 전동열차(통근형 EMU) 측면 실루엣 — 진행 방향 = +x
+                        g.innerHTML = `${isSelected && moving ? `<circle r="26" fill="${fillColor}" opacity="0.2" class="animate-ping" />` : ''}`
+                            + (moving ? `<rect class="train-trail" x="-23" y="-3.4" width="2.6" height="6.8" rx="1.3" fill="${fillColor}" /><rect class="train-trail" x="-27.5" y="-2.6" width="2.6" height="5.2" rx="1.3" fill="${fillColor}" />` : '')
+                            + `<rect x="-19.6" y="-1.2" width="3" height="2.4" rx="0.7" fill="${fillColor}" />`
+                            + `<rect x="-17" y="-6.6" width="34" height="13.2" rx="4" fill="${fillColor}" stroke="${trStroke}" stroke-width="${trStrokeW}" stroke-linejoin="round" />`
+                            + `<rect x="-15" y="-6" width="30" height="1.5" rx="0.7" fill="#FFFFFF" opacity="0.30" />`
+                            + `<rect x="-13" y="-3.3" width="18.5" height="3.5" rx="1.2" fill="#FFFFFF" opacity="0.9" />`
+                            + `<path d="M 8.6 -4 L 14 -4 Q 16 -4 16 -2 L 16 2 Q 16 4 14 4 L 8.6 4 Z" fill="#FFFFFF" opacity="0.96" />`
+                            + `<line x1="-6" y1="-6.2" x2="-6" y2="6.2" stroke="${trStroke}" stroke-width="0.7" opacity="0.4" /><line x1="1" y1="-6.2" x2="1" y2="6.2" stroke="${trStroke}" stroke-width="0.7" opacity="0.4" />`
+                            + `<circle cx="14.6" cy="3.6" r="1.1" fill="${lightColor}" />`
+                            + `${isLine ? `<g transform="rotate(${-t.angle})"><rect x="${rectX}" y="${isUp?12:-27}" width="${textWidth}" height="16" rx="8" fill="#ffffff" stroke="${tColor}" stroke-width="1.5" /><text x="0" y="${isUp?23:-16}" text-anchor="middle" fill="#111827" class="text-[10px] font-black tracking-wider">${t.id}</text></g>` : ''}`;
                     });
                 };
                 updateLayer(dom.lineTrainsUp, renderedT.filter(t => t.direction === 'up'), true); updateLayer(dom.lineTrainsDown, renderedT.filter(t => t.direction === 'down'), true);
             }
+            const stoppedAt = {};
+            renderedT.forEach(t => { if (t.isStopped && t.curr) stoppedAt[t.curr.name] = (t.direction === 'down' ? DOWN_COLOR : THEME_COLOR); });
             let lineHTML = ''; for (const stationName in STATIONS) {
                 const s = STATIONS[stationName]; const isSel = selectedStation === stationName; const lineY = 60 + lineLen * s.progress;
+                const stopColor = stoppedAt[stationName];
                 let transferHtml = '';
                 if (s.transfer && s.transfer.length > 0) {
                     const totalW = s.transfer.length * 16;
@@ -2032,7 +2238,10 @@
                 } else if (s.srt) {
                     ktxSrtHtml = `<image href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/SRT_logo.svg/960px-SRT_logo.svg.png" x="-15" y="10" width="30" height="12" style="filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px -1px 0px white) drop-shadow(1px -1px 0px white) drop-shadow(-1px 1px 0px white);" preserveAspectRatio="xMidYMid meet" />`;
                 }
-                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" /><circle r="${isSel ? '8' : '6'}" fill="#ffffff" stroke="${isSel ? THEME_COLOR : '#9CA3AF'}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel ? THEME_COLOR : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${transferHtml}${ktxSrtHtml}</g>`;
+                const dotStroke = stopColor || (isSel ? THEME_COLOR : '#9CA3AF');
+                const dotFill = stopColor || '#ffffff';
+                const ringHtml = stopColor ? `<circle class="station-ring" r="7" fill="${stopColor}" /><circle class="station-ring" r="7" fill="${stopColor}" style="animation-delay:0.7s" />` : '';
+                lineHTML += `<g transform="translate(200, ${lineY})" onclick="handleStationClick('${stationName}')" class="cursor-pointer"><path d="M -80 0 L 80 0" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="4" />${ringHtml}<circle r="${isSel ? '8' : '6'}" fill="${dotFill}" stroke="${dotStroke}" stroke-width="${isSel ? '4' : '3'}" /><text x="0" y="-12" text-anchor="middle" fill="${isSel || stopColor ? (stopColor || THEME_COLOR) : '#111827'}" class="text-[12px] font-bold">${stationName}</text>${transferHtml}${ktxSrtHtml}</g>`;
             }
             dom.lineStations.innerHTML = lineHTML;
             if (isAutoScroll && selectedData && !selectedStation && activeTab !== 'home') {
